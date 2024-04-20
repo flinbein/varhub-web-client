@@ -1,10 +1,10 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
-  "types": "./index.d.ts",
+  "types": "./types.d.ts",
   "author": "dpohvar@gmail.com",
   "scripts": {
     "build": "tsc",

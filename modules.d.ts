@@ -1,5 +1,3 @@
-export * from "./src/index.js"
-
 declare module "varhub:room" {
 	type RoomEvents = {
 		join: [string];
