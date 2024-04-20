@@ -1,21 +1,24 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
-  "types": "./src/index.ts",
+  "types": "./index.d.ts",
   "author": "dpohvar@gmail.com",
   "scripts": {
     "build": "tsc",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test": "node --experimental-websocket --import=./test/register.js --test --test-reporter spec ./test/**/*.test.ts"
   },
   "dependencies": {
     "@flinbein/xjmapper": "git+https://github.com/flinbein/xjmapper#1.0.2"
   },
   "devDependencies": {
+    "@types/__self__": "file:.",
     "@types/node": "^20.9.4",
     "typescript": "^5.4.5",
-    "husky": "^9.0.11"
+    "husky": "^9.0.11",
+    "ts-node": "^10.9.2"
   }
 }

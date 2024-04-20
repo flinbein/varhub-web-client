@@ -81,7 +81,6 @@ export class VarhubClient {
         return new Promise((resolve, reject) => {
             const currentCallId = this.#callId++;
             const binData = serialize(currentCallId, method, ...data);
-            this.#ws.send(binData);
             const onResponse = (event) => {
                 if (!(event instanceof CustomEvent))
                     return;
@@ -105,6 +104,7 @@ export class VarhubClient {
             };
             this.#responseEventTarget.addEventListener(currentCallId, onResponse, { once: true });
             this.once("close", onClose);
+            this.#ws.send(binData);
         });
     }
     close(reason) {

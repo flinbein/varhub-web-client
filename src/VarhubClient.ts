@@ -48,19 +48,19 @@ function createEventBox<T extends Record<string, unknown[]>>(): EventBox<T> {
 	}
 }
 
-type VarhubClientEvents<EVENTS extends Record<string, any>> = {
-	message: EVENTS[keyof EVENTS]
+type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
+	message: {[key in keyof MESSAGES]: [key, ...MESSAGES[key]]}[keyof MESSAGES]
 	close: [reason: string|null]
 }
 
 export class VarhubClient<
 	METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
-	EVENTS extends Record<string, any> = Record<string, XJData[]>
+	MESSAGES extends Record<string, any> = Record<string, XJData[]>
 > {
 	#ws: WebSocket;
 	#responseEventTarget = new EventTarget();
-	#messagesEventBox = createEventBox<EVENTS>();
-	#selfEventBox = createEventBox<VarhubClientEvents<EVENTS>>();
+	#messagesEventBox = createEventBox<MESSAGES>();
+	#selfEventBox = createEventBox<VarhubClientEvents<MESSAGES>>();
 	
 	messages = this.#messagesEventBox.subscriber;
 	
@@ -106,7 +106,6 @@ export class VarhubClient<
 		return new Promise<any>((resolve, reject) => {
 			const currentCallId = this.#callId++;
 			const binData = serialize(currentCallId, method, ...data as any);
-			this.#ws.send(binData);
 			const onResponse = (event: Event) => {
 				if (!(event instanceof CustomEvent)) return;
 				const eventData = event.detail;
@@ -126,6 +125,8 @@ export class VarhubClient<
 			}
 			this.#responseEventTarget.addEventListener(currentCallId as any, onResponse, {once: true});
 			this.once("close", onClose);
+			
+			this.#ws.send(binData);
 		});
 	}
 	
@@ -133,17 +134,17 @@ export class VarhubClient<
 		this.#ws.close(4000, reason);
 	}
 	
-	on<T extends keyof VarhubClientEvents<EVENTS>>(event: T & string, handler: (...args: VarhubClientEvents<EVENTS>[T]) => void): this{
+	on<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.on(event, handler);
 		return this;
 	}
 	
-	once<T extends keyof VarhubClientEvents<EVENTS>>(event: T & string, handler: (...args: VarhubClientEvents<EVENTS>[T]) => void): this{
+	once<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.once(event, handler);
 		return this;
 	}
 	
-	off<T extends keyof VarhubClientEvents<EVENTS>>(event: T & string, handler: (...args: VarhubClientEvents<EVENTS>[T]) => void): this{
+	off<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.off(event, handler);
 		return this;
 	}
