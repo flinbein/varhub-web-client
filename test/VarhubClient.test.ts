@@ -1,7 +1,8 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { parse, serialize } from "@flinbein/xjmapper";
-import { VarhubClient } from "../src/index.js";
+import { VarhubClient } from "../src/VarhubClient.js";
+import { Varhub } from "../src/Varhub.js";
 
 class MockEvent extends Event {
 	constructor(type: string, fields: any) {
@@ -45,12 +46,14 @@ class WebsocketMock extends EventTarget {
 	}
 }
 
+const mockHub = new Varhub("http://example.com/");
+
 function createMockClient<
 	const T extends Record<string, any> = any,
 >(methods?: T): <E extends Record<string, any>>() => VarhubClient<T, E> & {wsMock: WebsocketMock} {
 	return () => {
 		const wsMock = new WebsocketMock(methods ?? {});
-		const client = new VarhubClient(wsMock as any) as any;
+		const client = new VarhubClient(wsMock as any, mockHub, "00000", "player", {}) as any;
 		client.wsMock = wsMock;
 		return client;
 	};

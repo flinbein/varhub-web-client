@@ -12,7 +12,7 @@ interface RoomCreateOptions {
 	message?: string
 }
 
-interface RoomJoinOptions {
+export interface RoomJoinOptions {
 	integrity?: string
 	password?: any,
 	params?: any,
@@ -100,6 +100,6 @@ export class Varhub {
 			ws.addEventListener("message", onMessage);
 		});
 		
-		return new VarhubClient(ws);
+		return new VarhubClient(ws, this, roomId, name, options);
 	}
 }

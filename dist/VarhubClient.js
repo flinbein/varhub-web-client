@@ -45,8 +45,18 @@ export class VarhubClient {
     methods = new Proxy(Object.freeze(Object.create(null)), {
         get: (ignored, method) => (...args) => this.call(method, ...args),
     });
-    constructor(ws) {
+    #hub;
+    #roomId;
+    #name;
+    #params;
+    #roomIntegrity;
+    constructor(ws, hub, roomId, name, options) {
         this.#ws = ws;
+        this.#hub = hub;
+        this.#roomId = roomId;
+        this.#name = name;
+        this.#roomIntegrity = options?.integrity;
+        this.#params = options?.params;
         ws.binaryType = "arraybuffer";
         ws.addEventListener("close", (event) => {
             this.#selfEventBox.dispatch("close", [event.reason]);
@@ -71,6 +81,11 @@ export class VarhubClient {
             }
         });
     }
+    get hub() { return this.#hub; }
+    get roomId() { return this.#roomId; }
+    get name() { return this.#name; }
+    get roomIntegrity() { return this.#roomIntegrity; }
+    get params() { return this.#params; }
     get online() {
         return this.#ws.readyState === WebSocket.OPEN;
     }

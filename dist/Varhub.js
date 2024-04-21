@@ -67,6 +67,6 @@ export class Varhub {
             ws.addEventListener("close", onClose);
             ws.addEventListener("message", onMessage);
         });
-        return new VarhubClient(ws);
+        return new VarhubClient(ws, this, roomId, name, options);
     }
 }

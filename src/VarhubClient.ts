@@ -1,4 +1,5 @@
 import { parse, serialize, XJData } from "@flinbein/xjmapper";
+import type { RoomJoinOptions, Varhub } from "./Varhub.js";
 
 
 interface EventSubscriber<T extends Record<string, unknown[]>> {
@@ -61,18 +62,29 @@ export class VarhubClient<
 	#responseEventTarget = new EventTarget();
 	#messagesEventBox = createEventBox<MESSAGES>();
 	#selfEventBox = createEventBox<VarhubClientEvents<MESSAGES>>();
-	
+
 	messages = this.#messagesEventBox.subscriber;
-	
+
 	methods: {[K in keyof METHODS]: (...args: Parameters<METHODS[K]>) => Promise<ReturnType<METHODS[K]>>} = new Proxy(
 		Object.freeze(Object.create(null)),
 		{
 			get: (ignored, method) => (...args: any) => this.call(method as any, ...args),
 		}
 	);
-	
-	constructor(ws: WebSocket) {
+
+	readonly #hub: Varhub
+	readonly #roomId: string
+	readonly #name: string
+	readonly #params: unknown
+	readonly #roomIntegrity: string | undefined
+
+	constructor(ws: WebSocket, hub: Varhub, roomId: string, name: string, options: RoomJoinOptions) {
 		this.#ws = ws;
+		this.#hub = hub
+		this.#roomId = roomId
+		this.#name = name
+		this.#roomIntegrity = options?.integrity
+		this.#params = options?.params
 		ws.binaryType = "arraybuffer";
 		ws.addEventListener("close", (event) => {
 			this.#selfEventBox.dispatch("close", [event.reason]);
@@ -95,11 +107,17 @@ export class VarhubClient<
 			}
 		});
 	}
-	
-	get online(){
+
+	get hub(): Varhub {return this.#hub }
+	get roomId(): string {return this.#roomId }
+	get name(): string {return this.#name }
+	get roomIntegrity(): string | undefined {return this.#roomIntegrity }
+	get params(): unknown {return this.#params }
+
+	get online(): boolean {
 		return this.#ws.readyState === WebSocket.OPEN;
 	}
-	
+
 	#callId = 0;
 	async call<T extends keyof METHODS>(method: T & string, ...data: Parameters<METHODS[T]>): Promise<Awaited<ReturnType<METHODS[T]>>>{
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("connection status");
@@ -125,25 +143,25 @@ export class VarhubClient<
 			}
 			this.#responseEventTarget.addEventListener(currentCallId as any, onResponse, {once: true});
 			this.once("close", onClose);
-			
+
 			this.#ws.send(binData);
 		});
 	}
-	
+
 	close(reason?: string): void {
 		this.#ws.close(4000, reason);
 	}
-	
+
 	on<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.on(event, handler);
 		return this;
 	}
-	
+
 	once<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.once(event, handler);
 		return this;
 	}
-	
+
 	off<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.off(event, handler);
 		return this;
