@@ -5,7 +5,7 @@ declare module "varhub:room" {
 		online: [string];
 		offline: [string];
 	}
-	const room: {
+	class Room {
 		get message(): string;
 		set message(value: string);
 		get closed(): boolean;
@@ -22,11 +22,13 @@ declare module "varhub:room" {
 		once<T extends keyof RoomEvent>(event: T, handler: (...args: RoomEvents[T]) => void): this;
 		off<T extends keyof RoomEvent>(event: T, handler: (...args: RoomEvents[T]) => void): this;
 	}
+	export type { Room };
+	const room: Room;
 	export default room;
 }
 
 declare module "varhub:events" {
-	export declare class EventEmitter<M extends Record<any, any[]>> {
+	export class EventEmitter<M extends Record<any, any[]>> {
 		on<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		once<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		off<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;

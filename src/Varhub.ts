@@ -33,6 +33,10 @@ export class Varhub {
 		this.#baseUrl = new URL(url);
 	}
 	
+	get url(): string {
+		return this.#baseUrl.href;
+	}
+	
 	async createRoom(module: RoomModule, options: RoomCreateOptions = {}): Promise<RoomCreateResult> {
 		const createRoomUrl = new URL("room", this.#baseUrl);
 		const response = await fetch(createRoomUrl, {

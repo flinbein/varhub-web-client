@@ -1,10 +1,10 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
-  "types": "./types.d.ts",
+  "types": "./src/index.ts",
   "author": "dpohvar@gmail.com",
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,6 @@
     "@flinbein/xjmapper": "git+https://github.com/flinbein/xjmapper#1.0.2"
   },
   "devDependencies": {
-    "@types/__self__": "file:.",
     "@types/node": "^20.9.4",
     "typescript": "^5.4.5",
     "husky": "^9.0.11",

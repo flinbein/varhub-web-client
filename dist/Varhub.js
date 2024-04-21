@@ -4,6 +4,9 @@ export class Varhub {
     constructor(url) {
         this.#baseUrl = new URL(url);
     }
+    get url() {
+        return this.#baseUrl.href;
+    }
     async createRoom(module, options = {}) {
         const createRoomUrl = new URL("room", this.#baseUrl);
         const response = await fetch(createRoomUrl, {
