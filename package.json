@@ -1,6 +1,6 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
@@ -8,7 +8,6 @@
   "author": "dpohvar@gmail.com",
   "scripts": {
     "build": "tsc",
-    "prepare": "husky install",
     "test": "node --experimental-websocket --import=./test/register.js --test --test-reporter spec ./test/**/*.test.ts"
   },
   "dependencies": {
