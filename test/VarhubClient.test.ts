@@ -123,7 +123,9 @@ describe("VarHubClient", () => {
 		client.wsMock.sendEvent("greet", "hi");
 		client.wsMock.sendEvent("greet", "hello");
 		assert.deepEqual(greetEvents, [["hi"]]);
-	})
+	});
+	
+	
 	
 	it("test once messages off", {timeout: 100}, async () => {
 		const client = createMockClient({
@@ -173,7 +175,7 @@ describe("VarHubClient", () => {
 		assert.equal(reason, "closeReason");
 	})
 	
-	it("test method on close", {timeout: 100}, async () => {
+	it("test method throws on close", {timeout: 100}, async () => {
 		const client = createMockClient({
 			delay: () => new Promise(() => {}) // always pending
 		})();
@@ -182,5 +184,15 @@ describe("VarHubClient", () => {
 		client.wsMock.close(4000, "closeReason");
 		assert.equal(client.online, false);
 		await assert.rejects(delayPromise, (error: any) => error.message === "closeReason");
+	})
+	
+	it("test method this", {timeout: 100}, async () => {
+		const client = createMockClient({})<{greet: [string]}>();
+		let refThis1: any = undefined,refThis2: any = undefined;
+		client.messages.once("greet", function(){refThis1 = this});
+		client.on("message",  function(){refThis2 = this});
+		client.wsMock.sendEvent("greet");
+		assert.equal(client, refThis1);
+		assert.equal(client, refThis2);
 	})
 });

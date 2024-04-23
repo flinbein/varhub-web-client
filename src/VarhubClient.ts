@@ -2,51 +2,49 @@ import { parse, serialize, XJData } from "@flinbein/xjmapper";
 import type { RoomJoinOptions, Varhub } from "./Varhub.js";
 
 
-interface EventSubscriber<T extends Record<string, unknown[]>> {
-	on<E extends keyof T>(eventName: E, handler: (...args: T[E]) => void): void
-	once<E extends keyof T>(eventName: E, handler: (...args: T[E]) => void): void
-	off<E extends keyof T>(eventName: E, handler: (...args: T[E]) => void): void
-}
-interface EventBox<T extends Record<string, unknown[]>> {
-	dispatch<E extends keyof T>(type: E, detail: T[E]): void,
-	subscriber: EventSubscriber<T>
+interface EventSubscriber<T extends Record<string, unknown[]>, THIS extends unknown> {
+	on<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
+	once<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
+	off<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
 }
 
-function createEventBox<T extends Record<string, unknown[]>>(): EventBox<T> {
-	const target = new EventTarget();
-	const targetMap = new WeakMap<(...args: any) => void, (...args: any) => void>()
-	return {
-		dispatch<E extends keyof T>(type: E, detail: T[E]){
-			target.dispatchEvent(new CustomEvent(type as any, {detail}))
-		},
-		subscriber: {
-			on(event: string, handler: (...args: any) => void) {
-				let eventHandler = targetMap.get(handler);
-				if (!eventHandler) {
-					eventHandler = (event: CustomEvent) => {
-						handler(...event.detail);
-					}
-					targetMap.set(handler, eventHandler);
-				}
-				target.addEventListener(event, eventHandler as any);
-			},
-			once(event: string, handler: (...args: any) => void) {
-				let eventHandler = targetMap.get(handler);
-				if (!eventHandler) {
-					eventHandler = (event: CustomEvent) => {
-						handler(...event.detail)
-					}
-					targetMap.set(handler, eventHandler);
-				}
-				target.addEventListener(event, eventHandler as any, {once: true});
-			},
-			off(event: string, handler: (...args: any) => void) {
-				let eventHandler = targetMap.get(handler);
-				if (!eventHandler) return;
-				target.removeEventListener(event, eventHandler);
-			},
-		} as any
+class EventBox<T extends Record<keyof unknown, unknown[]>, THIS extends unknown> {
+	#eventTarget = new EventTarget();
+	#fnMap = new WeakMap<(...args: any) => void, (...args: any) => void>()
+	#source: THIS;
+	constructor(thisSource: THIS) {
+		this.#source = thisSource;
 	}
+	dispatch<E extends keyof T>(type: E, detail: T[E]): void {
+		this.#eventTarget.dispatchEvent(new CustomEvent(type as any, {detail}))
+	}
+	subscriber: EventSubscriber<T, THIS> = {
+		on: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
+			let eventHandler = this.#fnMap.get(handler);
+			if (!eventHandler) {
+				eventHandler = (event: CustomEvent) => {
+					handler.apply(this.#source, event.detail);
+				}
+				this.#fnMap.set(handler, eventHandler);
+			}
+			this.#eventTarget.addEventListener(eventName as any, eventHandler);
+		},
+		once: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
+			let eventHandler = this.#fnMap.get(handler);
+			if (!eventHandler) {
+				eventHandler = (event: CustomEvent) => {
+					handler.apply(this.#source, event.detail)
+				}
+				this.#fnMap.set(handler, eventHandler);
+			}
+			this.#eventTarget.addEventListener(eventName as any, eventHandler as any, {once: true});
+		},
+		off: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
+			let eventHandler = this.#fnMap.get(handler);
+			if (!eventHandler) return;
+			this.#eventTarget.removeEventListener(eventName as any, eventHandler);
+		},
+	};
 }
 
 type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
@@ -56,15 +54,55 @@ type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
 
 export class VarhubClient<
 	METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
-	MESSAGES extends Record<string, any> = Record<string, XJData[]>
+	MESSAGES extends Record<string, any[]> = Record<string, XJData[]>
 > {
 	#ws: WebSocket;
 	#responseEventTarget = new EventTarget();
-	#messagesEventBox = createEventBox<MESSAGES>();
-	#selfEventBox = createEventBox<VarhubClientEvents<MESSAGES>>();
-
-	messages = this.#messagesEventBox.subscriber;
-
+	#messagesEventBox = new EventBox<MESSAGES, typeof this>(this);
+	#selfEventBox = new EventBox<VarhubClientEvents<MESSAGES>, typeof this>(this);
+	
+	/**
+	 * Use this object to subscribe on room events
+	 *
+	 * room:
+	 * ```typescript
+	 * 	import room from "varhub:room";
+	 * 	room.broadcast("greet", "hello players!");
+	 * 	room.send(playerName, "greet", "hello player!")
+	 * ```
+	 *
+	 * web:
+	 * ```typescript
+	 * 	client.messages.on("greet", (message) => {
+	 * 		console.log(message);
+	 * 	});
+	 * ```
+	 * Use `client.messages.once(eventName, handler)` to subscribe on event
+	 *
+	 * Use `client.messages.once(eventName, handler)` to subscribe once
+	 *
+	 * Use `client.messages.off(eventName, handler)` to unsubscribe
+	 *
+	 * handler is required
+	 */
+	messages: EventSubscriber<MESSAGES, typeof this> = this.#messagesEventBox.subscriber;
+	
+	/**
+	 * Use this object to call room methods
+	 *
+	 * room:
+	 * ```typescript
+	 * 	export function getGreetMessage(this:{player: string}){
+	 * 		return "Hello "+ this.player + "!"
+	 * 	}
+	 * ```
+	 *
+	 * web:
+	 * ```typescript
+	 * 	const message = await client.methods.getGreetMessage();
+	 * 	// `Hello ${client.name}!`
+	 * ```
+	 */
 	methods: {[K in keyof METHODS]: (...args: Parameters<METHODS[K]>) => Promise<ReturnType<METHODS[K]>>} = new Proxy(
 		Object.freeze(Object.create(null)),
 		{
@@ -107,7 +145,7 @@ export class VarhubClient<
 			}
 		});
 	}
-
+	
 	get hub(): Varhub {return this.#hub }
 	get roomId(): string {return this.#roomId }
 	get name(): string {return this.#name }
@@ -119,6 +157,26 @@ export class VarhubClient<
 	}
 
 	#callId = 0;
+	
+	/**
+	 * call method directly
+	 *
+	 * room:
+	 * ```typescript
+	 * 	export function getGreetMessage(this:{player: string}){
+	 * 		return "Hello "+ this.player + "!"
+	 * 	}
+	 * ```
+	 *
+	 * web:
+	 * ```typescript
+	 * 	const message = await client.call("getGreetMessage");
+	 * 	// `Hello ${client.name}!`
+	 * ```
+	 * @param method name of method
+	 * @param data arguments
+	 * @returns Promise with call result
+	 */
 	async call<T extends keyof METHODS>(method: T & string, ...data: Parameters<METHODS[T]>): Promise<Awaited<ReturnType<METHODS[T]>>>{
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("connection status");
 		return new Promise<any>((resolve, reject) => {
@@ -151,18 +209,56 @@ export class VarhubClient<
 	close(reason?: string): void {
 		this.#ws.close(4000, reason);
 	}
-
-	on<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
+	
+	/**
+	 * subscribe on client event
+	 *
+	 * room:
+	 * ```typescript
+	 * 	import room from "varhub:room";
+	 * 	room.broadcast("greet", "hello players!");
+	 * 	room.send(playerName, "greet", "hello player!")
+	 * 	room.kick(playerName, "kicked")
+	 * ```
+	 *
+	 * web:
+	 * ```typescript
+	 * 	client.on("message", (eventName, ...eventData) => {
+	 * 		console.log(eventName, eventData);
+	 * 		// greet ["hello players!"]
+	 * 		// greet ["hello player!"]
+	 * 	});
+	 * 	client.on("close", (reason) => {
+	 * 		console.log("disconnected by reason:", reason);
+	 * 		// disconnected by reason: kicked
+	 * 	})
+	 * ```
+	 *
+	 * @param event "message" or "close"
+	 * @param handler event handler
+	 */
+	on<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.on(event, handler);
 		return this;
 	}
-
-	once<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
+	/**
+	 * Subscribe on client event once
+	 * @see {VarhubClient#on}
+	 * @param event
+	 * @param handler
+	 */
+	once<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.once(event, handler);
 		return this;
 	}
-
-	off<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
+	
+	/**
+	 * Unsubscribe from client event
+	 * @see {VarhubClient#on}
+	 * @param event
+	 * @param handler required!
+	 */
+	off<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.off(event, handler);
 		return this;
 	}

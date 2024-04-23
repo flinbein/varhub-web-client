@@ -1,28 +1,130 @@
 declare module "varhub:room" {
+	/**
+	 * Define all events dispatched by room controller
+	 * @see RoomEvents#join
+	 * @see RoomEvents#leave
+	 * @see RoomEvents#online
+	 * @see RoomEvents#offline
+	 */
 	type RoomEvents = {
-		join: [string];
-		leave: [string];
-		online: [string];
-		offline: [string];
+		/**
+		 * a new player joins the room.
+		 * event is not dispatched if the player joins again from another session
+		 * @params name of joined player
+		 */
+		join: [player: string];
+		/**
+		 * a player leaves the room.
+		 * event is not dispatched if the player closes session
+		 * event dispatched only manually by `room.kick`
+		 * @params name of leaved player
+		 */
+		leave: [player: string];
+		/**
+		 * a player joined again in new session
+		 * @params name of player who connected again
+		 */
+		online: [player: string];
+		/**
+		 * a player close all sessions
+		 *
+		 * Example: remove player when he had closes all sessions
+		 * ```typescript
+		 * 	room.on("offline", (player: string) => room.kick(player));
+		 * ```
+		 * @params name of player who disconnected
+		 */
+		offline: [player: string];
 	}
 	class Room {
+		/**
+		 * public message of the room.
+		 */
 		get message(): string;
-		set message(value: string);
+		/**
+		 * change public message of the room. Set null to make room private.
+		 * @param value
+		 */
+		set message(value: string | null);
+		
+		/**
+		 * is room closed. New players can not join a closed room.
+		 */
 		get closed(): boolean;
+		/**
+		 * set room closed
+		 */
 		set closed(value: boolean);
+		
+		/**
+		 * destroy this room.
+		 */
 		destroy(): void;
+		
+		/**
+		 * check if player online
+		 * @returns `undefined` if player is kicked or has not yet joined
+		 */
 		isPlayerOnline(name: string): boolean | undefined;
+		/**
+		 * check if player joined. `room.getPlayers().includes(name)`
+		 */
 		hasPlayer(name: string): boolean;
+		
+		/**
+		 * kick player and close all sessions
+		 */
 		kick(name: string, reason?: string|null): boolean;
+		/**
+		 * send message to player
+		 *
+		 * Example
+		 * ```typescript
+		 *	room.on("join", (player) => {
+		 *		room.send(player, "chatMessage", {
+		 *			from: "system",
+		 *			message: "Welcome, "+player+"!"
+		 *		});
+		 *	})
+		 * ```
+		 * @returns true if player online
+		 */
 		send(name: string, ...args: any[]): boolean;
+		/**
+		 * send message to all players
+		 *
+		 * Example
+		 * ```ts
+		 * 	room.on("join", (player) => {
+		 * 		room.broadcast("chatMessage", {
+		 * 			from: "system",
+		 * 			message: "New player connected: "+player;
+		 * 		});
+		 * 	})
+		 * ```
+		 */
 		broadcast(...args: any[]): void;
+		/**
+		 * get player's data saved on first connection
+		 */
 		getPlayerData(name: string): unknown;
+		/**
+		 * list of all (online & offline) players
+		 */
 		getPlayers(): string[];
-		on<T extends keyof RoomEvent>(event: T, handler: (...args: RoomEvents[T]) => void): this;
-		once<T extends keyof RoomEvent>(event: T, handler: (...args: RoomEvents[T]) => void): this;
-		off<T extends keyof RoomEvent>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		
+		/**
+		 * Subscribe on room event.
+		 * @see RoomEvents
+		 */
+		on<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		once<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		off<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
 	}
 	export type { Room };
+	/**
+	 * Controller of this room state.
+	 */
 	const room: Room;
 	export default room;
 }
@@ -37,6 +139,9 @@ declare module "varhub:events" {
 }
 
 declare module "varhub:config" {
+	/**
+	 * config of this room. Config is created with room.
+	 */
 	const config: unknown;
 	export default config;
 }

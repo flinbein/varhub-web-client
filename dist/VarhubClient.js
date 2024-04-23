@@ -1,46 +1,48 @@
 import { parse, serialize } from "@flinbein/xjmapper";
-function createEventBox() {
-    const target = new EventTarget();
-    const targetMap = new WeakMap();
-    return {
-        dispatch(type, detail) {
-            target.dispatchEvent(new CustomEvent(type, { detail }));
+class EventBox {
+    #eventTarget = new EventTarget();
+    #fnMap = new WeakMap();
+    #source;
+    constructor(thisSource) {
+        this.#source = thisSource;
+    }
+    dispatch(type, detail) {
+        this.#eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
+    }
+    subscriber = {
+        on: (eventName, handler) => {
+            let eventHandler = this.#fnMap.get(handler);
+            if (!eventHandler) {
+                eventHandler = (event) => {
+                    handler.apply(this.#source, event.detail);
+                };
+                this.#fnMap.set(handler, eventHandler);
+            }
+            this.#eventTarget.addEventListener(eventName, eventHandler);
         },
-        subscriber: {
-            on(event, handler) {
-                let eventHandler = targetMap.get(handler);
-                if (!eventHandler) {
-                    eventHandler = (event) => {
-                        handler(...event.detail);
-                    };
-                    targetMap.set(handler, eventHandler);
-                }
-                target.addEventListener(event, eventHandler);
-            },
-            once(event, handler) {
-                let eventHandler = targetMap.get(handler);
-                if (!eventHandler) {
-                    eventHandler = (event) => {
-                        handler(...event.detail);
-                    };
-                    targetMap.set(handler, eventHandler);
-                }
-                target.addEventListener(event, eventHandler, { once: true });
-            },
-            off(event, handler) {
-                let eventHandler = targetMap.get(handler);
-                if (!eventHandler)
-                    return;
-                target.removeEventListener(event, eventHandler);
-            },
-        }
+        once: (eventName, handler) => {
+            let eventHandler = this.#fnMap.get(handler);
+            if (!eventHandler) {
+                eventHandler = (event) => {
+                    handler.apply(this.#source, event.detail);
+                };
+                this.#fnMap.set(handler, eventHandler);
+            }
+            this.#eventTarget.addEventListener(eventName, eventHandler, { once: true });
+        },
+        off: (eventName, handler) => {
+            let eventHandler = this.#fnMap.get(handler);
+            if (!eventHandler)
+                return;
+            this.#eventTarget.removeEventListener(eventName, eventHandler);
+        },
     };
 }
 export class VarhubClient {
     #ws;
     #responseEventTarget = new EventTarget();
-    #messagesEventBox = createEventBox();
-    #selfEventBox = createEventBox();
+    #messagesEventBox = new EventBox(this);
+    #selfEventBox = new EventBox(this);
     messages = this.#messagesEventBox.subscriber;
     methods = new Proxy(Object.freeze(Object.create(null)), {
         get: (ignored, method) => (...args) => this.call(method, ...args),
