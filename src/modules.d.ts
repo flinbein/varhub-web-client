@@ -10,7 +10,7 @@ declare module "varhub:room" {
 		/**
 		 * a new player joins the room.
 		 * event is not dispatched if the player joins again from another session
-		 * @params name of joined player
+		 * @param player name of joined player
 		 */
 		join: [player: string];
 		/**
@@ -22,7 +22,7 @@ declare module "varhub:room" {
 		leave: [player: string];
 		/**
 		 * a player joined again in new session
-		 * @params name of player who connected again
+		 * @param player name of player who connected again
 		 */
 		online: [player: string];
 		/**
@@ -32,10 +32,32 @@ declare module "varhub:room" {
 		 * ```typescript
 		 * 	room.on("offline", (player: string) => room.kick(player));
 		 * ```
-		 * @params name of player who disconnected
+		 * @param player name of player who disconnected
 		 */
 		offline: [player: string];
+		/**
+		 * new connection created
+		 *
+		 * it can be a new player or existing player with new connection.
+		 *
+		 * `connectionJoin` emits after `join` event
+		 *
+		 * @param player name of player
+		 * @param connection connection id
+		 */
+		connectionJoin: [player: string, connection: number];
+		/**
+		 * connection closed
+		 *
+		 * `connectionClosed` emits before `offline` and `leave` events
+		 *
+		 * @param player name of player
+		 * @param connection connection id
+		 * @param reason reason
+		 */
+		connectionClosed: [player: string, connection: number, reason: null | string];
 	}
+	
 	class Room {
 		/**
 		 * public message of the room.
@@ -65,16 +87,34 @@ declare module "varhub:room" {
 		 * check if player online
 		 * @returns `undefined` if player is kicked or has not yet joined
 		 */
-		isPlayerOnline(name: string): boolean | undefined;
+		isPlayerOnline(player: string): boolean | undefined;
+		
+		/**
+		 * check if player online
+		 * @returns `false` if player offline or not yet joined
+		 */
+		isOnline(player: string): boolean;
+		
+		/**
+		 * check if connection online
+		 */
+		isOnline(connection: number): boolean;
 		/**
 		 * check if player joined. `room.getPlayers().includes(name)`
 		 */
-		hasPlayer(name: string): boolean;
+		hasPlayer(player: string): boolean;
 		
 		/**
 		 * kick player and close all sessions
+		 * @returns `true` on success, otherwise `false`
 		 */
-		kick(name: string, reason?: string|null): boolean;
+		kick(player: string, reason?: string|null): boolean;
+		
+		/**
+		 * kick one session of player
+		 * @returns `true` on success, otherwise `false`
+		 */
+		kick(connection: number, reason?: string|null): boolean;
 		/**
 		 * send message to player
 		 *
@@ -89,7 +129,20 @@ declare module "varhub:room" {
 		 * ```
 		 * @returns true if player online
 		 */
-		send(name: string, ...args: any[]): boolean;
+		send(player: string, ...args: any[]): boolean;
+		
+		/**
+		 * send message to special connection
+		 *
+		 * Example
+		 * ```typescript
+		 *	room.on("connectionJoin", (player, connection) => {
+		 *		room.send(connection, "state", getCurrentState());
+		 *	})
+		 * ```
+		 * @returns true if player online
+		 */
+		send(connection: number, ...args: any[]): boolean;
 		/**
 		 * send message to all players
 		 *
@@ -107,7 +160,16 @@ declare module "varhub:room" {
 		/**
 		 * get player's data saved on first connection
 		 */
-		getPlayerData(name: string): unknown;
+		getPlayerData(player: string): unknown;
+		/**
+		 * get all established connections of player
+		 * @returns
+		 *
+		 * `undefined` if there are no player
+		 *
+		 * `[]` if player offline
+		 */
+		getPlayerConnections(player: string): undefined | number[];
 		/**
 		 * list of all (online & offline) players
 		 */
@@ -118,7 +180,15 @@ declare module "varhub:room" {
 		 * @see RoomEvents
 		 */
 		on<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		/**
+		 * Subscribe on room event once.
+		 * @see RoomEvents
+		 */
 		once<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		/**
+		 * Unsubscribe from room event.
+		 * @see RoomEvents
+		 */
 		off<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
 	}
 	export type { Room };
