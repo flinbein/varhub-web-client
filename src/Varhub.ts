@@ -9,7 +9,8 @@ interface RoomModule {
 interface RoomCreateOptions {
 	integrity?: boolean | string
 	config?: any,
-	message?: string
+	message?: string,
+	async?: boolean
 }
 
 export interface RoomJoinOptions {
@@ -46,14 +47,18 @@ export class Varhub {
 	/**
 	 * Create new room
 	 * @param module module sources
-	 * @param [options] additional options: integrity, config, message
+	 * @param [options] additional options: integrity, config, message, async
 	 * @param [options.integrity] required to create public rooms.
+	 *
 	 *	`true` - create public room with integrity.
-	 *	`string` - create public room with integrity and check it.
-	 *	`false (default)` - create private room without integrity.
+	 *
+	 *  `string` - create public room with integrity and check it.
+	 *
+	 *  `false (default)` - create private room without integrity.
 	 * @param [options.config] add config that can be used as `import config from "varhub:config"`.
 	 *	config does not affect integrity
 	 * @param [options.message] set room public message on create
+	 * @param [options.async] set `true` if you need async module loader
 	 * @returns promise with room description.
 	 */
 	async createRoom(module: RoomModule, options: RoomCreateOptions = {}): Promise<RoomCreateResult> {
