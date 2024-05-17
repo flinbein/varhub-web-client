@@ -14,7 +14,7 @@ class MockEvent extends Event {
 }
 
 class WebsocketMock extends EventTarget {
-	readyState: number = WebSocket.OPEN;
+	readyState: number = WebSocket.CONNECTING;
 	
 	constructor(private methods: Record<string, Function> = {}) {
 		super();
@@ -40,6 +40,11 @@ class WebsocketMock extends EventTarget {
 		}
 	}
 	
+	init(){
+		this.readyState = WebSocket.OPEN;
+		this.dispatchEvent(new MockEvent("message", {data: null}));
+	}
+	
 	sendEvent(...args: any){
 		const data = serialize(2, ...args).buffer;
 		this.dispatchEvent(new MockEvent("message", {data}));
@@ -60,10 +65,28 @@ function createMockClient<
 }
 
 describe("VarHubClient", () => {
+	it("test ready", {timeout: 100}, async () => {
+		const client = createMockClient()();
+		assert.equal(client.ready, false);
+		client.wsMock.init();
+		assert.equal(client.ready, true);
+	})
+	
+	it("test waitForReady", {timeout: 100}, async () => {
+		const client = createMockClient()();
+		let ready = false;
+		client.waitForReady.then(() => ready = true);
+		assert.equal(ready, false);
+		client.wsMock.init();
+		await client.waitForReady;
+		assert.equal(ready, true);
+	});
+	
 	it("test method", {timeout: 100}, async () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})();
+		client.wsMock.init();
 		const result = await client.methods.sum(1, 2);
 		assert.equal(result, 3);
 	})
@@ -72,6 +95,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: async (x: number, y: number) => x + y
 		})();
+		client.wsMock.init();
 		const result = await client.methods.sum(1, 2);
 		assert.equal(result, 3);
 	})
@@ -80,6 +104,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})();
+		client.wsMock.init();
 		await assert.rejects(client.methods["notexist" as keyof typeof client.methods](1, 2));
 	})
 	
@@ -87,6 +112,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sumThrow: (x: number, y: number) => { throw x + y }
 		})();
+		client.wsMock.init();
 		await assert.rejects(client.methods.sumThrow(1, 2), error => error === 3);
 	})
 	
@@ -94,6 +120,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})();
+		client.wsMock.init();
 		const result = await client.call("sum", 1, 2);
 		assert.equal(result, 3);
 	})
@@ -102,6 +129,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})<{greet: [string]}>();
+		client.wsMock.init();
 		const greetEvents: any[] = [];
 		const addGreet = (...args: any[]) => void greetEvents.push(args)
 		client.messages.on("greet", addGreet);
@@ -117,6 +145,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})<{greet: [string]}>();
+		client.wsMock.init();
 		const greetEvents: any[] = [];
 		const addGreet = (...args: any[]) => void greetEvents.push(args)
 		client.messages.once("greet", addGreet);
@@ -131,6 +160,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})<{greet: [string]}>();
+		client.wsMock.init();
 		const greetEvents: any[] = [];
 		const addGreet = (...args: any[]) => void greetEvents.push(args)
 		client.messages.once("greet", addGreet);
@@ -144,6 +174,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			sum: (x: number, y: number) => x + y
 		})<{greet: [string]}>();
+		client.wsMock.init();
 		const messageEvents: any[] = [];
 		const addEvent = (...args: any[]) => void messageEvents.push(args)
 		client.on("message", addEvent);
@@ -157,6 +188,7 @@ describe("VarHubClient", () => {
 	
 	it("test event close self", {timeout: 100}, async () => {
 		const client = createMockClient()();
+		client.wsMock.init();
 		assert.equal(client.online, true);
 		client.close("closeReason");
 		assert.equal(client.online, false);
@@ -167,6 +199,7 @@ describe("VarHubClient", () => {
 	
 	it("test event close host", {timeout: 100}, async () => {
 		const client = createMockClient()();
+		client.wsMock.init();
 		assert.equal(client.online, true);
 		client.wsMock.close(4000, "closeReason");
 		assert.equal(client.online, false);
@@ -179,6 +212,7 @@ describe("VarHubClient", () => {
 		const client = createMockClient({
 			delay: () => new Promise(() => {}) // always pending
 		})();
+		client.wsMock.init();
 		const delayPromise = client.methods.delay();
 		assert.equal(client.online, true);
 		client.wsMock.close(4000, "closeReason");
@@ -188,6 +222,7 @@ describe("VarHubClient", () => {
 	
 	it("test method this", {timeout: 100}, async () => {
 		const client = createMockClient({})<{greet: [string]}>();
+		client.wsMock.init();
 		let refThis1: any = undefined,refThis2: any = undefined;
 		client.messages.once("greet", function(){refThis1 = this});
 		client.on("message",  function(){refThis2 = this});

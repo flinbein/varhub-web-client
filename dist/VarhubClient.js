@@ -1,43 +1,5 @@
 import { parse, serialize } from "@flinbein/xjmapper";
-class EventBox {
-    #eventTarget = new EventTarget();
-    #fnMap = new WeakMap();
-    #source;
-    constructor(thisSource) {
-        this.#source = thisSource;
-    }
-    dispatch(type, detail) {
-        this.#eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
-    }
-    subscriber = {
-        on: (eventName, handler) => {
-            let eventHandler = this.#fnMap.get(handler);
-            if (!eventHandler) {
-                eventHandler = (event) => {
-                    handler.apply(this.#source, event.detail);
-                };
-                this.#fnMap.set(handler, eventHandler);
-            }
-            this.#eventTarget.addEventListener(eventName, eventHandler);
-        },
-        once: (eventName, handler) => {
-            let eventHandler = this.#fnMap.get(handler);
-            if (!eventHandler) {
-                eventHandler = (event) => {
-                    handler.apply(this.#source, event.detail);
-                };
-                this.#fnMap.set(handler, eventHandler);
-            }
-            this.#eventTarget.addEventListener(eventName, eventHandler, { once: true });
-        },
-        off: (eventName, handler) => {
-            let eventHandler = this.#fnMap.get(handler);
-            if (!eventHandler)
-                return;
-            this.#eventTarget.removeEventListener(eventName, eventHandler);
-        },
-    };
-}
+import { EventBox } from "./EventBox.js";
 export class VarhubClient {
     #ws;
     #responseEventTarget = new EventTarget();
@@ -47,6 +9,9 @@ export class VarhubClient {
     methods = new Proxy(Object.freeze(Object.create(null)), {
         get: (ignored, method) => (...args) => this.call(method, ...args),
     });
+    #error;
+    #ready = false;
+    #readyPromise;
     #hub;
     #roomId;
     #name;
@@ -59,6 +24,11 @@ export class VarhubClient {
         this.#name = name;
         this.#roomIntegrity = options?.integrity;
         this.#params = options?.params;
+        this.#readyPromise = new Promise((resolve, reject) => {
+            this.once("ready", () => resolve(this));
+            this.once("close", (error) => reject(error));
+        });
+        this.#init(options);
         ws.binaryType = "arraybuffer";
         ws.addEventListener("close", (event) => {
             this.#selfEventBox.dispatch("close", [event.reason]);
@@ -83,6 +53,46 @@ export class VarhubClient {
             }
         });
     }
+    get waitForReady() {
+        return this.#readyPromise;
+    }
+    #init(options) {
+        const ws = this.#ws;
+        console.log("INIT", ws, options?.timeout);
+        const onSuccess = () => {
+            this.#ready = true;
+            this.#selfEventBox.dispatch("ready", []);
+        };
+        const onError = (error) => {
+            this.#error = error;
+            this.#selfEventBox.dispatch("error", [error]);
+        };
+        const abort = () => {
+            onError(new Error(`aborted`));
+            if (timeout != undefined)
+                clearTimeout(timeout);
+            ws.close(4000);
+        };
+        let timeout;
+        if (options.timeout instanceof AbortSignal) {
+            options.timeout.addEventListener("abort", abort);
+        }
+        else if (typeof options.timeout === "number") {
+            timeout = setTimeout(abort, options.timeout);
+        }
+        const onClose = (e) => onError(new Error(e.reason));
+        const onMessage = () => {
+            ws.removeEventListener("close", onClose);
+            ws.removeEventListener("message", onMessage);
+            if (timeout != undefined)
+                clearTimeout(timeout);
+            onSuccess();
+        };
+        ws.addEventListener("close", onClose);
+        ws.addEventListener("message", onMessage);
+    }
+    get error() { return this.#error; }
+    get ready() { return this.#ready; }
     get hub() { return this.#hub; }
     get roomId() { return this.#roomId; }
     get name() { return this.#name; }

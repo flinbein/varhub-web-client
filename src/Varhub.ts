@@ -17,7 +17,7 @@ export interface RoomJoinOptions {
 	integrity?: string
 	password?: any,
 	params?: any,
-	timeout?: AbortSignal | number
+	timeout?: AbortSignal | number,
 }
 
 interface RoomCreateResult {
@@ -154,40 +154,36 @@ export class Varhub {
 		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 		EVENTS extends Record<string, any> = Record<string, XJData[]>
 	>(roomId: string, name: string, options: RoomJoinOptions): Promise<VarhubClient<METHODS, EVENTS>> {
+		const client = this.createClient<METHODS, EVENTS>(roomId, name, options);
+		return new Promise<VarhubClient<METHODS, EVENTS>>((resolve, reject) => {
+			client.once("ready", () => resolve(client));
+			client.once("error", reject);
+		});
+	}
+	
+	createClient<
+		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
+		EVENTS extends Record<string, any> = Record<string, XJData[]>
+	>(roomId: string, name: string, options: RoomJoinOptions): VarhubClient<METHODS, EVENTS> {
+		const ws = this.#createWebsocket(roomId, name, options);
+		return new VarhubClient(ws, this, roomId, name, options);
+	}
+	
+	#createWebsocket(roomId: string, name: string | false, options: RoomJoinOptions){
 		const wsUrl = new URL(this.#baseUrl);
 		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
 		const joinRoomUrl = new URL(`room/${encodeURIComponent(roomId)}/join`, wsUrl);
-		joinRoomUrl.searchParams.set("name", name);
-		if (options.password != null) joinRoomUrl.searchParams.set("password", options.password);
-		if (options.integrity != null) joinRoomUrl.searchParams.set("integrity", options.integrity);
-		if (options.params !== undefined) joinRoomUrl.searchParams.set("params", JSON.stringify(options.params));
-		const ws = new WebSocket(joinRoomUrl);
-		await new Promise<void>((resolve, reject) => {
-			const abort = () => {
-				reject(new Error(`aborted`));
-				if (timeout != undefined) clearTimeout(timeout);
-				ws.close(4000);
-			}
-			
-			let timeout: undefined | ReturnType<typeof setTimeout>;
-			if (options.timeout instanceof AbortSignal) {
-				options.timeout.addEventListener("abort", abort);
-			} else if (typeof options.timeout === "number") {
-				timeout = setTimeout(abort, options.timeout);
-			}
-			
-			const onClose = (e: CloseEvent) => reject(new Error(e.reason));
-			const onMessage = () => {
-				ws.removeEventListener("close", onClose);
-				ws.removeEventListener("message", onMessage);
-				if (timeout != undefined) clearTimeout(timeout);
-				resolve(undefined);
-			}
-			
-			ws.addEventListener("close", onClose);
-			ws.addEventListener("message", onMessage);
-		});
+		if (name === false) {
+			joinRoomUrl.searchParams.set("raw", "true");
+			if (options.integrity != null) joinRoomUrl.searchParams.set("integrity", options.integrity);
+			if (options.params !== undefined) joinRoomUrl.searchParams.set("params", JSON.stringify(options.params));
+		} else {
+			joinRoomUrl.searchParams.set("name", name);
+			if (options.password != null) joinRoomUrl.searchParams.set("password", options.password);
+			if (options.integrity != null) joinRoomUrl.searchParams.set("integrity", options.integrity);
+			if (options.params !== undefined) joinRoomUrl.searchParams.set("params", JSON.stringify(options.params));
+		}
 		
-		return new VarhubClient(ws, this, roomId, name, options);
+		return new WebSocket(joinRoomUrl);
 	}
 }

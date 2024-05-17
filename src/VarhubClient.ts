@@ -1,55 +1,13 @@
-import { parse, serialize, XJData } from "@flinbein/xjmapper";
+import { parse, serialize, type XJData } from "@flinbein/xjmapper";
+import { EventBox, type EventSubscriber } from "./EventBox.js";
 import type { RoomJoinOptions, Varhub } from "./Varhub.js";
 
-
-interface EventSubscriber<T extends Record<string, unknown[]>, THIS extends unknown> {
-	on<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
-	once<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
-	off<E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E]) => void): void
-}
-
-class EventBox<T extends Record<keyof unknown, unknown[]>, THIS extends unknown> {
-	#eventTarget = new EventTarget();
-	#fnMap = new WeakMap<(...args: any) => void, (...args: any) => void>()
-	#source: THIS;
-	constructor(thisSource: THIS) {
-		this.#source = thisSource;
-	}
-	dispatch<E extends keyof T>(type: E, detail: T[E]): void {
-		this.#eventTarget.dispatchEvent(new CustomEvent(type as any, {detail}))
-	}
-	subscriber: EventSubscriber<T, THIS> = {
-		on: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
-			let eventHandler = this.#fnMap.get(handler);
-			if (!eventHandler) {
-				eventHandler = (event: CustomEvent) => {
-					handler.apply(this.#source, event.detail);
-				}
-				this.#fnMap.set(handler, eventHandler);
-			}
-			this.#eventTarget.addEventListener(eventName as any, eventHandler);
-		},
-		once: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
-			let eventHandler = this.#fnMap.get(handler);
-			if (!eventHandler) {
-				eventHandler = (event: CustomEvent) => {
-					handler.apply(this.#source, event.detail)
-				}
-				this.#fnMap.set(handler, eventHandler);
-			}
-			this.#eventTarget.addEventListener(eventName as any, eventHandler as any, {once: true});
-		},
-		off: <E extends keyof T>(eventName: E, handler: (this: THIS, ...args: T[E] & any[]) => void) => {
-			let eventHandler = this.#fnMap.get(handler);
-			if (!eventHandler) return;
-			this.#eventTarget.removeEventListener(eventName as any, eventHandler);
-		},
-	};
-}
 
 type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
 	message: {[key in keyof MESSAGES]: [key, ...MESSAGES[key]]}[keyof MESSAGES]
 	close: [reason: string|null]
+	ready: []
+	error: [Error]
 }
 
 export class VarhubClient<
@@ -109,13 +67,16 @@ export class VarhubClient<
 			get: (ignored, method) => (...args: any) => this.call(method as any, ...args),
 		}
 	);
-
+	
+	#error: Error | undefined
+	#ready = false;
+	readonly #readyPromise: Promise<this>;
 	readonly #hub: Varhub
 	readonly #roomId: string
 	readonly #name: string
 	readonly #params: unknown
 	readonly #roomIntegrity: string | undefined
-
+	
 	constructor(ws: WebSocket, hub: Varhub, roomId: string, name: string, options: RoomJoinOptions) {
 		this.#ws = ws;
 		this.#hub = hub
@@ -123,6 +84,11 @@ export class VarhubClient<
 		this.#name = name
 		this.#roomIntegrity = options?.integrity
 		this.#params = options?.params
+		this.#readyPromise = new Promise((resolve, reject) => {
+			this.once("ready", () => resolve(this));
+			this.once("close", (error) => reject(error));
+		});
+		this.#init(options);
 		ws.binaryType = "arraybuffer";
 		ws.addEventListener("close", (event) => {
 			this.#selfEventBox.dispatch("close", [event.reason]);
@@ -146,16 +112,61 @@ export class VarhubClient<
 		});
 	}
 	
+	get waitForReady(): Promise<this>{
+		return this.#readyPromise;
+	}
+	
+	#init(options: RoomJoinOptions){
+		const ws = this.#ws;
+		console.log("INIT", ws, options?.timeout);
+		
+		const onSuccess = () => {
+			this.#ready = true;
+			this.#selfEventBox.dispatch("ready", [])
+		}
+		
+		const onError = (error: Error) => {
+			this.#error = error;
+			this.#selfEventBox.dispatch("error", [error])
+		}
+		
+		const abort = () => {
+			onError(new Error(`aborted`));
+			if (timeout != undefined) clearTimeout(timeout);
+			ws.close(4000);
+		}
+		
+		let timeout: undefined | ReturnType<typeof setTimeout>;
+		if (options.timeout instanceof AbortSignal) {
+			options.timeout.addEventListener("abort", abort);
+		} else if (typeof options.timeout === "number") {
+			timeout = setTimeout(abort, options.timeout);
+		}
+		
+		const onClose = (e: CloseEvent) => onError(new Error(e.reason));
+		const onMessage = () => {
+			ws.removeEventListener("close", onClose);
+			ws.removeEventListener("message", onMessage);
+			if (timeout != undefined) clearTimeout(timeout);
+			onSuccess();
+		}
+		
+		ws.addEventListener("close", onClose);
+		ws.addEventListener("message", onMessage);
+	}
+	
+	get error(): Error | undefined {return this.#error }
+	get ready(): boolean {return this.#ready }
 	get hub(): Varhub {return this.#hub }
 	get roomId(): string {return this.#roomId }
 	get name(): string {return this.#name }
 	get roomIntegrity(): string | undefined {return this.#roomIntegrity }
 	get params(): unknown {return this.#params }
-
+	
 	get online(): boolean {
 		return this.#ws.readyState === WebSocket.OPEN;
 	}
-
+	
 	#callId = 0;
 	
 	/**
@@ -201,11 +212,11 @@ export class VarhubClient<
 			}
 			this.#responseEventTarget.addEventListener(currentCallId as any, onResponse, {once: true});
 			this.once("close", onClose);
-
+			
 			this.#ws.send(binData);
 		});
 	}
-
+	
 	close(reason?: string): void {
 		this.#ws.close(4000, reason);
 	}
