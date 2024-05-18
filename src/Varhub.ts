@@ -1,5 +1,6 @@
 import { VarhubClient } from "./VarhubClient.js";
 import { XJData } from "@flinbein/xjmapper";
+import { VarhubLogger } from "./VarhubLogger.js";
 
 interface RoomModule {
 	main: string,
@@ -25,6 +26,8 @@ interface RoomCreateResult {
 	integrity?: string | null
 	message: string | null
 }
+
+const decoder = new TextDecoder("utf-8");
 
 /**
  * Varhub instance to manage rooms, create clients
@@ -165,11 +168,27 @@ export class Varhub {
 		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 		EVENTS extends Record<string, any> = Record<string, XJData[]>
 	>(roomId: string, name: string, options: RoomJoinOptions): VarhubClient<METHODS, EVENTS> {
-		const ws = this.#createWebsocket(roomId, name, options);
+		const ws = this.#createWebsocketForConnection(roomId, name, options);
 		return new VarhubClient(ws, this, roomId, name, options);
 	}
 	
-	#createWebsocket(roomId: string, name: string | false, options: RoomJoinOptions){
+	async createLogger(): Promise<VarhubLogger> {
+		const wsUrl = new URL(this.#baseUrl);
+		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
+		const loggerUrl = new URL(`log`, wsUrl);
+		const ws = new WebSocket(loggerUrl);
+		ws.binaryType = "arraybuffer";
+		return new Promise<VarhubLogger>((resolve, reject) => {
+			ws.addEventListener("close", () => reject(new Error("ws closed")));
+			ws.addEventListener("message", (event) => {
+				const dataView = new DataView(event.data as ArrayBuffer);
+				const id = decoder.decode(dataView);
+				resolve(new VarhubLogger(ws, this, id));
+			});
+		})
+	}
+	
+	#createWebsocketForConnection(roomId: string, name: string | false, options: RoomJoinOptions){
 		const wsUrl = new URL(this.#baseUrl);
 		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
 		const joinRoomUrl = new URL(`room/${encodeURIComponent(roomId)}/join`, wsUrl);

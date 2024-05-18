@@ -1,4 +1,6 @@
 import { VarhubClient } from "./VarhubClient.js";
+import { VarhubLogger } from "./VarhubLogger.js";
+const decoder = new TextDecoder("utf-8");
 export class Varhub {
     #baseUrl;
     constructor(url) {
@@ -38,10 +40,25 @@ export class Varhub {
         });
     }
     createClient(roomId, name, options) {
-        const ws = this.#createWebsocket(roomId, name, options);
+        const ws = this.#createWebsocketForConnection(roomId, name, options);
         return new VarhubClient(ws, this, roomId, name, options);
     }
-    #createWebsocket(roomId, name, options) {
+    async createLogger() {
+        const wsUrl = new URL(this.#baseUrl);
+        wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
+        const loggerUrl = new URL(`log`, wsUrl);
+        const ws = new WebSocket(loggerUrl);
+        ws.binaryType = "arraybuffer";
+        return new Promise((resolve, reject) => {
+            ws.addEventListener("close", () => reject(new Error("ws closed")));
+            ws.addEventListener("message", (event) => {
+                const dataView = new DataView(event.data);
+                const id = decoder.decode(dataView);
+                resolve(new VarhubLogger(ws, this, id));
+            });
+        });
+    }
+    #createWebsocketForConnection(roomId, name, options) {
         const wsUrl = new URL(this.#baseUrl);
         wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
         const joinRoomUrl = new URL(`room/${encodeURIComponent(roomId)}/join`, wsUrl);

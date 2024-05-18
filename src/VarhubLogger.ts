@@ -11,32 +11,21 @@ type VarhubLoggerEvents = {
 }
 
 export class VarhubLogger {
+	readonly #id: string;
 	#ws: WebSocket;
 	#selfEventBox = new EventBox<VarhubLoggerEvents, typeof this>(this);
 	
 	#error: Error | undefined
-	readonly #readyPromise: Promise<this>;
 	readonly #hub: Varhub
 
-	constructor(ws: WebSocket, hub: Varhub) {
+	constructor(ws: WebSocket, hub: Varhub, id: string) {
 		this.#ws = ws;
 		this.#hub = hub;
+		this.#id = id;
 		
-		this.#ws.addEventListener("open", () => {
-			this.#selfEventBox.dispatch("ready", []);
-		}, { once: true });
 		this.#ws.addEventListener("close", (event) => {
 			this.#selfEventBox.dispatch("close", [event.reason]);
 		}, { once: true });
-		this.#ws.addEventListener("error", () => {
-			this.#error = new Error(`websocket error`);
-			this.#selfEventBox.dispatch("error", [this.#error]);
-		}, { once: true });
-		
-		this.#readyPromise = new Promise((resolve, reject) => {
-			this.once("ready", () => resolve(this));
-			this.once("close", (error) => reject(error));
-		});
 		
 		ws.addEventListener("message", (event) => {
 			const binData = new Uint8Array(event.data as ArrayBuffer);
@@ -45,14 +34,11 @@ export class VarhubLogger {
 		});
 	}
 	
-	get waitForReady(): Promise<this>{
-		return this.#readyPromise;
-	}
-	
+	get id(): string {return this.#id }
 	get error(): Error | undefined {return this.#error }
 	get hub(): Varhub {return this.#hub }
 	
-	get ready(): boolean {
+	get online(): boolean {
 		return this.#ws.readyState === WebSocket.OPEN;
 	}
 
