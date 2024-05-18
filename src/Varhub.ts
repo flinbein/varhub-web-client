@@ -12,6 +12,7 @@ interface RoomCreateOptions {
 	config?: any,
 	message?: string,
 	async?: boolean
+	logger?: string,
 }
 
 export interface RoomJoinOptions {
@@ -26,8 +27,6 @@ interface RoomCreateResult {
 	integrity?: string | null
 	message: string | null
 }
-
-const decoder = new TextDecoder("utf-8");
 
 /**
  * Varhub instance to manage rooms, create clients
@@ -181,10 +180,8 @@ export class Varhub {
 		return new Promise<VarhubLogger>((resolve, reject) => {
 			ws.addEventListener("close", () => reject(new Error("ws closed")));
 			ws.addEventListener("message", (event) => {
-				const dataView = new DataView(event.data as ArrayBuffer);
-				const id = decoder.decode(dataView);
-				resolve(new VarhubLogger(ws, this, id));
-			});
+				resolve(new VarhubLogger(ws, this, String(event.data)));
+			}, {once: true});
 		})
 	}
 	

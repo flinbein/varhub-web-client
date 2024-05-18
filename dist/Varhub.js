@@ -1,6 +1,5 @@
 import { VarhubClient } from "./VarhubClient.js";
 import { VarhubLogger } from "./VarhubLogger.js";
-const decoder = new TextDecoder("utf-8");
 export class Varhub {
     #baseUrl;
     constructor(url) {
@@ -52,10 +51,8 @@ export class Varhub {
         return new Promise((resolve, reject) => {
             ws.addEventListener("close", () => reject(new Error("ws closed")));
             ws.addEventListener("message", (event) => {
-                const dataView = new DataView(event.data);
-                const id = decoder.decode(dataView);
-                resolve(new VarhubLogger(ws, this, id));
-            });
+                resolve(new VarhubLogger(ws, this, String(event.data)));
+            }, { once: true });
         });
     }
     #createWebsocketForConnection(roomId, name, options) {
