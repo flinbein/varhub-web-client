@@ -31,6 +31,19 @@ export class Varhub {
         }
         return response.json();
     }
+    async getRoomMessage(roomId, integrity) {
+        const getRoomMessageUrl = new URL(`room/${encodeURIComponent(roomId)}`, this.#baseUrl);
+        if (integrity)
+            getRoomMessageUrl.searchParams.set("integrity", integrity);
+        const response = await fetch(getRoomMessageUrl, {
+            method: "GET",
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+        return response.json();
+    }
     async join(roomId, name, options) {
         const client = this.createClient(roomId, name, options);
         return new Promise((resolve, reject) => {

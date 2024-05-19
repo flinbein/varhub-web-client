@@ -4,7 +4,7 @@ import type { RoomJoinOptions, Varhub } from "./Varhub.js";
 
 
 type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
-	message: {[key in keyof MESSAGES]: [key, ...MESSAGES[key]]}[keyof MESSAGES]
+	message: {[key in keyof MESSAGES]: [eventName: key, ...eventParams: MESSAGES[key]]}[keyof MESSAGES]
 	close: [reason: string|null]
 	ready: []
 	error: [Error]
@@ -14,10 +14,10 @@ export class VarhubClient<
 	METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 	MESSAGES extends Record<string, any[]> = Record<string, XJData[]>
 > {
-	#ws: WebSocket;
-	#responseEventTarget = new EventTarget();
-	#messagesEventBox = new EventBox<MESSAGES, typeof this>(this);
-	#selfEventBox = new EventBox<VarhubClientEvents<MESSAGES>, typeof this>(this);
+	readonly #ws: WebSocket;
+	readonly #responseEventTarget = new EventTarget();
+	readonly #messagesEventBox = new EventBox<MESSAGES, typeof this>(this);
+	readonly #selfEventBox = new EventBox<VarhubClientEvents<MESSAGES>, typeof this>(this);
 	
 	/**
 	 * Use this object to subscribe on room events
@@ -112,6 +112,9 @@ export class VarhubClient<
 		});
 	}
 	
+	/**
+	 * Promise wait for ready status.
+	 */
 	get waitForReady(): Promise<this>{
 		return this.#readyPromise;
 	}

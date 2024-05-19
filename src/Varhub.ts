@@ -96,6 +96,26 @@ export class Varhub {
 	}
 	
 	/**
+	 * Get public message of room.
+	 * @param roomId {string} room id
+	 * @param integrity {string} required if room was created with integrity
+	 * @returns string
+	 * @throws Error if room not found or room not public or integrity mismatch
+	 */
+	async getRoomMessage(roomId: string, integrity?: string): Promise<string> {
+		const getRoomMessageUrl = new URL(`room/${encodeURIComponent(roomId)}`, this.#baseUrl);
+		if (integrity) getRoomMessageUrl.searchParams.set("integrity", integrity);
+		const response = await fetch(getRoomMessageUrl, {
+			method: "GET",
+			headers: {'Content-Type': 'application/json'}
+		});
+		if (!response.ok) {
+			throw new Error(await response.text());
+		}
+		return response.json();
+	}
+	
+	/**
 	 * Join room.
 	 * @template METHODS methods that the main module exports.
 	 *

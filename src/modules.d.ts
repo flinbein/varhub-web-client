@@ -5,6 +5,8 @@ declare module "varhub:room" {
 	 * @see RoomEvents#leave
 	 * @see RoomEvents#online
 	 * @see RoomEvents#offline
+	 * @see RoomEvents#connectionJoin
+	 * @see RoomEvents#connectionClosed
 	 */
 	type RoomEvents = {
 		/**
@@ -214,4 +216,9 @@ declare module "varhub:config" {
 	 */
 	const config: unknown;
 	export default config;
+}
+
+declare module "varhub:performance" {
+	/** performance.now() */
+	export const now: () => number;
 }

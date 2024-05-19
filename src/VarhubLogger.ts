@@ -41,7 +41,7 @@ export class VarhubLogger {
 	get online(): boolean {
 		return this.#ws.readyState === WebSocket.OPEN;
 	}
-
+	
 	close(reason?: string): void {
 		this.#ws.close(4000, reason);
 	}
