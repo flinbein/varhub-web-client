@@ -44,14 +44,14 @@ export class Varhub {
         }
         return response.json();
     }
-    async join(roomId, name, options) {
+    async join(roomId, name, options = {}) {
         const client = this.createClient(roomId, name, options);
         return new Promise((resolve, reject) => {
             client.once("ready", () => resolve(client));
             client.once("error", reject);
         });
     }
-    createClient(roomId, name, options) {
+    createClient(roomId, name, options = {}) {
         const ws = this.#createWebsocketForConnection(roomId, name, options);
         return new VarhubClient(ws, this, roomId, name, options);
     }

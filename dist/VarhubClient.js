@@ -58,7 +58,6 @@ export class VarhubClient {
     }
     #init(options) {
         const ws = this.#ws;
-        console.log("INIT", ws, options?.timeout);
         const onSuccess = () => {
             this.#ready = true;
             this.#selfEventBox.dispatch("ready", []);

@@ -121,7 +121,6 @@ export class VarhubClient<
 	
 	#init(options: RoomJoinOptions){
 		const ws = this.#ws;
-		console.log("INIT", ws, options?.timeout);
 		
 		const onSuccess = () => {
 			this.#ready = true;

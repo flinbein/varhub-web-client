@@ -175,7 +175,7 @@ export class Varhub {
 	async join<
 		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 		EVENTS extends Record<string, any> = Record<string, XJData[]>
-	>(roomId: string, name: string, options: RoomJoinOptions): Promise<VarhubClient<METHODS, EVENTS>> {
+	>(roomId: string, name: string, options: RoomJoinOptions = {}): Promise<VarhubClient<METHODS, EVENTS>> {
 		const client = this.createClient<METHODS, EVENTS>(roomId, name, options);
 		return new Promise<VarhubClient<METHODS, EVENTS>>((resolve, reject) => {
 			client.once("ready", () => resolve(client));
@@ -186,7 +186,7 @@ export class Varhub {
 	createClient<
 		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 		EVENTS extends Record<string, any> = Record<string, XJData[]>
-	>(roomId: string, name: string, options: RoomJoinOptions): VarhubClient<METHODS, EVENTS> {
+	>(roomId: string, name: string, options: RoomJoinOptions = {}): VarhubClient<METHODS, EVENTS> {
 		const ws = this.#createWebsocketForConnection(roomId, name, options);
 		return new VarhubClient(ws, this, roomId, name, options);
 	}
