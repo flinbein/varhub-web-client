@@ -19,7 +19,7 @@ export class Varhub {
         return this.#fetch("GET", `room/${encodeURIComponent(roomId)}`);
     }
     join(roomId, options = {}) {
-        return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options);
+        return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
     }
     createLogger(loggerId) {
         return this.#createWebsocket(`log/${encodeURIComponent(String(loggerId))}`);
@@ -36,13 +36,18 @@ export class Varhub {
         }
         return response.json();
     }
-    #createWebsocket(path, options = {}) {
+    #createWebsocket(path, options, stringifyKeys) {
         const wsUrl = new URL(this.#baseUrl);
         wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
         const joinRoomUrl = new URL(path, wsUrl);
-        for (let [key, value] of Object.entries(options)) {
-            joinRoomUrl.searchParams.set(key, value);
-        }
+        if (options)
+            for (let [key, value] of Object.entries(options)) {
+                if (value === undefined)
+                    continue;
+                if (stringifyKeys?.includes(key))
+                    value = JSON.stringify(value);
+                joinRoomUrl.searchParams.set(key, value);
+            }
         const ws = new WebSocket(joinRoomUrl);
         ws.binaryType = "arraybuffer";
         return ws;

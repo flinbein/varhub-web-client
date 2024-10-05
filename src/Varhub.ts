@@ -146,7 +146,7 @@ export class Varhub {
 	 * @returns client's websocket
 	 */
 	join(roomId: string, options: RoomJoinOptions = {}): WebSocket {
-		return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options);
+		return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
 	}
 	
 	/**
@@ -173,11 +173,13 @@ export class Varhub {
 		return response.json();
 	}
 	
-	#createWebsocket(path: string, options: RoomJoinOptions = {}): WebSocket{
+	#createWebsocket<T extends Record<string, any>>(path: string, options?: T, stringifyKeys?: (keyof T)[] ): WebSocket{
 		const wsUrl = new URL(this.#baseUrl);
 		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
 		const joinRoomUrl = new URL(path, wsUrl);
-		for (let [key, value] of Object.entries(options)) {
+		if (options) for (let [key, value] of Object.entries(options)) {
+			if (value === undefined) continue;
+			if (stringifyKeys?.includes(key)) value = JSON.stringify(value);
 			joinRoomUrl.searchParams.set(key, value);
 		}
 		const ws = new WebSocket(joinRoomUrl);
