@@ -3,7 +3,7 @@
 	"compilerOptions": {
         "experimentalDecorators": true,
 		"removeComments": true,
-		"target": "ESNext",
+		"target": "ES2023",
 		"lib": [
           "ESNext",
           "dom"
@@ -20,7 +20,8 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"strictBindCallApply": true,
-		"strictFunctionTypes": true
+		"strictFunctionTypes": true,
+		"sourceMap": true
 	},
 	"buildOptions": {
 		"verbose": true

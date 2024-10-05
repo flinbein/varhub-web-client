@@ -37,3 +37,4 @@ export class EventBox {
         },
     };
 }
+//# sourceMappingURL=EventBox.js.map

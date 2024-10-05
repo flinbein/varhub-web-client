@@ -1,31 +1,68 @@
-import { VarhubClient } from "./VarhubClient.js";
-import { XJData } from "@flinbein/xjmapper";
-import { VarhubLogger } from "./VarhubLogger.js";
+type RoomCreateOptionsMap = {
+	/** isolate-dvm controller */
+	"ivm": {
+		request: {
+			/** javascript sources */
+			module: RoomModule,
+			/** `true` - generate integrity key for module; `string` - check integrity; other - do not use integrity */
+			integrity?: boolean | string
+			/** value of ```import config from "varhub:config"``` */
+			config?: any,
+			/** public message of this room. Required to publish room */
+			message?: string,
+			/** `true` - allow to inspect v8; `string` - allow to inspect and add inspector with this id */
+			inspect?: string | boolean,
+		},
+		response: {
+			/** room id */
+			id: string,
+			/** room integrity if used */
+			integrity: string | null
+			/** public message of this room */
+			message: string | null
+			/** new key of websocket to inspect v8 */
+			inspect: string | null
+		}
+	},
+	/** quick-js controller */
+	"qjs": {
+		request: {
+			/** javascript sources */
+			module: RoomModule,
+			/** `true` - generate integrity key for module; `string` - check integrity; other - do not use integrity */
+			integrity?: boolean | string
+			/** value of ```import config from "varhub:config"``` */
+			config?: any,
+			/** public message of this room. Required to publish room */
+			message?: string,
+			/** use quick-js in async node */
+			async?: boolean
+			/** add logger with this id */
+			logger?: string,
+		},
+		response: {
+			/** room id */
+			id: string,
+			/** room integrity if used */
+			integrity: string | null
+			/** public message of this room */
+			message: string | null
+		}
+		
+	}
+}
+
+type RoomCreateOptions<T extends string> = T extends keyof RoomCreateOptionsMap ? RoomCreateOptionsMap[T]["request"] : any;
+type RoomCreateResult<T extends string> = T extends keyof RoomCreateOptionsMap ? RoomCreateOptionsMap[T]["response"] : any;
 
 interface RoomModule {
 	main: string,
 	source: Record<string, string>
 }
 
-interface RoomCreateOptions {
-	integrity?: boolean | string
-	config?: any,
-	message?: string,
-	async?: boolean
-	logger?: string,
-}
-
 export interface RoomJoinOptions {
 	integrity?: string
-	password?: any,
-	params?: any,
-	timeout?: AbortSignal | number,
-}
-
-interface RoomCreateResult {
-	id: string,
-	integrity?: string | null
-	message: string | null
+	params?: any[],
 }
 
 /**
@@ -48,32 +85,21 @@ export class Varhub {
 	
 	/**
 	 * Create new room
-	 * @param module module sources
-	 * @param [options] additional options: integrity, config, message, async
-	 * @param [options.integrity] required to create public rooms.
-	 *
-	 *	`true` - create public room with integrity.
-	 *
-	 *  `string` - create public room with integrity and check it.
-	 *
-	 *  `false (default)` - create private room without integrity.
-	 * @param [options.config] add config that can be used as `import config from "varhub:config"`.
-	 *	config does not affect integrity
-	 * @param [options.message] set room public message on create
-	 * @param [options.async] set `true` if you need async module loader
-	 * @returns promise with room description.
+	 * @param type type of VM
+	 * @param [options] options
 	 */
-	async createRoom(module: RoomModule, options: RoomCreateOptions = {}): Promise<RoomCreateResult> {
-		const createRoomUrl = new URL("room", this.#baseUrl);
-		const response = await fetch(createRoomUrl, {
-			method: "POST",
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({module, ...options})
-		});
-		if (!response.ok) {
-			throw new Error(await response.text());
-		}
-		return response.json();
+	async createRoom<T extends keyof RoomCreateOptionsMap>(type: T, options: RoomCreateOptions<T>): Promise<RoomCreateResult<T>> {
+		return this.#fetch("POST", `room/${encodeURIComponent(type)}`, JSON.stringify(options));
+	}
+	
+	/**
+	 * create websocket connection to handle new room
+	 * @param [options] options
+	 * @param [options.message] set public message of this room
+	 * @param [options.integrity] set integrity for new room. Starts with "custom:"
+	 */
+	createRoomSocket(options: {message?: string, integrity?: `custom:${string}`} = {}): WebSocket {
+		return this.#createWebsocket("room/ws", options);
 	}
 	
 	/**
@@ -84,15 +110,7 @@ export class Varhub {
 	 * @returns record of <roomId, message>.
 	 */
 	async findRooms(integrity: string): Promise<Record<string, string>> {
-		const getRoomsUrl = new URL(`rooms/${encodeURIComponent(integrity)}`, this.#baseUrl);
-		const response = await fetch(getRoomsUrl, {
-			method: "GET",
-			headers: {'Content-Type': 'application/json'}
-		});
-		if (!response.ok) {
-			throw new Error(await response.text());
-		}
-		return response.json();
+		return this.#fetch("GET", `rooms/${encodeURIComponent(integrity)}`);
 	}
 	
 	/**
@@ -103,60 +121,19 @@ export class Varhub {
 	 * @throws Error if room not found or room not public or integrity mismatch
 	 */
 	async getRoomMessage(roomId: string, integrity?: string): Promise<string> {
-		const getRoomMessageUrl = new URL(`room/${encodeURIComponent(roomId)}`, this.#baseUrl);
-		if (integrity) getRoomMessageUrl.searchParams.set("integrity", integrity);
-		const response = await fetch(getRoomMessageUrl, {
-			method: "GET",
-			headers: {'Content-Type': 'application/json'}
-		});
-		if (!response.ok) {
-			throw new Error(await response.text());
-		}
-		return response.json();
+		return this.#fetch("GET", `room/${encodeURIComponent(roomId)}`);
 	}
 	
 	/**
 	 * Join room.
-	 * @template METHODS methods that the main module exports.
 	 *
-	 *	Example:
-	 *	```typescript
-	 * 		type METHODS = {
-	 * 			sendMessage(message: string) => boolean
-	 * 		}
-	 * 		const client = await varhub.join<METHODS>(...);
-	 * 		const sentIsSuccess = await client.methods.sendMessage("hello");
-	 * 	```
-	 *
-	 * 	You can import type of room module to inject exported methods:
-	 * 	```typescript
-	 * 		import type * as RoomModule from "./controller/index";
-	 * 		varhub.join<typeof RoomModule>(...);
-	 * 	```
-	 *
-	 * @template EVENTS events that the main module emits.
-	 *
-	 * 	Example:
-	 * 	```typescript
-	 * 		type EVENTS = {
-	 * 			messageReceived: [message: string]
-	 * 		}
-	 * 		const client = await varhub.join<METHODS, EVENTS>(...);
-	 * 		client.messages.on("messageReceived", (message) => {
-	 * 			console.log(message);
-	 * 		});
-	 * 	```
 	 * @param roomId room id
-	 *
-	 * @param name name of client (player name)
 	 *
 	 * @param [options] options
 	 *
 	 * @param [options.integrity] check room integrity before join.
 	 *
 	 * 	if there is an integrity error there will be a connection error.
-	 *
-	 * @param [options.password] password of client.
 	 *
 	 * 	two clients can not be connected with different passwords.
 	 *
@@ -166,60 +143,45 @@ export class Varhub {
 	 *
 	 * 	data is set only in first connection.
 	 *
-	 * @param [options.timeout] timeout to cancel connection.
-	 *
-	 *  You can use `AbortSignal` to abort connection manually.
-	 *
-	 * @returns client to manage room connection
+	 * @returns client's websocket
 	 */
-	async join<
-		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
-		EVENTS extends Record<string, any> = Record<string, XJData[]>
-	>(roomId: string, name: string, options: RoomJoinOptions = {}): Promise<VarhubClient<METHODS, EVENTS>> {
-		const client = this.createClient<METHODS, EVENTS>(roomId, name, options);
-		return new Promise<VarhubClient<METHODS, EVENTS>>((resolve, reject) => {
-			client.once("ready", () => resolve(client));
-			client.once("error", reject);
+	join(roomId: string, options: RoomJoinOptions = {}): WebSocket {
+		return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options);
+	}
+	
+	/**
+	 * example to generate random id
+	 * ```js
+	 * Array.from({length:10}).map(() => Math.random().toString(36).substring(2)).join("")
+	 * ```
+	 * @param loggerId
+	 */
+	createLogger(loggerId: string): WebSocket {
+		return this.#createWebsocket(`log/${encodeURIComponent(String(loggerId))}`)
+	}
+	
+	async #fetch(method: string, path: string, body?: string): Promise<any> {
+		const getRoomsUrl = new URL(path, this.#baseUrl);
+		const response = await fetch(getRoomsUrl, {
+			method: method,
+			headers: {'Content-Type': 'application/json'},
+			body,
 		});
-	}
-	
-	createClient<
-		METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
-		EVENTS extends Record<string, any> = Record<string, XJData[]>
-	>(roomId: string, name: string, options: RoomJoinOptions = {}): VarhubClient<METHODS, EVENTS> {
-		const ws = this.#createWebsocketForConnection(roomId, name, options);
-		return new VarhubClient(ws, this, roomId, name, options);
-	}
-	
-	async createLogger(): Promise<VarhubLogger> {
-		const wsUrl = new URL(this.#baseUrl);
-		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
-		const loggerUrl = new URL(`log`, wsUrl);
-		const ws = new WebSocket(loggerUrl);
-		ws.binaryType = "arraybuffer";
-		return new Promise<VarhubLogger>((resolve, reject) => {
-			ws.addEventListener("close", () => reject(new Error("ws closed")));
-			ws.addEventListener("message", (event) => {
-				resolve(new VarhubLogger(ws, this, String(event.data)));
-			}, {once: true});
-		})
-	}
-	
-	#createWebsocketForConnection(roomId: string, name: string | false, options: RoomJoinOptions){
-		const wsUrl = new URL(this.#baseUrl);
-		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
-		const joinRoomUrl = new URL(`room/${encodeURIComponent(roomId)}/join`, wsUrl);
-		if (name === false) {
-			joinRoomUrl.searchParams.set("raw", "true");
-			if (options.integrity != null) joinRoomUrl.searchParams.set("integrity", options.integrity);
-			if (options.params !== undefined) joinRoomUrl.searchParams.set("params", JSON.stringify(options.params));
-		} else {
-			joinRoomUrl.searchParams.set("name", name);
-			if (options.password != null) joinRoomUrl.searchParams.set("password", options.password);
-			if (options.integrity != null) joinRoomUrl.searchParams.set("integrity", options.integrity);
-			if (options.params !== undefined) joinRoomUrl.searchParams.set("params", JSON.stringify(options.params));
+		if (!response.ok) {
+			throw new Error(await response.text());
 		}
-		
-		return new WebSocket(joinRoomUrl);
+		return response.json();
+	}
+	
+	#createWebsocket(path: string, options: RoomJoinOptions = {}): WebSocket{
+		const wsUrl = new URL(this.#baseUrl);
+		wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
+		const joinRoomUrl = new URL(path, wsUrl);
+		for (let [key, value] of Object.entries(options)) {
+			joinRoomUrl.searchParams.set(key, value);
+		}
+		const ws = new WebSocket(joinRoomUrl);
+		ws.binaryType = "arraybuffer";
+		return ws;
 	}
 }

@@ -1,6 +1,7 @@
 import { parse, serialize, type XJData } from "@flinbein/xjmapper";
 import { EventBox, type EventSubscriber } from "./EventBox.js";
 import type { RoomJoinOptions, Varhub } from "./Varhub.js";
+import { resolve } from "node:dns";
 
 
 type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
@@ -10,10 +11,10 @@ type VarhubClientEvents<MESSAGES extends Record<string, XJData[]>> = {
 	error: [Error]
 }
 
-export class VarhubClient<
+export class VarhubRpcClient<
 	METHODS extends Record<string, any> = Record<string, (...args: XJData[]) => XJData>,
 	MESSAGES extends Record<string, any[]> = Record<string, XJData[]>
-> {
+> implements Disposable, AsyncDisposable {
 	readonly #ws: WebSocket;
 	readonly #responseEventTarget = new EventTarget();
 	readonly #messagesEventBox = new EventBox<MESSAGES, typeof this>(this);
@@ -70,44 +71,51 @@ export class VarhubClient<
 	
 	#error: Error | undefined
 	#ready = false;
+	#closed = false;
 	readonly #readyPromise: Promise<this>;
-	readonly #hub: Varhub
-	readonly #roomId: string
-	readonly #name: string
-	readonly #params: unknown
-	readonly #roomIntegrity: string | undefined
 	
-	constructor(ws: WebSocket, hub: Varhub, roomId: string, name: string, options: RoomJoinOptions) {
+	constructor(ws: WebSocket) {
+		if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
+			throw new Error("websocket is closed");
+		}
+		ws.binaryType = "arraybuffer"
 		this.#ws = ws;
-		this.#hub = hub
-		this.#roomId = roomId
-		this.#name = name
-		this.#roomIntegrity = options?.integrity
-		this.#params = options?.params
-		this.#readyPromise = new Promise((resolve, reject) => {
-			this.once("ready", () => resolve(this));
-			this.once("close", (error) => reject(error));
-		});
-		this.#init(options);
+		if (ws.readyState === WebSocket.CONNECTING) {
+			this.#readyPromise = new Promise((resolve, reject) => {
+				this.once("ready", () => resolve(this));
+				this.once("close", (error) => reject(error));
+			});
+			ws.addEventListener("open", () => {
+				this.#ready = true;
+				this.#selfEventBox.dispatch("ready", []);
+			});
+		} else {
+			this.#ready = true;
+			this.#readyPromise = Promise.resolve(this);
+		}
+		this.#readyPromise.catch(() => {});
+		
 		ws.binaryType = "arraybuffer";
 		ws.addEventListener("close", (event) => {
+			this.#closed = true;
+			this.#ready = false;
 			this.#selfEventBox.dispatch("close", [event.reason]);
 		});
 		ws.addEventListener("message", (event) => {
 			const binData = new Uint8Array(event.data as ArrayBuffer);
-			const [type, ...parsedData] = parse(binData);
-			if (type === 2) {
-				this.#selfEventBox.dispatch("message", parsedData as any);
-				if (parsedData.length >= 1) {
-					const [eventType, ...eventData] = parsedData;
+			const [code = undefined, ...args] = parse(binData);
+			if (code === "$rpcEvent") {
+				this.#selfEventBox.dispatch("message", args as any);
+				if (args.length >= 1) {
+					const [eventType, ...eventData] = args;
 					if (typeof eventType === "string") {
 						this.#messagesEventBox.dispatch(eventType, eventData as any);
 					}
 				}
-			} else {
-				const [callId, response] = parsedData;
+			} else if (code === "$rpcResult") {
+				const [callId = undefined, errorCode = undefined, response = undefined] = args;
 				if (typeof callId !== "number" && typeof callId !== "string") return;
-				this.#responseEventTarget.dispatchEvent(new CustomEvent(callId as any, {detail: [type, response]}));
+				this.#responseEventTarget.dispatchEvent(new CustomEvent(callId as any, {detail: [errorCode, response]}));
 			}
 		});
 	}
@@ -119,51 +127,9 @@ export class VarhubClient<
 		return this.#readyPromise;
 	}
 	
-	#init(options: RoomJoinOptions){
-		const ws = this.#ws;
-		
-		const onSuccess = () => {
-			this.#ready = true;
-			this.#selfEventBox.dispatch("ready", [])
-		}
-		
-		const onError = (error: Error) => {
-			this.#error = error;
-			this.#selfEventBox.dispatch("error", [error])
-		}
-		
-		const abort = () => {
-			onError(new Error(`aborted`));
-			if (timeout != undefined) clearTimeout(timeout);
-			ws.close(4000);
-		}
-		
-		let timeout: undefined | ReturnType<typeof setTimeout>;
-		if (options.timeout instanceof AbortSignal) {
-			options.timeout.addEventListener("abort", abort);
-		} else if (typeof options.timeout === "number") {
-			timeout = setTimeout(abort, options.timeout);
-		}
-		
-		const onClose = (e: CloseEvent) => onError(new Error(e.reason));
-		const onMessage = () => {
-			ws.removeEventListener("close", onClose);
-			ws.removeEventListener("message", onMessage);
-			if (timeout != undefined) clearTimeout(timeout);
-			onSuccess();
-		}
-		
-		ws.addEventListener("close", onClose);
-		ws.addEventListener("message", onMessage);
-	}
-	
 	get error(): Error | undefined {return this.#error }
 	get ready(): boolean {return this.#ready }
-	get hub(): Varhub {return this.#hub }
-	get roomId(): string {return this.#roomId }
-	get name(): string {return this.#name }
-	get roomIntegrity(): string | undefined {return this.#roomIntegrity }
-	get params(): unknown {return this.#params }
+	get closed(): boolean {return this.#closed }
 	
 	get online(): boolean {
 		return this.#ws.readyState === WebSocket.OPEN;
@@ -194,23 +160,21 @@ export class VarhubClient<
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("connection status");
 		return new Promise<any>((resolve, reject) => {
 			const currentCallId = this.#callId++;
-			const binData = serialize(currentCallId, method, ...data as any);
+			const binData = serialize("$rpc", currentCallId, method, ...data as any);
 			const onResponse = (event: Event) => {
 				if (!(event instanceof CustomEvent)) return;
 				const eventData = event.detail;
 				if (!Array.isArray(eventData)) return;
 				const [type, response] = eventData;
-				clearEvents();
-				if (type === 0) resolve(response);
-				else reject(response);
+				clear(type === 0 ? resolve: reject, response);
 			}
 			const onClose = (reason: string | null) => {
-				clearEvents();
-				reject(new Error(reason ?? "connection closed"));
+				clear(reject, new Error(reason ?? "connection closed"));
 			}
-			const clearEvents = () => {
+			const clear = <T extends (...args: any[]) => any>(fn: T, ...args: Parameters<T>) => {
 				this.#responseEventTarget.removeEventListener(currentCallId as any, onResponse);
 				this.off("close", onClose);
+				fn(...args);
 			}
 			this.#responseEventTarget.addEventListener(currentCallId as any, onResponse, {once: true});
 			this.once("close", onClose);
@@ -220,6 +184,8 @@ export class VarhubClient<
 	}
 	
 	close(reason?: string): void {
+		this.#closed = true;
+		this.#ready = false;
 		this.#ws.close(4000, reason);
 	}
 	
@@ -274,5 +240,18 @@ export class VarhubClient<
 	off<T extends keyof VarhubClientEvents<MESSAGES>>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents<MESSAGES>[T]) => void): this{
 		this.#selfEventBox.subscriber.off(event, handler);
 		return this;
+	}
+	
+	[Symbol.dispose](){
+		if (this.#ws.readyState === WebSocket.CLOSED) return;
+		this.#ws.close();
+	}
+	
+	[Symbol.asyncDispose](){
+		if (this.#ws.readyState === WebSocket.CLOSED) return Promise.resolve();
+		return new Promise<void>((resolve) => {
+			this.#ws.close();
+			this.#ws.addEventListener("close", () => resolve());
+		});
 	}
 }
