@@ -198,7 +198,7 @@ class Channel {
                 if (prop in subscribers)
                     return subscribers[prop];
                 if (typeof prop !== "string")
-                    throw new Error("wrong key format");
+                    return undefined;
                 if (children.has(prop))
                     return children.get(prop);
                 const handler = this.createProxy([...path, prop]);

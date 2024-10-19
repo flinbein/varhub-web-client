@@ -265,7 +265,7 @@ class Channel {
 					if (prop === "close") return this.close;
 				}
 				if (prop in subscribers) return (subscribers as any)[prop];
-				if (typeof prop !== "string") throw new Error("wrong key format");
+				if (typeof prop !== "string") return undefined;
 				// on, once, off
 				if (children.has(prop)) return children.get(prop);
 				const handler = this.createProxy([...path, prop]);
