@@ -285,7 +285,7 @@ class Channel {
 			set(){throw new Error(`can not set property of channel`)},
 			delete(){throw new Error(`can not delete property of channel`)},
 			has(){return false},
-			ownKeys(){return []}
+			ownKeys(){return ["prototype"]}
 		}
 		return new Proxy(proxyTarget, proxyHandler);
 	}
