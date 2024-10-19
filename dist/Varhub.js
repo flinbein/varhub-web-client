@@ -1,3 +1,5 @@
+import { VarhubClient } from "./VarhubClient.js";
+import { RoomSocketHandler } from "./RoomSocketHandler.js";
 export class Varhub {
     #baseUrl;
     constructor(url) {
@@ -10,7 +12,8 @@ export class Varhub {
         return this.#fetch("POST", `room/${encodeURIComponent(type)}`, JSON.stringify(options));
     }
     createRoomSocket(options = {}) {
-        return this.#createWebsocket("room/ws", options);
+        const ws = this.#createWebsocket("room/ws", options);
+        return new RoomSocketHandler(ws);
     }
     async findRooms(integrity) {
         return this.#fetch("GET", `rooms/${encodeURIComponent(integrity)}`);
@@ -19,7 +22,8 @@ export class Varhub {
         return this.#fetch("GET", `room/${encodeURIComponent(roomId)}`);
     }
     join(roomId, options = {}) {
-        return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
+        const ws = this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
+        return new VarhubClient(ws);
     }
     createLogger(loggerId) {
         return this.#createWebsocket(`log/${encodeURIComponent(String(loggerId))}`);

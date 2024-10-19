@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { parse, serialize, XJData } from "@flinbein/xjmapper";
 
 type TypedArray =
@@ -15,7 +16,7 @@ export class MockEvent extends Event {
 	}
 }
 
-export class WebsocketMock extends EventTarget implements WebSocket {
+export class WebsocketMock extends (EventTarget as typeof WebSocket) implements WebSocket {
 	binaryType: "blob"| "arraybuffer" = "blob";
 	readyState: number = WebSocket.CONNECTING;
 	url: string = "/mock/url"
@@ -65,7 +66,7 @@ export class WebsocketMock extends EventTarget implements WebSocket {
 	readonly protocol = "";
 }
 
-class WebsocketBackendMock extends EventTarget implements WebSocket {
+class WebsocketBackendMock extends (EventTarget as typeof WebSocket) implements WebSocket {
 	binaryType: "blob"| "arraybuffer" = "arraybuffer"
 	readyState: number = WebSocket.CONNECTING;
 	url: string = "/mock/url"
@@ -107,7 +108,10 @@ class WebsocketBackendMock extends EventTarget implements WebSocket {
 				this.client.dispatchEvent(new MockEvent("message", {data}));
 			}, 10);
 		});
-		
+	}
+	
+	sendData(...args: XJData[]){
+		this.send(serialize(...args));
 	}
 	
 	readonly CLOSED = 3;
@@ -226,13 +230,15 @@ export class WebsocketMockClientWithMethods<T extends Record<string, any>> exten
 	constructor(public readonly methods: T, open?: boolean) {
 		super(open);
 		this.backend.addEventListener("message", async ({data}: any) => {
-			const [/*"$rpc"*/, currentCallId, method, ...params] = parse(data);
+			const [/*"$rpc"*/, channelId, callCode, currentCallId, path, params] = parse(data);
 			try {
-				const result = await (methods as any)[method as any](...params);
-				const data = serialize("$rpcResult", currentCallId, 0, result);
+				let target:any = methods;
+				for (const step of path as any[]) target = target[step];
+				const result = await target(...params as any[]);
+				const data = serialize("$rpc", channelId, 0, currentCallId, result);
 				this.backend.send(data);
 			} catch (error: any) {
-				const data = serialize("$rpcResult", currentCallId, 1, error);
+				const data = serialize("$rpc", channelId, 3, currentCallId, error);
 				this.backend.send(data);
 			}
 		})

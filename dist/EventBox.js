@@ -5,8 +5,15 @@ export class EventBox {
     constructor(thisSource) {
         this.#source = thisSource;
     }
+    setSource(thisSource) {
+        this.#source = thisSource;
+    }
     dispatch(type, detail) {
         this.#eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
+    }
+    clear() {
+        this.#fnMap = null;
+        this.#eventTarget = null;
     }
     subscriber = {
         on: (eventName, handler) => {
@@ -30,10 +37,10 @@ export class EventBox {
             this.#eventTarget.addEventListener(eventName, eventHandler, { once: true });
         },
         off: (eventName, handler) => {
-            let eventHandler = this.#fnMap.get(handler);
+            let eventHandler = this.#fnMap?.get(handler);
             if (!eventHandler)
                 return;
-            this.#eventTarget.removeEventListener(eventName, eventHandler);
+            this.#eventTarget?.removeEventListener(eventName, eventHandler);
         },
     };
 }

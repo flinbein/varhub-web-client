@@ -4,18 +4,18 @@ import type { RoomJoinOptions, Varhub } from "./Varhub.js";
 import { resolve } from "node:dns";
 
 
-type VarhubClientEvents = {
+export type VarhubClientEvents = {
 	message: XJData[]
 	close: [reason: string|null]
-	ready: []
+	open: []
 	error: []
 }
 
-export class VarhubRawClient {
+export class VarhubClient {
 	readonly #ws: WebSocket;
 	
 	readonly #selfEventBox = new EventBox<VarhubClientEvents, typeof this>(this);
-	readonly #readyPromise: Promise<this>;
+	readonly #readyPromise: Promise<void>;
 	#ready = false;
 	#closed = false;
 	
@@ -28,16 +28,16 @@ export class VarhubRawClient {
 		if (ws.readyState === WebSocket.CONNECTING) {
 			ws.addEventListener("open", (event) => {
 				this.#ready = true;
-				this.#closed = true;
-				this.#selfEventBox.dispatch("ready", []);
+				this.#closed = false;
+				this.#selfEventBox.dispatch("open", []);
 			})
-			this.#readyPromise = new Promise((resolve, reject) => {
-				this.on("ready", () => {resolve(this)});
+			this.#readyPromise = new Promise<void>((resolve, reject) => {
+				this.on("open", () => {resolve()});
 				this.on("close", () => {reject()});
 			})
 		} else {
 			this.#ready = true;
-			this.#readyPromise = Promise.resolve(this);
+			this.#readyPromise = Promise.resolve();
 		}
 		ws.addEventListener("message", (event) => {
 			this.#selfEventBox.dispatch("message", [...parse(event.data)]);
@@ -52,17 +52,18 @@ export class VarhubRawClient {
 			this.#closed = true;
 			this.#selfEventBox.dispatch("error", []);
 		})
+		this.#readyPromise.catch(() => {})
 	}
+	
+	then<R1 = [this], R2 = never>(
+		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
+		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
+	): PromiseLike<R1 | R2> {
+		return this.#readyPromise.then(() => [this] as [this]).then(onfulfilled, onrejected);
+	};
 	
 	get ready(): boolean { return this.#ready }
 	get closed(): boolean { return this.#closed }
-	
-	/**
-	 * Promise wait for ready status.
-	 */
-	get waitForReady(): Promise<this>{
-		return this.#readyPromise;
-	}
 	
 	send(...data: XJData[]){
 		const rawData = serialize(...data);
@@ -71,7 +72,7 @@ export class VarhubRawClient {
 	
 	/**
 	 * subscribe on client event
-	 * @param event "message", "ready" or "close"
+	 * @param event "message", "open" or "close"
 	 * @param handler event handler
 	 */
 	on<T extends keyof VarhubClientEvents>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents[T]) => void): this{
@@ -80,7 +81,7 @@ export class VarhubRawClient {
 	}
 	/**
 	 * Subscribe on client event once
-	 * @see {VarhubRawClient#on}
+	 * @see {VarhubClient#on}
 	 * @param event
 	 * @param handler
 	 */
@@ -91,7 +92,7 @@ export class VarhubRawClient {
 	
 	/**
 	 * Unsubscribe from client event
-	 * @see {VarhubRawClient#on}
+	 * @see {VarhubClient#on}
 	 * @param event
 	 * @param handler required!
 	 */
@@ -100,15 +101,19 @@ export class VarhubRawClient {
 		return this;
 	}
 	
+	close(reason?: string|null){
+		if (this.#ws.readyState === WebSocket.CLOSED || this.#ws.readyState === WebSocket.CLOSING) return;
+		this.#ws.close(4000, reason ?? undefined);
+	}
+	
 	[Symbol.dispose](){
-		if (this.#ws.readyState === WebSocket.CLOSED) return;
-		this.#ws.close();
+		this.close("disposed");
 	}
 	
 	[Symbol.asyncDispose](){
 		if (this.#ws.readyState === WebSocket.CLOSED) return Promise.resolve();
 		return new Promise<void>((resolve) => {
-			this.#ws.close();
+			this.#ws.close(4000, "disposed");
 			this.#ws.addEventListener("close", () => resolve());
 		});
 	}

@@ -3,7 +3,7 @@
 	"compilerOptions": {
         "experimentalDecorators": true,
 		"removeComments": true,
-		"target": "ES2023",
+		"target": "es2023",
 		"lib": [
           "ESNext",
           "dom"

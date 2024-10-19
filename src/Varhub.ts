@@ -1,3 +1,6 @@
+import { VarhubClient } from "./VarhubClient.js";
+import { RoomSocketHandler } from "./RoomSocketHandler.js";
+
 type RoomCreateOptionsMap = {
 	/** isolate-dvm controller */
 	"ivm": {
@@ -98,8 +101,9 @@ export class Varhub {
 	 * @param [options.message] set public message of this room
 	 * @param [options.integrity] set integrity for new room. Starts with "custom:"
 	 */
-	createRoomSocket(options: {message?: string, integrity?: `custom:${string}`} = {}): WebSocket {
-		return this.#createWebsocket("room/ws", options);
+	createRoomSocket(options: {message?: string, integrity?: `custom:${string}`} = {}): RoomSocketHandler {
+		const ws = this.#createWebsocket("room/ws", options);
+		return new RoomSocketHandler(ws);
 	}
 	
 	/**
@@ -143,10 +147,11 @@ export class Varhub {
 	 *
 	 * 	data is set only in first connection.
 	 *
-	 * @returns client's websocket
+	 * @returns client
 	 */
-	join(roomId: string, options: RoomJoinOptions = {}): WebSocket {
-		return this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
+	join(roomId: string, options: RoomJoinOptions = {}): VarhubClient {
+		const ws = this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
+		return new VarhubClient(ws);
 	}
 	
 	/**

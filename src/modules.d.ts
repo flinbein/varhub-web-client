@@ -1,66 +1,57 @@
+import { EventBox } from "./EventBox.js";
+import type { XJData } from "xjmapper";
+import { Connection, RoomSocketHandler } from "./RoomSocketHandler.js";
+
 declare module "varhub:room" {
-	/**
-	 * Define all events dispatched by room controller
-	 * @see RoomEvents#join
-	 * @see RoomEvents#leave
-	 * @see RoomEvents#online
-	 * @see RoomEvents#offline
-	 * @see RoomEvents#connectionJoin
-	 * @see RoomEvents#connectionClosed
-	 */
-	type RoomEvents = {
-		/**
-		 * a new player joins the room.
-		 * event is not dispatched if the player joins again from another session
-		 * @param player name of joined player
-		 */
-		join: [player: string];
-		/**
-		 * a player leaves the room.
-		 * event is not dispatched if the player closes session
-		 * event dispatched only manually by `room.kick`
-		 * @params name of leaved player
-		 */
-		leave: [player: string];
-		/**
-		 * a player joined again in new session
-		 * @param player name of player who connected again
-		 */
-		online: [player: string];
-		/**
-		 * a player close all sessions
-		 *
-		 * Example: remove player when he had closes all sessions
-		 * ```typescript
-		 * 	room.on("offline", (player: string) => room.kick(player));
-		 * ```
-		 * @param player name of player who disconnected
-		 */
-		offline: [player: string];
-		/**
-		 * new connection created
-		 *
-		 * it can be a new player or existing player with new connection.
-		 *
-		 * `connectionJoin` emits after `join` event
-		 *
-		 * @param player name of player
-		 * @param connection connection id
-		 */
-		connectionJoin: [player: string, connection: number];
-		/**
-		 * connection closed
-		 *
-		 * `connectionClosed` emits before `offline` and `leave` events
-		 *
-		 * @param player name of player
-		 * @param connection connection id
-		 * @param reason reason
-		 */
-		connectionClosed: [player: string, connection: number, reason: null | string];
+	
+	export type ConnectionEvents = {
+		open: [];
+		close: [reason: string|null, wasOnline: boolean];
+		message: any[];
 	}
 	
+	class Connection {
+		private constructor();
+		then<R1 = [this], R2 = never>(
+			onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
+			onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
+		): PromiseLike<R1 | R2>;
+		get parameters(): any[];
+		get ready(): boolean;
+		get closed(): boolean;
+		get deferred(): boolean;
+		defer<T>(fn: (this: this, connection: this) => T): T;
+		open(): this;
+		send(...args: any[]): this;
+		on<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		once<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		off<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		close(reason?: string|null): void;
+		toString(): string;
+		valueOf(): number;
+	}
+	export type { Connection };
+	
+	/**
+	 * Define all events dispatched by room controller
+	 */
+	export type RoomEvents = {
+		/** created new connection */
+		connection: [connection: Connection, ...args: any[]];
+		/** connection successfully opened */
+		connectionOpen: [connection: Connection];
+		/** connection successfully closed */
+		connectionClose: [connection: Connection, reason: string | null, wasOnline: boolean];
+		/** received a message */
+		connectionMessage: [connection: Connection, ...args: any[]];
+	}
+	
+	
 	class Room {
+		then<R1 = [this], R2 = never>(
+			onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
+			onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
+		): PromiseLike<R1>;
 		/**
 		 * public message of the room.
 		 */
@@ -72,110 +63,21 @@ declare module "varhub:room" {
 		set message(value: string | null);
 		
 		/**
-		 * is room closed. New players can not join a closed room.
-		 */
-		get closed(): boolean;
-		/**
-		 * set room closed
-		 */
-		set closed(value: boolean);
-		
-		/**
 		 * destroy this room.
 		 */
 		destroy(): void;
 		
 		/**
-		 * check if player online
-		 * @returns `undefined` if player is kicked or has not yet joined
+		 * send message to all ready connections.
 		 */
-		isPlayerOnline(player: string): boolean | undefined;
+		broadcast(...msg: any[]): this;
 		
 		/**
-		 * check if player online
-		 * @returns `false` if player offline or not yet joined
+		 * get all connections
+		 * @param [filter] filter connections, optional.
+		 * @param [filter.ready] true = get only ready connections; false = only lobby connections;
 		 */
-		isOnline(player: string): boolean;
-		
-		/**
-		 * check if connection online
-		 */
-		isOnline(connection: number): boolean;
-		/**
-		 * check if player joined. `room.getPlayers().includes(name)`
-		 */
-		hasPlayer(player: string): boolean;
-		
-		/**
-		 * kick player and close all sessions
-		 * @returns `true` on success, otherwise `false`
-		 */
-		kick(player: string, reason?: string|null): boolean;
-		
-		/**
-		 * kick one session of player
-		 * @returns `true` on success, otherwise `false`
-		 */
-		kick(connection: number, reason?: string|null): boolean;
-		/**
-		 * send message to player
-		 *
-		 * Example
-		 * ```typescript
-		 *	room.on("join", (player) => {
-		 *		room.send(player, "chatMessage", {
-		 *			from: "system",
-		 *			message: "Welcome, "+player+"!"
-		 *		});
-		 *	})
-		 * ```
-		 * @returns true if player online
-		 */
-		send(player: string, ...args: any[]): boolean;
-		
-		/**
-		 * send message to special connection
-		 *
-		 * Example
-		 * ```typescript
-		 *	room.on("connectionJoin", (player, connection) => {
-		 *		room.send(connection, "state", getCurrentState());
-		 *	})
-		 * ```
-		 * @returns true if player online
-		 */
-		send(connection: number, ...args: any[]): boolean;
-		/**
-		 * send message to all players
-		 *
-		 * Example
-		 * ```ts
-		 * 	room.on("join", (player) => {
-		 * 		room.broadcast("chatMessage", {
-		 * 			from: "system",
-		 * 			message: "New player connected: "+player;
-		 * 		});
-		 * 	})
-		 * ```
-		 */
-		broadcast(...args: any[]): void;
-		/**
-		 * get player's data saved on first connection
-		 */
-		getPlayerData(player: string): unknown;
-		/**
-		 * get all established connections of player
-		 * @returns
-		 *
-		 * `undefined` if there are no player
-		 *
-		 * `[]` if player offline
-		 */
-		getPlayerConnections(player: string): undefined | number[];
-		/**
-		 * list of all (online & offline) players
-		 */
-		getPlayers(): string[];
+		getConnections(filter?: {ready?: boolean}): Set<Connection>;
 		
 		/**
 		 * Subscribe on room event.
@@ -199,6 +101,8 @@ declare module "varhub:room" {
 	 */
 	const room: Room;
 	export default room;
+	
+	export declare class RPCSourceInterface<T> {}
 }
 
 declare module "varhub:events" {
@@ -208,6 +112,82 @@ declare module "varhub:events" {
 		off<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		emit<T extends keyof M>(event: T, ...args: M[T]): boolean
 	}
+}
+
+declare module "varhub:players" {
+	import type { Connection, Room } from "varhub:room"
+	export type PlayerEvents = {
+		leave: []
+		online: []
+		offline: []
+	}
+	class Player {
+		private constructor();
+		get name(): string;
+		get connections(): Set<Connection>;
+		get online(): boolean;
+		get registered(): boolean;
+		get group(): string|undefined;
+		set group(value: string|undefined);
+		on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		kick(reason: string|null = null): void;
+		toString(): string;
+		valueOf(): string;
+		[Symbol.iterator](): SetIterator<Connection>;
+	}
+	export type { Player };
+	
+	export type PlayersEvents = {
+		join: [Player]
+		leave: [Player]
+		online: [Player]
+		offline: [Player]
+	}
+	export default class Players {
+		constructor(room: Room, registerPlayer: (connection: Connection, ...args: any) => string|void|null|undefined|Promise<string|void|null|undefined>);
+		get(nameOrConnection: Connection|string): Player|undefined;
+		get count(): number;
+		getGroup(group: string|undefined): Set<Player>;
+		all(): Set<Player>;
+		on<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		once<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		off<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		[Symbol.iterator](): MapIterator<Player>;
+	}
+}
+
+declare module "varhub:rpc" {
+	import type { Room } from "varhub:room"
+	type EventPath<T, K extends keyof T = keyof T> = (
+		K extends string ? (
+			T[K] extends any[] ? (K | [K]) : [K, ...(
+				EventPath<T[K]> extends infer NEXT extends (string|string[]) ? (
+					NEXT extends any[] ? NEXT : [NEXT]
+				) : never
+			)]
+		) : never
+	);
+	
+	type EventPathArgs<PATH, FORM> = (
+		PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) :
+		PATH extends [] ? (FORM extends any[] ? FORM : never) :
+		PATH extends [infer STEP extends string, ...infer TAIL extends string[]] ? (
+			STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never
+		) : never
+	);
+	
+	export default class RPCSource<METHODS extends Record<string, any> = {}, EVENTS = any> implements Disposable {
+		declare public [Symbol.unscopables]: { __rpc_methods: METHODS, __rpc_events: EVENTS }
+		constructor(handler?: RPCHandler|METHODS);
+		withEventTypes<EVENTS = never>(): RPCSource<METHODS, EVENTS>;
+		get disposed(): boolean;
+		emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>);
+		dispose(reason?: any);
+		static start(rpcSource: RPCSource, room: Room, key: string, options: {maxChannelsPerClient: number} = {maxChannelsPerClient: Infinity});
+	}
+	
 }
 
 declare module "varhub:config" {

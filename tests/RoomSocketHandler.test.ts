@@ -1,7 +1,7 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { describe, it, mock } from "node:test";
-import { parse, serialize, XJData } from "@flinbein/xjmapper";
-import { WebsocketMock, WebsocketMockRoom } from "./WebsocketMocks.js";
+import { parse, serialize } from "@flinbein/xjmapper";
+import { WebsocketMockRoom } from "./WebsocketMocks.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 
 describe("Room init", async () => {
@@ -15,21 +15,21 @@ describe("Room init", async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 	});
 
 	await it("rejects waitForReady", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.close();
-		await assert.rejects(room.waitForReady);
+		await assert.rejects(Promise.resolve(room));
 	});
 
 	await it("close backend", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.close();
-		await assert.rejects(room.waitForReady);
+		await assert.rejects(Promise.resolve(room));
 		assert.equal(room.ready, false);
 		assert.equal(room.closed, true);
 	});
@@ -40,14 +40,14 @@ describe("Room init", async () => {
 		assert.equal(room.ready, false);
 		assert.equal(room.closed, false);
 		assert.equal(room.id, null);
-		assert.equal(room.publicMessage, null);
+		assert.equal(room.message, null);
 		assert.equal(room.integrity, null);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		assert.equal(room.ready, true);
 		assert.equal(room.closed, false);
 		assert.equal(room.id, "room-id");
-		assert.equal(room.publicMessage, "msg");
+		assert.equal(room.message, "msg");
 		assert.equal(room.integrity, "x");
 	});
 })
@@ -55,115 +55,115 @@ describe("Room init", async () => {
 describe("Room methods", async () => {
 	await it("throws before ready", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
-		await using  room = new RoomSocketHandler(wsMock);
-		assert.throws(() => room.setPublicMessage("test"));
+		await using room = new RoomSocketHandler(wsMock);
+		assert.throws(() => room.message = "test");
 		assert.throws(() => room.broadcast("test"));
-		assert.throws(() => room.send(1, "test"));
-		assert.throws(() => room.kick(1));
-		assert.throws(() => room.join(1));
 	});
+	
 	await it("throws after close", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
-		await using  room = new RoomSocketHandler(wsMock);
+		await using room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
+		wsMock.createClientMock();
 		wsMock.backend.close();
 		await new Promise<void>(r => room.on("close", r));
 		assert.throws(() => room.broadcast("test"));
-		assert.throws(() => room.setPublicMessage("test"));
-		assert.throws(() => room.send(1, "test"));
-		assert.throws(() => room.kick(1));
-		assert.throws(() => room.join(1));
+		assert.throws(() => room.message = "test");
 	});
 	
-	await it("call room.setPublicMessage", {timeout: 200}, async () => {
+	await it("set room.message", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
-		assert.equal(room.publicMessage, null);
-		room.setPublicMessage("msg");
+		await room;
+		assert.equal(room.message, null);
+		room.message = "msg";
 		await new Promise(resolve => setTimeout(resolve, 31));
-		assert.equal(room.publicMessage, "msg");
+		assert.equal(room.message, "msg");
 	});
 	
 	await it("call room.destroy", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		room.destroy();
 		await new Promise(resolve => setTimeout(resolve, 12));
 		assert.equal(room.ready, false, "room not ready");
 		assert.equal(room.closed, true,  "room closed");
 	});
 	
-	await it("call room.join", {timeout: 200}, async () => {
+	await it("call con.join", {timeout: 500}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
+		// infinity defer
+		room.on("connection", con => con.defer(() => new Promise(() => {})));
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
 		const bobWs = wsMock.createClientMock("Bob", "player");
-		await new Promise(resolve => setTimeout(resolve, 12));
-		assert.ok(room.lobbyConnections.has(bobWs.mockId), "bob in lobby");
-		assert.ok(!room.onlineConnections.has(bobWs.mockId), "bob in offline");
+		await new Promise(resolve => setTimeout(resolve, 32));
+		
+		// infinity defer
+		room.on("connection", con => con.defer(() => new Promise(() => {})));
+		
+		const bobClient = [...room.getConnections()][0]
+		assert.ok(bobClient, "bob in lobby");
+		assert.ok(!bobClient.ready, "bob in offline");
 		assert.equal(bobWs.readyState, WebSocket.CONNECTING, "bob is connecting");
 		
-		room.join(bobWs.mockId);
-		assert.ok(!room.lobbyConnections.has(bobWs.mockId), "bob not in lobby");
-		assert.ok(room.onlineConnections.has(bobWs.mockId), "bob is online");
+		const onOpen = mock.fn();
+		const onClose = mock.fn();
+		bobClient.on("open", onOpen);
+		bobClient.on("close", onClose);
+		bobClient.open();
+		assert.ok(bobClient.ready, "bob is online");
 		await new Promise(resolve => bobWs.addEventListener("open", resolve));
 		assert.equal(bobWs.readyState, WebSocket.OPEN, "bob is connected");
+		assert.equal(onOpen.mock.callCount(), 1, "onOpen call 1");
+		assert.deepEqual(onOpen.mock.calls[0].arguments, [], "onOpen args");
+		
+		bobClient.close("kick bob");
+		await new Promise(resolve => setTimeout(resolve, 32));
+		assert.equal(bobWs.readyState, WebSocket.CLOSED, "bob is discconnected");
+		assert.equal(onClose.mock.callCount(), 1, "onClose call 1");
+		assert.deepEqual(onClose.mock.calls[0].arguments, ["kick bob", true], "onClose args");
 	});
 	
 	await it("call room.kick for lobby", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
+		// infinity defer
+		room.on("connection", con => con.defer(() => new Promise(() => {})));
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
 		
-		room.kick(bobWs.mockId);
-		assert.ok(!room.lobbyConnections.has(bobWs.mockId), "bob not in lobby");
-		assert.ok(!room.onlineConnections.has(bobWs.mockId), "bob is offline");
+		assert.equal(room.getConnections({ready: false}).size, 1, "bob in lobby");
+		
+		for (let connection of room.getConnections()) {
+			connection.close("reason-to-close");
+		}
+		
+		assert.equal(room.getConnections({ready: false}).size, 0, "bob not in lobby");
+		assert.equal(room.getConnections({ready: true}).size, 0, "bob not in ready");
 		await new Promise(resolve => bobWs.addEventListener("close", resolve));
 		assert.equal(bobWs.readyState, WebSocket.CLOSED, "bob is disconnected");
 	});
-	
-	await it("call room.kick for online", {timeout: 200}, async () => {
-		const wsMock = new WebsocketMockRoom("room-id");
-		await using  room = new RoomSocketHandler(wsMock);
-		wsMock.backend.open();
-		await room.waitForReady;
-		
-		const bobWs = wsMock.createClientMock("Bob", "player");
-		await new Promise(resolve => setTimeout(resolve, 12));
-		
-		room.join(bobWs.mockId);
-		assert.ok(room.onlineConnections.has(bobWs.mockId), "bob is online");
-		await new Promise(resolve => bobWs.addEventListener("open", resolve));
-		assert.equal(bobWs.readyState, WebSocket.OPEN, "bob is connected");
-		
-		room.kick(bobWs.mockId);
-		assert.ok(!room.onlineConnections.has(bobWs.mockId), "bob is offline");
-		assert.ok(!room.lobbyConnections.has(bobWs.mockId), "bob not in lobby");
-		await new Promise(resolve => bobWs.addEventListener("close", resolve));
-		assert.equal(bobWs.readyState, WebSocket.CLOSED, "bob is disconnected");
-	})
 	
 	await it("call room.broadcast", {timeout: 200}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
+		room.on("connection", con => con.open());
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
-		room.join([bobWs.mockId, eveWs.mockId]);
 		await Promise.all([
 			new Promise(resolve => bobWs.addEventListener("open", resolve)),
 			new Promise(resolve => eveWs.addEventListener("open", resolve))
@@ -182,81 +182,73 @@ describe("Room methods", async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
+		room.on("connection", con => con.open());
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
-		room.join([bobWs.mockId, eveWs.mockId]);
 		await Promise.all([
 			new Promise(resolve => eveWs.addEventListener("open", resolve)),
 			new Promise(resolve => bobWs.addEventListener("open", resolve))
 		]);
 		await new Promise(resolve => setTimeout(resolve, 12));
 		
-		room.send(eveWs.mockId, "hello", "Eve");
-		room.send(bobWs.mockId, "hello", "Bob");
+		for (let connection of room.getConnections()) {
+			connection.send("hello", connection.parameters[0]);
+		}
 		const messages = await Promise.all([
 			new Promise<any>(resolve => eveWs.addEventListener("message", (e: any) => resolve(parse(e.data)))),
 			new Promise<any>(resolve => bobWs.addEventListener("message", (e: any) => resolve(parse(e.data))))
 		]);
 		assert.deepEqual(messages, [["hello", "Eve"], ["hello", "Bob"]], "different messages received");
 	});
-	
-	await it("call room.send, multi", {timeout: 200}, async () => {
-		const wsMock = new WebsocketMockRoom("room-id");
-		await using  room = new RoomSocketHandler(wsMock);
-		wsMock.backend.open();
-		await room.waitForReady;
-		
-		const bobWs = wsMock.createClientMock("Bob", "player");
-		const eveWs = wsMock.createClientMock("Eve", "player");
-		await new Promise(resolve => setTimeout(resolve, 12));
-		room.join([bobWs.mockId, eveWs.mockId]);
-		await Promise.all([
-			new Promise(resolve => eveWs.addEventListener("open", resolve)),
-			new Promise(resolve => bobWs.addEventListener("open", resolve))
-		]);
-		await new Promise(resolve => setTimeout(resolve, 12));
-		
-		room.send([eveWs.mockId, bobWs.mockId], "hello", "player");
-		const messages = await Promise.all([
-			new Promise<any>(resolve => bobWs.addEventListener("message", (e: any) => resolve(parse(e.data)))),
-			new Promise<any>(resolve => eveWs.addEventListener("message", (e: any) => resolve(parse(e.data))))
-		]);
-		assert.deepEqual(messages, [["hello", "player"], ["hello", "player"]], "same messages received");
-	});
 });
 
 describe("Room props", async () => {
-	await it("props lobbyConnections, onlineConnections", {timeout: 200}, async () => {
+	await it("props lobbyConnections, onlineConnections", {timeout: 500}, async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
+		// infinity defer
+		room.on("connection", con => con.defer(() => new Promise(() => {})));
+		
 		wsMock.backend.open();
-		await room.waitForReady;
-		assert.deepEqual(room.lobbyConnections, new Set([]));
-		assert.deepEqual(room.onlineConnections, new Set([]));
+		await room;
+		
+		assert.deepEqual(room.getConnections({ready: true}), new Set([]));
+		assert.deepEqual(room.getConnections({ready: false}), new Set([]));
+		assert.deepEqual(room.getConnections(), new Set([]));
 		
 		const aliceWs = wsMock.createClientMock("Alice");
 		const bobWs = wsMock.createClientMock("Bob");
 		const charlieWs = wsMock.createClientMock("Charlie");
 		const eveWs = wsMock.createClientMock("Eve");
-		await new Promise(resolve => setTimeout(resolve, 12));
-		assert.deepEqual(room.lobbyConnections, new Set([aliceWs.mockId, bobWs.mockId, charlieWs.mockId, eveWs.mockId]));
-		assert.deepEqual(room.onlineConnections, new Set());
+		await new Promise(resolve => setTimeout(resolve, 32));
 		
-		room.join(bobWs.mockId);
-		room.kick(eveWs.mockId);
+		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]))
+		const alice = connectionsMap.get("Alice")!;
+		const bob = connectionsMap.get("Bob")!;
+		const charlie = connectionsMap.get("Charlie")!;
+		const eve = connectionsMap.get("Eve")!;
+		
+		assert.deepEqual(room.getConnections(), new Set([alice, bob, charlie, eve]));
+		assert.deepEqual(room.getConnections({ready: false}), new Set([alice, bob, charlie, eve]));
+		assert.deepEqual(room.getConnections({ready: true}), new Set());
+		
+		bob.open()
+		eve.close("eve-close");
 		charlieWs.close();
 		await new Promise(resolve => setTimeout(resolve, 32));
-		assert.deepEqual(room.lobbyConnections, new Set([aliceWs.mockId]));
-		assert.deepEqual(room.onlineConnections, new Set([bobWs.mockId]));
+		assert.deepEqual(room.getConnections(), new Set([alice, bob]));
+		assert.deepEqual(room.getConnections({ready: false}), new Set([alice]));
+		assert.deepEqual(room.getConnections({ready: true}), new Set([bob]));
 		
-		room.join(aliceWs.mockId);
-		room.kick(bobWs.mockId);
+		alice.open()
+		bob.close("bob-close")
 		await new Promise(resolve => setTimeout(resolve, 12));
-		assert.deepEqual(room.lobbyConnections, new Set([]));
-		assert.deepEqual(room.onlineConnections, new Set([aliceWs.mockId]));
+		assert.deepEqual(room.getConnections(), new Set([alice]));
+		assert.deepEqual(room.getConnections({ready: false}), new Set([]));
+		assert.deepEqual(room.getConnections({ready: true}), new Set([alice]));
 	})
 })
 
@@ -268,7 +260,7 @@ describe("Room events", async () => {
 		room.on("init", onInit);
 		assert.equal(onInit.mock.callCount(), 0);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		assert.equal(onInit.mock.callCount(), 1);
 		assert.deepEqual(onInit.mock.calls[0].arguments, []);
 	});
@@ -283,7 +275,7 @@ describe("Room events", async () => {
 		assert.equal(onClose.mock.callCount(), 0);
 		assert.equal(onError.mock.callCount(), 0);
 		wsMock.backend.close();
-		await Promise.allSettled([room.waitForReady]);
+		await Promise.allSettled([room]);
 		assert.equal(onClose.mock.callCount(), 1);
 		assert.equal(onError.mock.callCount(), 1);
 		assert.deepEqual(onClose.mock.calls[0].arguments, []);
@@ -298,7 +290,7 @@ describe("Room events", async () => {
 		await using  room = new RoomSocketHandler(wsMock);
 		room.on("close", onClose);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		assert.equal(onClose.mock.callCount(), 0);
 		wsMock.backend.close();
 		await new Promise(resolve => setTimeout(resolve, 12));
@@ -309,95 +301,105 @@ describe("Room events", async () => {
 	
 	
 	await it("emit enter", {timeout: 200}, async () => {
-		const onEnter = mock.fn();
+		const onConnection = mock.fn();
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
-		room.on("enter", onEnter);
+		room.on("connection", onConnection);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
+		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]))
 		
-		assert.equal(onEnter.mock.callCount(), 2);
-		assert.deepEqual(onEnter.mock.calls[0].arguments, [bobWs.mockId, "Bob", "player"]);
-		assert.deepEqual(onEnter.mock.calls[1].arguments, [eveWs.mockId, "Eve", "player"]);
+		assert.equal(onConnection.mock.callCount(), 2);
+		assert.deepEqual(onConnection.mock.calls[0].arguments, [connectionsMap.get("Bob"), "Bob", "player"]);
+		assert.deepEqual(onConnection.mock.calls[1].arguments, [connectionsMap.get("Eve"), "Eve", "player"]);
 	});
 	
 	await it("emit join", {timeout: 200}, async () => {
-		const onJoin = mock.fn();
+		const onConnectionOpen = mock.fn();
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using  room = new RoomSocketHandler(wsMock);
-		room.on("enter", (c) => room.join(c));
-		room.on("join", onJoin);
+		room.on("connection", (c) => c.open());
+		room.on("connectionOpen", onConnectionOpen);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		await new Promise(resolve => setTimeout(resolve, 32));
 		
-		assert.equal(onJoin.mock.callCount(), 2);
-		assert.deepEqual(onJoin.mock.calls[0].arguments, [eveWs.mockId]);
-		assert.deepEqual(onJoin.mock.calls[1].arguments, [bobWs.mockId]);
-	})
-	
-	await it("emit messageChange", {timeout: 200}, async () => {
-		const onMessageChange = mock.fn();
-		const wsMock = new WebsocketMockRoom("room-id", "a");
-		await using room = new RoomSocketHandler(wsMock);
-		room.on("messageChange", onMessageChange);
-		wsMock.backend.open();
-		await room.waitForReady;
-		room.setPublicMessage("b");
-		await new Promise(resolve => setTimeout(resolve, 12));
-		assert.equal(onMessageChange.mock.callCount(), 1);
-		assert.deepEqual(onMessageChange.mock.calls[0].arguments, ["b", "a"]);
+		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]))
+		
+		assert.equal(onConnectionOpen.mock.callCount(), 2);
+		assert.deepEqual(onConnectionOpen.mock.calls[0].arguments, [connectionsMap.get("Eve")]);
+		assert.deepEqual(onConnectionOpen.mock.calls[1].arguments, [connectionsMap.get("Bob")]);
 	})
 	
 	await it("emit leave", {timeout: 200}, async () => {
-		const onLeave = mock.fn();
+		const onConnectionClose = mock.fn();
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(wsMock)
-		room.on("leave", onLeave);
+		room.on("connectionClose", onConnectionClose);
+		
+		// infinity defer
+		room.on("connection", con => con.defer(() => new Promise(() => {})));
+		
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 		
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
 		
-		room.join(eveWs.mockId);
+		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]))
+		
+		connectionsMap.get("Eve")!.open();
 		await new Promise(resolve => setTimeout(resolve, 12));
-		bobWs.close();
-		eveWs.close();
+		bobWs.close(4000, "bob-close");
+		eveWs.close(4000, "eve-close");
 		await new Promise(resolve => setTimeout(resolve, 32));
-		assert.equal(onLeave.mock.callCount(), 2);
-		assert.deepEqual(onLeave.mock.calls[0].arguments, [bobWs.mockId, false]);
-		assert.deepEqual(onLeave.mock.calls[1].arguments, [eveWs.mockId, true]);
+		assert.equal(onConnectionClose.mock.callCount(), 2);
+		assert.deepEqual(onConnectionClose.mock.calls[0].arguments, [connectionsMap.get("Bob"), "bob-close", false]);
+		assert.deepEqual(onConnectionClose.mock.calls[1].arguments, [connectionsMap.get("Eve"), "eve-close", true]);
 	})
 	
 	await it("emit message", {timeout: 200}, async () => {
 		const onMessage = mock.fn();
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(wsMock)
-		room.on("enter", id => room.join(id));
-		room.on("message", onMessage);
+		room.on("connection", con => con.open());
+		room.on("connectionMessage", onMessage);
 		wsMock.backend.open();
-		await room.waitForReady;
+		await room;
 
 		const bobWs = wsMock.createClientMock("Bob", "player");
 		const eveWs = wsMock.createClientMock("Eve", "player");
 		await new Promise(resolve => setTimeout(resolve, 12));
-		room.join(eveWs.mockId);
-		room.join(eveWs.mockId);
-		await new Promise(resolve => setTimeout(resolve, 12));
+		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]));
+		
+		const bobOnMessage = mock.fn();
+		const bob = connectionsMap.get("Bob")!;
+		bob.on("message", bobOnMessage);
+		
+		const eveOnMessage = mock.fn();
+		const eve = connectionsMap.get("Eve")!;
+		eve.on("message", eveOnMessage);
+		
+		
 		bobWs.send(serialize("hello", "from Bob"));
 		eveWs.send(serialize("hello", "from Eve"));
 		await new Promise(resolve => setTimeout(resolve, 42));
 		assert.equal(onMessage.mock.callCount(), 2);
-		assert.deepEqual(onMessage.mock.calls[0].arguments, [bobWs.mockId, "hello", "from Bob"]);
-		assert.deepEqual(onMessage.mock.calls[1].arguments, [eveWs.mockId, "hello", "from Eve"]);
+		assert.deepEqual(onMessage.mock.calls[0].arguments, [bob, "hello", "from Bob"]);
+		assert.deepEqual(onMessage.mock.calls[1].arguments, [eve, "hello", "from Eve"]);
+		
+		assert.equal(bobOnMessage.mock.callCount(), 1);
+		assert.deepEqual(bobOnMessage.mock.calls[0].arguments, ["hello", "from Bob"]);
+		
+		assert.equal(eveOnMessage.mock.callCount(), 1);
+		assert.deepEqual(eveOnMessage.mock.calls[0].arguments, ["hello", "from Eve"]);
 	});
 })
