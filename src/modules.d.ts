@@ -1,9 +1,4 @@
-import { EventBox } from "./EventBox.js";
-import type { XJData } from "xjmapper";
-import { Connection, RoomSocketHandler } from "./RoomSocketHandler.js";
-
 declare module "varhub:room" {
-	
 	export type ConnectionEvents = {
 		open: [];
 		close: [reason: string|null, wasOnline: boolean];
