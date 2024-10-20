@@ -173,14 +173,24 @@ declare module "varhub:rpc" {
 		) : never
 	);
 	
-	export default class RPCSource<METHODS extends Record<string, any> = {}, EVENTS = any> implements Disposable {
-		declare public [Symbol.unscopables]: { __rpc_methods: METHODS, __rpc_events: EVENTS }
-		constructor(handler?: RPCHandler|METHODS);
+	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = any> implements Disposable {
+		declare public [Symbol.unscopables]: { __rpc_methods: METHODS, __rpc_events: EVENTS, __rpc_state: STATE }
+		constructor(handler?: RPCHandler|METHODS, initialState?: STATE);
 		withEventTypes<EVENTS = never>(): RPCSource<METHODS, EVENTS>;
+		setState(state: (oldState: STATE) => STATE): this
+		setState(state: STATE extends (...args: any) => any ? never : STATE): this
+		withState<S>(): RPCSource<METHODS, S|undefined, EVENTS>
+		withState<S>(state: S): RPCSource<METHODS, S, EVENTS>
 		get disposed(): boolean;
-		emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>);
+		get state(): STATE;
+		emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this;
 		dispose(reason?: any);
-		static start(rpcSource: RPCSource, room: Room, key: string, options: {maxChannelsPerClient: number} = {maxChannelsPerClient: Infinity});
+		static start(
+			rpcSource: RPCSource<any, undefined, any>,
+			room: Room,
+			key: string,
+			options: {maxChannelsPerClient: number} = {maxChannelsPerClient: Infinity}
+		): () => void;
 	}
 	
 }

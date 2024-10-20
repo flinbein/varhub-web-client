@@ -3,7 +3,16 @@ import type { XJData } from "@flinbein/xjmapper";
 import type { VarhubClient } from "./VarhubClient.js";
 
 
-type RPCChannelEvents = {
+type RPCChannelEvents<S> =
+	S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>
+
+type RPCChannelEventWithState<S> = {
+	close: [reason: string|null]
+	init: []
+	error: [Error]
+	state: [S]
+}
+type RPCChannelEventStateless = {
 	close: [reason: string|null]
 	init: []
 	error: [Error]
@@ -29,7 +38,7 @@ type KeyOfArray<T, K = keyof T> = K extends keyof T ? (
 
 type KeyOfNotArray<T> = Exclude<keyof T, KeyOfArray<T>>
 
-interface RpcInstance extends Disposable {
+interface RpcInstance<S> extends Disposable {
 	then<R1 = [this], R2 = never>(
 		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
 		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null,
@@ -37,8 +46,9 @@ interface RpcInstance extends Disposable {
 	ready: boolean,
 	closed: boolean,
 	call: (path: string[], ...args: any[]) => Promise<any>,
-	create: (path: string[], ...args: any[]) => RpcInstance & RpcEmitter<never>,
+	create: (path: string[], ...args: any[]) => RpcInstance<any> & RpcEmitter<never>,
 	close: (reason?: string) => void,
+	state: S
 }
 
 interface RpcEmitter<E> {
@@ -47,9 +57,12 @@ interface RpcEmitter<E> {
 	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
 }
 type RpcMapper<M, E = never> = (
+	[M] extends [{new(...args: infer PARAM): MetaScope<infer METHODS, infer EVENTS, infer STATE>}] ? (
+		{new(...args: PARAM): RPCChannel<METHODS, EVENTS, STATE>}
+	) :
 	M extends (...args: any) => infer RET ? (
 		[RET] extends [never] ? (...args: Parameters<M>) => Promise<Awaited<ReturnType<M>>> :
-		RET extends MetaScope<infer METHODS, infer EVENTS> ? {new(...args: Parameters<M>): RPCChannel<RET>} :
+		RET extends MetaScope<unknown, unknown, unknown> ? {new(...args: Parameters<M>): RPCChannel<RET>} :
 		(...args: Parameters<M>) => Promise<Awaited<ReturnType<M>>>
 	) :
 	M extends {[key: string]: any} ? {[key in (keyof M | KeyOfNotArray<E>)]: RpcMapper<key extends keyof M ? M[key] : void, key extends keyof E ? E[key]: void> } :
@@ -61,18 +74,21 @@ export const RPCChannel = (function(client: VarhubClient, key: string): {foo: st
 	const manager = new ChannelManager(client, key);
 	return manager.defaultChannel.proxy;
 } as any as {
-	new<S>(client: VarhubClient, key: string): RPCChannel<S>,
-	new<M, E>(client: VarhubClient, key: string): RPCChannel<MetaScope<M, E>>}
+	new(client: VarhubClient, key: string): RPCChannel<{}, unknown>,
+	new<M>(client: VarhubClient, key: string): M extends MetaScope<infer METHODS, infer EVENTS, unknown> ? RPCChannel<METHODS, EVENTS, undefined> : RPCChannel<M>,
+	new<M, E>(client: VarhubClient, key: string): RPCChannel<MetaScope<M, E, undefined>>
+	new<M, E, S>(client: VarhubClient, key: string): RPCChannel<MetaScope<M, E, S>>
+});
+
+type MetaScope<M, E, S> = { [Symbol.unscopables]: {__rpc_methods: M, __rpc_events: E, __rpc_state: S}}
+
+export type RPCChannel<M = any, E = any, S = undefined> = (
+	M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? (
+		RpcInstance<STATE> & RpcMapper<METHODS, EVENTS & RPCChannelEvents<STATE>>
+	) : (
+		RpcInstance<S> & RpcMapper<M, E & RPCChannelEvents<S>>
+	)
 );
-
-type MetaScope<M, E> = { [Symbol.unscopables]: {__rpc_methods: M, __rpc_events: E}}
-
-export type RPCChannel<S = any, E = any> = RpcInstance & (
-	S extends MetaScope<infer METHODS, infer EVENTS> ? RpcMapper<METHODS, EVENTS & RPCChannelEvents> :
-	RpcMapper<S, E & RPCChannelEvents>
-)
-
-
 // CALL	-> key:$rpc, channelId, 0, callId:number, 0:call, path:string[], args[]
 // CLOC	-> key:$rpc, channelId, 1, reason
 // CHAN	-> key:$rpc, channelId, 2, newChannelId:number, path:string[], args[]
@@ -125,7 +141,7 @@ class ChannelManager {
 const proxyTarget = function(){};
 class Channel {
 	proxy: any;
-	initialData: any;
+	state: any = undefined;
 	eventBox: EventBox<any, any>;
 	resolver = Promise.withResolvers<void>();
 	ready = false;
@@ -147,11 +163,20 @@ class Channel {
 		manager.client.once("close", (reason) => this.onClose(reason));
 	}
 	
-	onInit(initData?: any){
-		this.initialData = initData;
+	onInit(state?: any){
+		if (this.closed) return;
+		const sameState = this.state === state;
+		const wasReady = this.ready;
+		this.state = state;
 		this.ready = true;
-		this.eventBox.dispatch("init", [initData]);
-		this.resolver.resolve();
+		if (!wasReady) {
+			this.eventBox.dispatch("init", []);
+			this.resolver.resolve();
+		}
+		if (!sameState) {
+			this.eventBox.dispatch("state", [state]);
+		}
+		
 	}
 	
 	onClose(reason: any){
@@ -232,10 +257,10 @@ class Channel {
 		this.close("disposed");
 	}
 	
-	getEventCode(path: string[], eventName: string){
-		if (path.length > 0) return JSON.stringify([...path, eventName]);
-		if (eventName === "close" || eventName === "init" || eventName === "error") return eventName;
-		return JSON.stringify([eventName]);
+	getEventCode(path: string[], e: string){
+		if (path.length > 0) return JSON.stringify([...path, e]);
+		if (e === "close" || e === "init" || e === "error" || e === "state") return e;
+		return JSON.stringify([e]);
 	}
 	
 	createProxy(path: string[] = []){
@@ -258,7 +283,7 @@ class Channel {
 					if (prop === Symbol.dispose) return this[Symbol.dispose];
 					if (prop === "ready") return this.ready;
 					if (prop === "closed") return this.closed;
-					if (prop === "initialData") return this.initialData;
+					if (prop === "state") return this.state;
 					if (prop === "then") return this.then;
 					if (prop === "call") return this.proxyApply;
 					if (prop === "create") return this.proxyConstruct;

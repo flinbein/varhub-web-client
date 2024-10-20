@@ -2,7 +2,7 @@ import * as assert from "node:assert";
 import { describe, it, mock } from "node:test";
 import { RPCChannel } from "../src/RPCChannel.js";
 import { VarhubClient } from "../src/VarhubClient.js";
-import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
+import { Connection, RoomSocketHandler } from "../src/RoomSocketHandler.js";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 import { RPCSource } from "../src/RPCSource.js";
 
@@ -188,5 +188,68 @@ describe("RPCSource", () => {
 		new rpcClient.deck();
 		new rpcClient.deck();
 		await assert.rejects(Promise.resolve(new rpcClient.deck()), "limit for 2 channels per client");
+	})
+	
+	it("constructor channel", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		class Deck extends RPCSource<{getMyName(): string, changeState(a: number): void}, number, unknown> {
+			constructor(baseState: number) {
+				super({
+					getMyName(this: Connection){
+						return String(this.parameters[0]);
+					},
+					changeState: (value: number) => {
+						this.setState(value);
+					},
+				}, baseState);
+			}
+		}
+		const rpcRoom = new RPCSource({Deck});
+		
+		
+		RPCSource.start(rpcRoom, room, "$rpc");
+		
+		const clientWs = roomWs.createClientMock("Bob", "player");
+		const client = new VarhubClient(clientWs);
+		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client, "$rpc");
+		const deck = new rpcClient.Deck(99);
+		const onState = mock.fn();
+		deck.on("state", onState);
+		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
+		assert.equal(deck.state, 99, "deck base state");
+		await deck.changeState(55);
+		assert.equal(deck.state, 55, "deck next state");
+	})
+	
+	it("connection in RPCSource constructor", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+			await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		class Deck extends RPCSource<{getMyName(): string}> {
+			declare private static connection: Connection;
+			constructor() {
+				const connection = new.target.connection;
+				super({
+					getMyName(this: Connection){
+						return String(connection.parameters[0]);
+					}
+				});
+			}
+		}
+		const rpcRoom = new RPCSource({Deck});
+		
+		RPCSource.start(rpcRoom, room, "$rpc");
+		
+		const clientWs = roomWs.createClientMock("Bob", "player");
+		const client = new VarhubClient(clientWs);
+		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client, "$rpc");
+		const deck = new rpcClient.Deck();
+		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
 	})
 });

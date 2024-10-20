@@ -50,7 +50,7 @@ class Channel {
     manager;
     channelId;
     proxy;
-    initialData;
+    state = undefined;
     eventBox;
     resolver = Promise.withResolvers();
     ready = false;
@@ -73,11 +73,20 @@ class Channel {
         }
         manager.client.once("close", (reason) => this.onClose(reason));
     }
-    onInit(initData) {
-        this.initialData = initData;
+    onInit(state) {
+        if (this.closed)
+            return;
+        const sameState = this.state === state;
+        const wasReady = this.ready;
+        this.state = state;
         this.ready = true;
-        this.eventBox.dispatch("init", [initData]);
-        this.resolver.resolve();
+        if (!wasReady) {
+            this.eventBox.dispatch("init", []);
+            this.resolver.resolve();
+        }
+        if (!sameState) {
+            this.eventBox.dispatch("state", [state]);
+        }
     }
     onClose(reason) {
         if (this.closed)
@@ -155,12 +164,12 @@ class Channel {
     [Symbol.dispose] = () => {
         this.close("disposed");
     };
-    getEventCode(path, eventName) {
+    getEventCode(path, e) {
         if (path.length > 0)
-            return JSON.stringify([...path, eventName]);
-        if (eventName === "close" || eventName === "init" || eventName === "error")
-            return eventName;
-        return JSON.stringify([eventName]);
+            return JSON.stringify([...path, e]);
+        if (e === "close" || e === "init" || e === "error" || e === "state")
+            return e;
+        return JSON.stringify([e]);
     }
     createProxy(path = []) {
         const children = new Map();
@@ -184,8 +193,8 @@ class Channel {
                         return this.ready;
                     if (prop === "closed")
                         return this.closed;
-                    if (prop === "initialData")
-                        return this.initialData;
+                    if (prop === "state")
+                        return this.state;
                     if (prop === "then")
                         return this.then;
                     if (prop === "call")
