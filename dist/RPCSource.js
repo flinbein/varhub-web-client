@@ -21,8 +21,13 @@ export class RPCSource {
             const form = handler;
             handler = function (con, path, args, creatingNewChannel) {
                 let target = form;
-                for (let step of path)
+                for (let step of path) {
+                    if (typeof target !== "object")
+                        throw new Error("wrong path");
+                    if (!Object.keys(target).includes(step))
+                        throw new Error("wrong path");
                     target = target[step];
+                }
                 if (creatingNewChannel && isESClass(target)) {
                     const MetaConstructor = function () { return con; };
                     MetaConstructor.prototype = target.prototype;

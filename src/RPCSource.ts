@@ -75,7 +75,11 @@ export class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefin
 			const form = handler;
 			handler = function(con: Connection, path: string[], args: XJData[], creatingNewChannel: boolean) {
 				let target: any = form;
-				for (let step of path) target = target[step];
+				for (let step of path) {
+					if (typeof target !== "object") throw new Error("wrong path");
+					if (!Object.keys(target).includes(step)) throw new Error("wrong path");
+					target = target[step];
+				}
 				if (creatingNewChannel && isESClass(target)) {
 					const MetaConstructor = function (){return con}
 					MetaConstructor.prototype = target.prototype;
