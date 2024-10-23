@@ -1,4 +1,4 @@
-import { EventBox } from "./EventBox.js";
+import { EventEmitter } from "./EventEmitter.js";
 const isConstructable = (fn) => {
     try {
         return Boolean(class E extends fn {
@@ -10,16 +10,49 @@ const isConstructable = (fn) => {
 };
 const isESClass = (fn) => (typeof fn === 'function' && isConstructable(fn) &&
     Function.prototype.toString.call(fn).startsWith("class"));
-export class RPCSource {
+class RPCSourceChannel {
+    #source;
+    #closed = false;
+    #connection;
+    #closeHook;
+    constructor(source, connection, closeHook) {
+        this.#source = source;
+        this.#connection = connection;
+        this.#closeHook = closeHook;
+    }
+    get closed() { return this.#closed; }
+    get source() { return this.#source; }
+    get connection() { return this.#connection; }
+    close(reason) {
+        if (this.#closed)
+            return;
+        this.#closed = true;
+        this.#closeHook(reason);
+    }
+}
+export default class RPCSource {
     #handler;
-    #events = new EventBox(this);
+    #innerEvents = new EventEmitter();
+    #events = new EventEmitter();
     #state;
+    on(eventName, handler) {
+        this.#events.on.call(this, eventName, handler);
+        return this;
+    }
+    once(eventName, handler) {
+        this.#events.on.call(this, eventName, handler);
+        return this;
+    }
+    off(eventName, handler) {
+        this.#events.on.call(this, eventName, handler);
+        return this;
+    }
     get state() { return this.#state; }
     constructor(handler, initialState) {
         this.#state = initialState;
         if (typeof handler === "object") {
             const form = handler;
-            handler = function (con, path, args, creatingNewChannel) {
+            handler = function (con, path, args, openChannel) {
                 let target = form;
                 for (let step of path) {
                     if (typeof target !== "object")
@@ -28,11 +61,18 @@ export class RPCSource {
                         throw new Error("wrong path");
                     target = target[step];
                 }
-                if (creatingNewChannel && isESClass(target)) {
-                    const MetaConstructor = function () { return con; };
+                if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
+                    const MetaConstructor = function (...args) {
+                        return Reflect.construct(target, args, MetaConstructor);
+                    };
                     MetaConstructor.prototype = target.prototype;
                     MetaConstructor.connection = con;
-                    return Reflect.construct(target, args, MetaConstructor);
+                    MetaConstructor.autoClose = true;
+                    const result = MetaConstructor(...args);
+                    if (MetaConstructor.autoClose) {
+                        result.on("channelClose", (_channel, reason) => result.dispose(reason));
+                    }
+                    return result;
                 }
                 return target.apply(con, args);
             };
@@ -43,11 +83,15 @@ export class RPCSource {
         return this;
     }
     setState(state) {
+        if (this.disposed)
+            throw new Error("disposed");
         const newState = typeof state === "function" ? state(this.#state) : state;
         const stateChanged = this.#state !== newState;
         this.#state = newState;
-        if (stateChanged)
-            this.#events.dispatch("state", [newState]);
+        if (stateChanged) {
+            this.#innerEvents.emit("state", newState);
+            this.#events.emit("state", newState);
+        }
         return this;
     }
     withState(state) {
@@ -61,13 +105,15 @@ export class RPCSource {
     emit(event, ...args) {
         if (this.#disposed)
             throw new Error("disposed");
-        this.#events.dispatch("message", [event, args]);
+        this.#innerEvents.emit("message", event, args);
         return this;
     }
     dispose(reason) {
+        if (this.#disposed)
+            return;
         this.#disposed = true;
-        this.#events.dispatch("dispose", [reason]);
-        this.#events.clear();
+        this.#events.emit("dispose", reason);
+        this.#innerEvents.emit("dispose", reason);
     }
     [Symbol.dispose]() {
         this.dispose("disposed");
@@ -107,9 +153,12 @@ export class RPCSource {
                 return;
             }
             if (operationId === 1) {
-                const subscriber = channels.get(con)?.get(channelId);
-                subscriber?.dispose();
-                channels.get(con)?.delete(channelId);
+                const reason = msgArgs[0];
+                const channel = channels.get(con)?.get(channelId);
+                const deleted = channels.get(con)?.delete(channelId);
+                if (channel && deleted)
+                    source.#events.emit("channelClose", channel, reason);
+                channel?.close(reason);
                 return;
             }
             if (operationId === 2) {
@@ -138,16 +187,31 @@ export class RPCSource {
                         const onSourceState = (state) => {
                             con.send(incomingKey, newChannelId, 2, state);
                         };
-                        const dispose = () => {
-                            result.#events.subscriber.off("dispose", onSourceDispose);
-                            result.#events.subscriber.off("message", onSourceMessage);
-                            result.#events.subscriber.off("state", onSourceState);
+                        let disposeReason;
+                        const dispose = (reason) => {
+                            disposeReason = reason;
+                            result.#innerEvents.off("dispose", onSourceDispose);
+                            result.#innerEvents.off("message", onSourceMessage);
+                            result.#innerEvents.off("state", onSourceState);
+                            if (!channelReady)
+                                return;
+                            const deleted = channels.get(con)?.delete(newChannelId);
+                            if (deleted)
+                                con.send(incomingKey, newChannelId, 1, reason);
                         };
+                        let channelReady = false;
+                        const channel = new RPCSourceChannel(result, con, dispose);
+                        result.#events.emit("channelOpen", channel);
+                        if (channel.closed) {
+                            con.send(incomingKey, newChannelId, 1, disposeReason);
+                            return;
+                        }
                         con.send(incomingKey, newChannelId, 2, result.#state);
-                        map.set(newChannelId, { dispose, source: result });
-                        result.#events.subscriber.once("dispose", onSourceDispose);
-                        result.#events.subscriber.on("message", onSourceMessage);
-                        result.#events.subscriber.on("state", onSourceState);
+                        channelReady = true;
+                        map.set(newChannelId, channel);
+                        result.#innerEvents.once("dispose", onSourceDispose);
+                        result.#innerEvents.on("message", onSourceMessage);
+                        result.#innerEvents.on("state", onSourceState);
                     }
                     catch (error) {
                         con.send(incomingKey, newChannelId, 1, error);
@@ -160,8 +224,8 @@ export class RPCSource {
             }
         };
         const clearChannelsForConnection = (con) => {
-            for (let value of channels.get(con)?.values() ?? []) {
-                value.dispose();
+            for (let channel of channels.get(con)?.values() ?? []) {
+                channel.close();
             }
         };
         room.on("connectionClose", clearChannelsForConnection);
@@ -175,6 +239,4 @@ export class RPCSource {
         };
     }
 }
-const x = new RPCSource({}).withState();
-x.setState(5);
 //# sourceMappingURL=RPCSource.js.map

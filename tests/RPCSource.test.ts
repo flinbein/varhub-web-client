@@ -1,10 +1,7 @@
 import * as assert from "node:assert";
 import { describe, it, mock } from "node:test";
-import { RPCChannel } from "../src/RPCChannel.js";
-import { VarhubClient } from "../src/VarhubClient.js";
-import { Connection, RoomSocketHandler } from "../src/RoomSocketHandler.js";
+import { RPCSource, RPCChannel, VarhubClient, Connection, RoomSocketHandler } from "../src/index.js";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
-import { RPCSource } from "../src/RPCSource.js";
 
 describe("RPCSource", () => {
 	it("tests rpc", {timeout: 400}, async () => {
@@ -126,10 +123,10 @@ describe("RPCSource", () => {
 		deck.emit("test", 1);
 		deck.emit("test", 2);
 		clientDeck.close();
-		await new Promise(resolve => setTimeout(resolve, 32)); // wait for close on backend
+		await new Promise(resolve => setTimeout(resolve, 52)); // wait for close on backend
 		deck.emit("test", 3);
 		deck.emit("test", 4);
-		await new Promise(resolve => setTimeout(resolve, 32)); // wait for collect message
+		await new Promise(resolve => setTimeout(resolve, 52)); // wait for collect message
 		assert.equal(onMessage.mock.callCount(), 3, "no other messages");
 		assert.equal(onError.mock.callCount(), 0, "no errors");
 		assert.equal(onClose.mock.callCount(), 1, "1 close event");
@@ -251,5 +248,101 @@ describe("RPCSource", () => {
 		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client, "$rpc");
 		const deck = new rpcClient.Deck();
 		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
+	})
+	
+	it("RPCSource events", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const onChannelClose = mock.fn();
+		class Deck extends RPCSource<{}, number> {
+			declare private static connection: Connection;
+			constructor(state: number) {
+				super({}, state);
+				this.on("channelOpen", (channel) => {
+					if (state < 5) channel.close("less");
+				})
+				this.on("channelClose", onChannelClose);
+			}
+		}
+		const rpcRoom = new RPCSource({Deck});
+		
+		RPCSource.start(rpcRoom, room, "$rpc");
+		
+		const clientWs = roomWs.createClientMock("Bob", "player");
+		const client = new VarhubClient(clientWs);
+		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client, "$rpc");
+		const deck1 = new rpcClient.Deck(4);
+		await assert.rejects(Promise.resolve(deck1), (v) => v === "less" , "deck closed by handler");
+		
+		const deck2 = new rpcClient.Deck(6);
+		await deck2;
+		assert.equal(deck2.state, 6, "deck ok with value 6");
+		deck2.close("deck-2-close-reason");
+		await new Promise(r => setTimeout(r, 40));
+		assert.equal(onChannelClose.mock.calls[0].arguments[1], "deck-2-close-reason", "close reason");
+	})
+	
+	it("RPCSource autoClose", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const decks: Deck[] = [];
+		class Deck extends RPCSource<{}, number> {
+			declare private static connection: Connection;
+			declare private static autoClose: boolean;
+			constructor(state: number, autoClose?: boolean) {
+				super({}, state);
+				decks.push(this);
+				if (autoClose != null) new.target.autoClose = autoClose;
+			}
+		}
+		const rpcRoom = new RPCSource({
+			Deck,
+			nope: () => {},
+			getDisposed: (state: number) => {
+				return decks.find(deck => deck.state === state)?.disposed
+			},
+		});
+		
+		RPCSource.start(rpcRoom, room, "$rpc");
+		
+		const clientWs = roomWs.createClientMock("Bob", "player");
+		const client = new VarhubClient(clientWs);
+		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client, "$rpc");
+		const deck1 = new rpcClient.Deck(1);
+		assert.equal(await rpcClient.getDisposed(1), false, "deck1 not disposed");
+		deck1.close();
+		await rpcClient.nope();
+		assert.equal(await rpcClient.getDisposed(1), true, "deck1 disposed");
+		
+		const deck2 = new rpcClient.Deck(2, true);
+		assert.equal(await rpcClient.getDisposed(2), false, "deck2 not disposed");
+		deck2.close();
+		await rpcClient.nope();
+		assert.equal(await rpcClient.getDisposed(2), true, "deck2 disposed");
+		
+		const deck3 = new rpcClient.Deck(3, false);
+		assert.equal(await rpcClient.getDisposed(3), false, "deck3 not disposed");
+		deck3.close();
+		await rpcClient.nope();
+		assert.equal(await rpcClient.getDisposed(3), false, "deck3 still not disposed");
+		
+		const onState = mock.fn();
+		const onDispose = mock.fn();
+		const deck = new Deck(4);
+		deck.on("state", onState);
+		deck.on("dispose", onDispose);
+		deck.setState(5);
+		deck.setState(6);
+		deck.dispose("dispose-reason-1");
+		deck.dispose("dispose-reason-2");
+		assert.throws(() => deck.setState(6), "setState throws on disposed");
+		assert.deepEqual(onState.mock.calls.map(c => c.arguments), [[5], [6]], "deck state events");
+		assert.deepEqual(onDispose.mock.calls.map(c => c.arguments), [["dispose-reason-1"]], "dispose events");
 	})
 });

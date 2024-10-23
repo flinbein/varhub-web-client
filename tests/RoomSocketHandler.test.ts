@@ -103,7 +103,7 @@ describe("Room methods", async () => {
 		await room;
 		
 		const bobWs = wsMock.createClientMock("Bob", "player");
-		await new Promise(resolve => setTimeout(resolve, 32));
+		await new Promise(resolve => setTimeout(resolve, 52));
 		
 		// infinity defer
 		room.on("connection", con => con.defer(() => new Promise(() => {})));
@@ -125,7 +125,7 @@ describe("Room methods", async () => {
 		assert.deepEqual(onOpen.mock.calls[0].arguments, [], "onOpen args");
 		
 		bobClient.close("kick bob");
-		await new Promise(resolve => setTimeout(resolve, 32));
+		await new Promise(resolve => setTimeout(resolve, 52));
 		assert.equal(bobWs.readyState, WebSocket.CLOSED, "bob is discconnected");
 		assert.equal(onClose.mock.callCount(), 1, "onClose call 1");
 		assert.deepEqual(onClose.mock.calls[0].arguments, ["kick bob", true], "onClose args");

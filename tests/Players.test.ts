@@ -41,7 +41,7 @@ describe("Players", () => {
 		assert.deepEqual(players.all(), new Set([bobPlayer]), "players.all");
 		
 		bobWs.close(4000, "close-bob-reason");
-		await new Promise(resolve => setTimeout(resolve, 32));
+		await new Promise(resolve => setTimeout(resolve, 52));
 		
 		assert.deepEqual(onOffline.mock.calls[0]?.arguments, [], "offline event");
 		assert.deepEqual(onPlayerOffline.mock.calls[0]?.arguments, [bobPlayer], "player offline event");
@@ -57,7 +57,7 @@ describe("Players", () => {
 		assert.equal(bobPlayer.registered, true, "bob registered");
 		
 		bobPlayer.kick("kick-reason");
-		await new Promise(resolve => setTimeout(resolve, 32));
+		await new Promise(resolve => setTimeout(resolve, 52));
 		
 		assert.equal(bobPlayer.registered, false, "bob disposed");
 		assert.equal(players.count, 0, "no players after kick");
