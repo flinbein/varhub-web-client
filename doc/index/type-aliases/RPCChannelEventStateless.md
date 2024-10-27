@@ -60,4 +60,4 @@ rpc.on("init", (reason) => {
 
 ## Defined in
 
-[src/RPCChannel.ts:8](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L8)
+[src/RPCChannel.ts:8](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L8)

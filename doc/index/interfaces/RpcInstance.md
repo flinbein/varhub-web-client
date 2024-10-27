@@ -34,7 +34,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:90](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L90)
+[src/RPCChannel.ts:90](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L90)
 
 ***
 
@@ -52,7 +52,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:92](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L92)
+[src/RPCChannel.ts:92](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L92)
 
 ***
 
@@ -62,7 +62,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:89](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L89)
+[src/RPCChannel.ts:89](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L89)
 
 ***
 
@@ -82,7 +82,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:91](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L91)
+[src/RPCChannel.ts:91](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L91)
 
 ***
 
@@ -92,7 +92,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:88](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L88)
+[src/RPCChannel.ts:88](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L88)
 
 ***
 
@@ -102,7 +102,7 @@ Instance of RPC channel
 
 #### Defined in
 
-[src/RPCChannel.ts:93](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L93)
+[src/RPCChannel.ts:93](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L93)
 
 ## Methods
 
@@ -164,4 +164,4 @@ node\_modules/@types/node/globals.d.ts:282
 
 #### Defined in
 
-[src/RPCChannel.ts:84](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCChannel.ts#L84)
+[src/RPCChannel.ts:84](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/RPCChannel.ts#L84)

@@ -16,4 +16,4 @@
 
 ## Defined in
 
-[src/modules.d.ts:552](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L552)
+[src/modules.d.ts:552](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L552)

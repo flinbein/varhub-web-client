@@ -48,7 +48,7 @@ const players = new Players(room, async (connection, name, password) => {
 
 #### Defined in
 
-[src/Players.ts:118](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L118)
+[src/Players.ts:118](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L118)
 
 ## Accessors
 
@@ -64,7 +64,7 @@ get number of players
 
 #### Defined in
 
-[src/Players.ts:193](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L193)
+[src/Players.ts:193](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L193)
 
 ## Methods
 
@@ -80,7 +80,7 @@ iterate on all players
 
 #### Defined in
 
-[src/Players.ts:249](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L249)
+[src/Players.ts:249](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L249)
 
 ***
 
@@ -96,7 +96,7 @@ get all players
 
 #### Defined in
 
-[src/Players.ts:208](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L208)
+[src/Players.ts:208](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L208)
 
 ***
 
@@ -118,7 +118,7 @@ name or connection
 
 #### Defined in
 
-[src/Players.ts:184](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L184)
+[src/Players.ts:184](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L184)
 
 ***
 
@@ -138,7 +138,7 @@ get all players with specified group. If group is undefined - get all players wi
 
 #### Defined in
 
-[src/Players.ts:201](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L201)
+[src/Players.ts:201](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L201)
 
 ## Events
 
@@ -168,7 +168,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:241](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L241)
+[src/Players.ts:241](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L241)
 
 ***
 
@@ -198,7 +198,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:219](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L219)
+[src/Players.ts:219](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L219)
 
 ***
 
@@ -228,4 +228,4 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:230](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L230)
+[src/Players.ts:230](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L230)
