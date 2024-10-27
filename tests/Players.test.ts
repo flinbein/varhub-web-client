@@ -1,10 +1,10 @@
 import * as assert from "node:assert";
-import { describe, it, mock } from "node:test";
+import test, { it, mock } from "node:test";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
-import { Players } from "../src/Players.js";
+import Players from "../src/Players.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 
-describe("Players", () => {
+test.describe("Players", () => {
 	it("join and leave", {timeout: 300}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
@@ -69,7 +69,7 @@ describe("Players", () => {
 	
 	it("function with validation", {timeout: 300}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		
 		const players = new Players(room, (_connection, name, password) => {
@@ -125,7 +125,7 @@ describe("Players", () => {
 	
 	it("iterate on connections", {timeout: 300}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		
 		const players = new Players(room, (_con, name) => String(name));
@@ -151,7 +151,7 @@ describe("Players", () => {
 	
 	it("groups", {timeout: 300}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		
 		const players = new Players(room, (_con, name) => String(name));
@@ -204,6 +204,19 @@ describe("Players", () => {
 		assert.notEqual(bob1, bob2, "different players");
 		assert.equal(bob1.registered, false, "Bob1 gone");
 		assert.equal(bob2.registered, true, "Bob2 here");
+	})
+	
+	it("this leave", {timeout: 300}, async () => {
+		const roomWs = new WebsocketMockRoom("test");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		
+		const players = new Players(room, (_con, name) => name ? String(name) : null);
+		const joinPromiseThisValue = new Promise<any>(resolve => {
+			players.on("join", function (this: any){resolve(this)});
+		})
+		roomWs.createClientMock("Bob");
+		assert.equal(await joinPromiseThisValue, players, "this value is players");
 	})
 });
 // end of file

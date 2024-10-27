@@ -1,8 +1,8 @@
 import { parse, serialize } from "@flinbein/xjmapper";
-import { EventBox } from "./EventBox.js";
+import EventEmitter from "./EventEmitter.js";
 export class VarhubClient {
     #ws;
-    #selfEventBox = new EventBox(this);
+    #selfEvents = new EventEmitter();
     #readyPromise;
     #ready = false;
     #closed = false;
@@ -13,10 +13,10 @@ export class VarhubClient {
             throw new Error("websocket is closed");
         }
         if (ws.readyState === WebSocket.CONNECTING) {
-            ws.addEventListener("open", (event) => {
+            ws.addEventListener("open", () => {
                 this.#ready = true;
                 this.#closed = false;
-                this.#selfEventBox.dispatch("open", []);
+                this.#selfEvents.emit("open");
             });
             this.#readyPromise = new Promise((resolve, reject) => {
                 this.on("open", () => { resolve(); });
@@ -28,17 +28,18 @@ export class VarhubClient {
             this.#readyPromise = Promise.resolve();
         }
         ws.addEventListener("message", (event) => {
-            this.#selfEventBox.dispatch("message", [...parse(event.data)]);
+            this.#selfEvents.emit("message", ...parse(event.data));
         });
         ws.addEventListener("close", (event) => {
+            const wasReady = this.#ready;
             this.#ready = false;
             this.#closed = true;
-            this.#selfEventBox.dispatch("close", [event.reason]);
+            this.#selfEvents.emit("close", event.reason, wasReady);
         });
-        ws.addEventListener("error", (event) => {
+        ws.addEventListener("error", () => {
             this.#ready = false;
             this.#closed = true;
-            this.#selfEventBox.dispatch("error", []);
+            this.#selfEvents.emit("error");
         });
         this.#readyPromise.catch(() => { });
     }
@@ -51,17 +52,18 @@ export class VarhubClient {
     send(...data) {
         const rawData = serialize(...data);
         this.#ws.send(rawData);
+        return this;
     }
     on(event, handler) {
-        this.#selfEventBox.subscriber.on(event, handler);
+        this.#selfEvents.on.call(this, event, handler);
         return this;
     }
     once(event, handler) {
-        this.#selfEventBox.subscriber.once(event, handler);
+        this.#selfEvents.once.call(this, event, handler);
         return this;
     }
     off(event, handler) {
-        this.#selfEventBox.subscriber.off(event, handler);
+        this.#selfEvents.off.call(this, event, handler);
         return this;
     }
     close(reason) {

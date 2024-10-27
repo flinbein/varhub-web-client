@@ -1,6 +1,6 @@
-import { EventEmitter } from "./EventEmitter.js";
+import EventEmitter from "./EventEmitter.js";
 import type { XJData } from "@flinbein/xjmapper";
-import type { Connection, RoomSocketHandler } from "./RoomSocketHandler.js";
+import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
 
 export type RPCHandler = ((
 	connection: Connection,
@@ -54,20 +54,38 @@ const isESClass = (fn: any) => (
 	Function.prototype.toString.call(fn).startsWith("class")
 );
 
+/**
+ * Communication channel established between the {@link RPCChannel} and {@link RPCSource}
+ */
 class RPCSourceChannel<S = RPCSource> {
-	#source;
+	readonly #source;
+	readonly #connection;
+	readonly #closeHook;
 	#closed: boolean = false;
-	#connection;
-	#closeHook;
+	/** @hidden */
 	constructor(source: RPCSource, connection: Connection, closeHook: (reason: XJData) => void) {
 		this.#source = source;
 		this.#connection = connection;
 		this.#closeHook = closeHook;
 	}
+	
+	/**
+	 * channel is closed
+	 */
 	get closed() {return this.#closed}
+	/**
+	 * get rpc source
+	 */
 	get source(): S {return this.#source as any;}
+	/**
+	 * get client's connection
+	 */
 	get connection(){return this.#connection;}
 	
+	/**
+	 * close this communication channel
+	 * @param reason
+	 */
 	close(reason?: XJData){
 		if (this.#closed) return;
 		this.#closed = true;
@@ -76,17 +94,73 @@ class RPCSourceChannel<S = RPCSource> {
 }
 export type { RPCSourceChannel };
 
+/**
+ * @event
+ * @template {any} STATE
+ * @template {RPCSourceChannel} C
+ */
 export type RPCSourceEvents<STATE, C> = {
-	channelOpen: [C],
-	channelClose: [C, XJData],
-	state: [STATE],
-	dispose: [XJData],
+	/**
+	 * new channel is open
+	 * @example
+	 * ```typescript
+	 * rpc = new RPCSource({});
+	 * rpc.on("channelOpen", (sourceChannel) => {
+	 *   if (isBadClient(sourceChannel.client)) {
+	 *   	sourceChannel.close("bad!");
+	 *   }
+	 * })
+	 * ```
+	 * If you close the sourceChannel while the event is being processed,
+	 * the channel will not be created and `channelClose` event will not be triggered.
+	 */
+	channelOpen: [sourceChannel: C],
+	/**
+	 * channel is closed
+	 * @example
+	 * ```typescript
+	 * rpc = new RPCSource({});
+	 * rpc.on("channelClose", (sourceChannel, reason) => {
+	 *   console.log("client closed this channel:", sourceChannel.client, "reason:", reason);
+	 * })
+	 * ```
+	 */
+	channelClose: [sourceChannel: C, reason: XJData],
+	/**
+	 * state is changed
+	 * @example
+	 * ```typescript
+	 * rpc = new RPCSource({}, "state1");
+	 * console.assert(rpc.state === "state1");
+	 *
+	 * rpc.on("state", (newState, oldState) => {
+	 *   console.log("new state:", newState);
+	 *   console.log("old state:", oldState);
+	 *   console.assert(rpc.state === newState);
+	 * });
+	 * rpc.setState("state2");
+	 * ```
+	 */
+	state: [newState: STATE, oldState: STATE],
+	/**
+	 * rpc is disposed
+	 * @example
+	 * ```typescript
+	 * rpc = new RPCSource({});
+	 * rpc.on("dispose", (reason) => {
+	 *   console.log("disposed by reason:", reason);
+	 * });
+	 * rpc.dispose("reason");
+	 * ```
+	 */
+	dispose: [reason: XJData],
 }
+
 export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 	#handler: RPCHandler
 	#innerEvents = new EventEmitter<{
 		message: [string|string[], XJData[]],
-		state: [STATE],
+		state: [STATE, STATE],
 		dispose: [XJData],
 	}>();
 	#events = new EventEmitter<RPCSourceEvents<STATE, this>>();
@@ -97,23 +171,88 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		__rpc_state: STATE,
 	};
 	
+	/**
+	 * @event
+	 * @template {keyof RPCSourceEvents} T
+	 * subscribe on event
+	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
+	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
+	 */
 	on<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this{
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
+	
+	/**
+	 * @event
+	 * @template {keyof RPCSourceEvents} T
+	 * subscribe on event once
+	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
+	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
+	 */
 	once<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this{
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
+	
+	/**
+	 * @event
+	 * @template {keyof RPCSourceEvents} T
+	 * unsubscribe from event
+	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
+	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
+	 */
 	off<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this {
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
 	
-	get state(){return this.#state}
+	/**
+	 * get current state
+	 */
+	get state(): STATE {return this.#state as any}
 	
-	declare public connection: Connection;
-	
+	/**
+	 * Create new instance of RPC
+	 * @example
+	 * ```typescript
+	 * // remote code
+	 * const rpcSource = new RPCSource((connection: Connection, path: string[], args: any[], openChannel: boolean) => {
+	 *   console.log("connection:", this);
+	 *   if (path.length === 0 && path[0] === "sum") return args[0] + args[1];
+	 *   throw new Error("method not found");
+	 * });
+	 * RPCSource.start(rpcSource, room);
+	 * ```
+	 * ```typescript
+	 * // client code
+	 * const rpc = new RPCChannel(client);
+	 * const result = await rpc.test(5, 3);
+	 * console.assert(result === 8);
+	 * ```
+	 * @example
+	 * ```typescript
+	 * // remote code
+	 * const rpcSource = new RPCSource({
+	 *   sum(x, y){
+	 *     console.log("connection:", this);
+	 *     return x + y;
+	 *   }
+	 * });
+	 * RPCSource.start(rpcSource, room);
+	 * ```
+	 * ```typescript
+	 * // client code
+	 * const rpc = new RPCChannel(client);
+	 * const result = await rpc.test(5, 3);
+	 * console.assert(result === 8);
+	 * ```
+	 * @param {RPCHandler|METHODS} handler
+	 * handler can be:
+	 * - function of type {@link RPCHandler};
+	 * - object with methods for remote call.
+	 * @param initialState
+	 */
 	constructor(handler?: RPCHandler|METHODS, initialState?: STATE) {
 		this.#state = initialState;
 		if (typeof handler === "object") {
@@ -144,28 +283,39 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		this.#handler = handler as any;
 	}
 	
+	/** apply generic types for events */
 	withEventTypes<E = EVENTS>(): RPCSource<METHODS, STATE, E>{
 		return this as any;
 	}
 	
+	/** @hidden */
 	setState(state: (oldState: STATE) => STATE): this
+	/**
+	 * set new state
+	 * @param state
+	 * - new state value, if state is not a function.
+	 * - function takes the current state and returns a new one
+	 */
 	setState(state: STATE extends (...args: any) => any ? never : STATE): this
 	setState(state: any): this{
 		if (this.disposed) throw new Error("disposed");
-		const newState = typeof state === "function" ? state(this.#state) : state;
+		const oldState = this.#state;
+		const newState = typeof state === "function" ? state(oldState) : state;
 		const stateChanged = this.#state !== newState;
 		this.#state = newState;
 		if (stateChanged) {
-			this.#innerEvents.emit("state", newState);
-			this.#events.emit("state", newState);
+			this.#innerEvents.emit("state", newState, oldState as any);
+			this.#events.emit("state", newState, oldState as any);
 		}
 		return this;
 	}
 	
-	withState<S>(): RPCSource<METHODS, S|undefined, EVENTS>
+	/** apply generic types for state. */
+	withState<S>(): RPCSource<METHODS, S, EVENTS>
+	/** apply generic types for state and set new state. */
 	withState<S>(state: S): RPCSource<METHODS, S, EVENTS>
-	withState(state?: any) {
-		this.#state = state;
+	withState(...stateArgs: any[]) {
+		if (stateArgs.length > 0) this.#state = stateArgs[0];
 		return this;
 	}
 	
@@ -174,12 +324,21 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		return this.#disposed;
 	}
 	
-	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>) {
+	/**
+	 * Emit event for all connected clients
+	 * @param event path for event. String or array of strings.
+	 * @param args event values
+	 */
+	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this {
 		if (this.#disposed) throw new Error("disposed");
 		this.#innerEvents.emit("message", event, args);
 		return this;
 	}
 	
+	/**
+	 * dispose this source and disconnect all channels
+	 * @param reason
+	 */
 	dispose(reason?: XJData){
 		if (this.#disposed) return;
 		this.#disposed = true;
@@ -187,16 +346,26 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		this.#innerEvents.emit("dispose", reason);
 	}
 	
+	/**
+	 * dispose this source and disconnect all channels
+	 */
 	[Symbol.dispose](){
 		this.dispose("disposed");
 	}
 	
-	static start(rpcSource: RPCSource<any, undefined, any>, room: RoomSocketHandler, baseKey: string, options: {maxChannelsPerClient: number} = {maxChannelsPerClient: Infinity}){
+	/**
+	 * start listening for messages and processing procedure calls
+	 * @param rpcSource message handler
+	 * @param room room
+	 * @param maxChannelsPerClient set a limit on the number of opened channels
+	 * @param key Special key for listening events. Default value: `"$rpc"`
+	 */
+	static start(rpcSource: RPCSource<any, undefined, any>, room: Room, {maxChannelsPerClient = Infinity, key = "$rpc"} = {}){
 		const channels = new WeakMap<Connection, Map<number, RPCSourceChannel>>
 		const onConnectionMessage = async (con: Connection, ...args: XJData[]) => {
 			if (args.length < 4) return;
 			const [incomingKey, channelId, operationId, ...msgArgs] = args;
-			if (incomingKey !== baseKey) return;
+			if (incomingKey !== key) return;
 			const source = channelId === undefined ? rpcSource : channels.get(con)?.get(channelId as any)?.source;
 			if (!source) {
 				con.send(incomingKey, channelId, REMOTE_ACTION.CLOSE, new Error("wrong channel"));
@@ -234,7 +403,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 					try {
 						let map = channels.get(con);
 						if (!map) channels.set(con, map  = new Map());
-						if (map.size >= options.maxChannelsPerClient) throw new Error("channels limit");
+						if (map.size >= maxChannelsPerClient) throw new Error("channels limit");
 						const result = await source.#handler(con, path as any[], callArgs as any[], true);
 						if (!(result instanceof RPCSource)) throw new Error("wrong data type");
 						if (result.disposed) throw new Error("channel is disposed");

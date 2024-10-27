@@ -1,18 +1,72 @@
-import { Connection, RoomSocketHandler } from "./RoomSocketHandler.js";
-import { XJData } from "@flinbein/xjmapper";
-import { EventBox } from "./EventBox.js";
+import EventEmitter from "./EventEmitter.js";
+import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
+import type { XJData } from "@flinbein/xjmapper";
 
+/** @group Events */
 export type PlayersEvents = {
+	/**
+	 * new player joined
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("join", (player) => {
+	 *   console.log("player joined:", player.name);
+	 * })
+	 * ```
+	 */
 	join: [Player]
+	/**
+	 * player leaves the game
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("leave", (player) => {
+	 *   console.log("player leaves:", player.name);
+	 * })
+	 * ```
+	 *
+	 * Attention!
+	 *
+	 * If the player's last connection is closed, he does not leave the game, but goes offline.
+	 *
+	 * You can kick player when he goes offline
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("offline", player => player.kick("disconnected"))
+	 * ```
+	 */
 	leave: [Player]
+	/**
+	 * player goes online
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("online", (player) => {
+	 *   console.log("player online now!", player.name);
+	 *   console.assert(player.online);
+	 * })
+	 * ```
+	 */
 	online: [Player]
+	/**
+	 * player goes offline, last player's connection is closed.
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("offline", (player) => {
+	 *   console.log("player offline now!", player.name);
+	 *   console.assert(!player.online);
+	 * })
+	 * ```
+	 */
 	offline: [Player]
 }
-export class Players {
+export default class Players {
 	readonly #playerMap = new Map<string, Player>();
 	readonly #playerConnections = new WeakMap<Player, Set<Connection>>();
 	readonly #playerGroups = new WeakMap<Player, string>();
-	readonly #playerEvents = new WeakMap<Player, EventBox<PlayerEvents, Player>>();
+	readonly #playerEvents = new WeakMap<Player, EventEmitter<PlayerEvents>>();
 	readonly #connectionPlayerNameMap = new WeakMap<Connection, string>();
 	readonly #registerPlayer
 	readonly #controller = {
@@ -23,7 +77,7 @@ export class Players {
 			this.#playerGroups.set(player, group);
 		},
 		getConnectionsOf: (player: Player) => this.#playerConnections.get(player),
-		registerEvents: (player: Player, events: EventBox<PlayerEvents, Player>) => this.#playerEvents.set(player, events),
+		registerEvents: (player: Player, events: EventEmitter<PlayerEvents>) => this.#playerEvents.set(player, events),
 		kick: (player: Player, reason: string|null) => {
 			const existsPlayer =  this.#playerMap.get(player.name);
 			if (existsPlayer !== player) return;
@@ -31,16 +85,38 @@ export class Players {
 			const connections = this.#playerConnections.get(player)!
 			for (let connection of connections) connection.close(reason);
 			connections.clear();
-			this.#playerEvents.get(player)?.dispatch("leave", []);
-			this.#eventBox.dispatch("leave", [player]);
+			this.#playerEvents.get(player)?.emit("leave");
+			this.#eventBox.emit("leave", player);
 		}
 	}
 	
 	
-	readonly #eventBox = new EventBox<PlayersEvents, this>(this);
+	readonly #eventBox = new EventEmitter<PlayersEvents>();
 	
-	constructor(room: RoomSocketHandler, registerPlayer: (connection: Connection, ...args: XJData[]) => string|void|null|undefined|Promise<string|void|null|undefined>) {
-		this.#registerPlayer = registerPlayer;
+	/**
+	 * Create a player list based on connections.
+	 * @example
+	 * ```typescript
+	 * const players = new Players(room, (connection, ...args) => String(args[0]));
+	 * ```
+	 * @example
+	 * ```typescript
+	 * const players = new Players(room, async (connection, name, password) => {
+	 *   const permitted: boolean = await checkUser(name, password);
+	 *   if (!permitted) throw "wrong password";
+	 *   return name;
+	 * });
+	 * ```
+	 * @param room room
+	 * @param registerPlayerHandler
+	 * handler to get the player's name.
+	 * - if handler returns or resolves a string - it will be the player's name
+	 * - if handler returns or resolves a null or undefined - the connection will be opened without a player
+	 * - if handler throws or rejects - the connection will be closed
+	 * - async handler will defer the connection
+	 */
+	constructor(room: Room, registerPlayerHandler: (connection: Connection, ...args: XJData[]) => string|void|null|undefined|Promise<string|void|null|undefined>) {
+		this.#registerPlayer = registerPlayerHandler;
 		room.on("connection", this.#onConnection);
 		room.on("connectionOpen", this.#onConnectionOpen);
 		room.on("connectionClose", this.#onConnectionClose);
@@ -75,15 +151,15 @@ export class Players {
 			const connections = this.#playerConnections.get(existsPlayer)!;
 			connections.add(connection);
 			if (connections.size === 1){
-				this.#eventBox.dispatch("online", [existsPlayer]);
-				this.#playerEvents.get(existsPlayer)!.dispatch("online", []);
+				this.#eventBox.emit("online", existsPlayer);
+				this.#playerEvents.get(existsPlayer)?.emit("online");
 			}
 			return;
 		}
 		const player = new Player(playerName, this.#controller);
 		this.#playerConnections.set(player, new Set([connection]));
 		this.#playerMap.set(playerName, player);
-		this.#eventBox.dispatch("join", [player]);
+		this.#eventBox.emit("join", player);
 	}
 	
 	#onConnectionClose = (connection: Connection) => {
@@ -96,84 +172,204 @@ export class Players {
 		connections.delete(connection);
 		const online = connections.size > 0;
 		if (wasOnline && !online) {
-			this.#eventBox.dispatch("offline", [existsPlayer]);
-			this.#playerEvents.get(existsPlayer)!.dispatch("offline", []);
+			this.#eventBox.emit("offline", existsPlayer);
+			this.#playerEvents.get(existsPlayer)?.emit("offline");
 		}
 	}
 	
-	
+	/**
+	 * get player by name or connection
+	 * @param nameOrConnection name or connection
+	 */
 	get(nameOrConnection: Connection|string): Player|undefined {
 		if (typeof nameOrConnection === "string") return this.#playerMap.get(nameOrConnection);
 		const playerName = this.#connectionPlayerNameMap.get(nameOrConnection);
 		if (playerName != null) return this.#playerMap.get(playerName);
 	}
 	
+	/**
+	 * get number of players
+	 */
 	get count(){
 		return this.#playerMap.size;
 	}
 	
+	/**
+	 * get all players with specified group. If group is undefined - get all players without group.
+	 * @param group
+	 */
 	getGroup(group: string|undefined): Set<Player> {
 		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === group));
 	}
 	
+	/**
+	 * get all players
+	 */
 	all(): Set<Player> {
 		return new Set(this.#playerMap.values());
 	}
 	
+	/**
+	 * @event
+	 * @template {keyof PlayersEvents} T
+	 * subscribe on event
+	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
+	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
+	 */
 	on<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this{
-		this.#eventBox.subscriber.on(eventName, handler);
+		this.#eventBox.on.call(this, eventName, handler as any);
 		return this;
 	}
+	/**
+	 * @event
+	 * @template {keyof PlayersEvents} T
+	 * subscribe on event once
+	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
+	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
+	 */
 	once<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this{
-		this.#eventBox.subscriber.once(eventName, handler);
+		this.#eventBox.once.call(this, eventName, handler as any);
 		return this;
 	}
+	/**
+	 * @event
+	 * @template {keyof PlayersEvents} T
+	 * unsubscribe from event
+	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
+	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
+	 */
 	off<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this {
-		this.#eventBox.subscriber.off(eventName, handler);
+		this.#eventBox.off.call(this, eventName, handler as any);
 		return this;
 	}
 	
+	/**
+	 * iterate on all players
+	 */
 	[Symbol.iterator](): MapIterator<Player> {
 		return this.#playerMap.values();
 	}
 }
 
+/** @group Events */
 export type PlayerEvents = {
+	/**
+	 * player leaves the game
+	 * @example
+	 * ```typescript
+	 * player.on("leave", () => {
+	 *   console.log("player leaves:", player.name);
+	 * })
+	 * ```
+	 *
+	 * Attention!
+	 *
+	 * If the player's last connection is closed, he does not leave the game, but goes offline.
+	 *
+	 * You can kick player when he goes offline
+	 * @example
+	 * ```typescript
+	 * const players = new Players((con, name) => String(name));
+	 * players.on("offline", player => player.kick("disconnected"));
+	 * ```
+	 */
 	leave: []
+	/**
+	 * player goes online
+	 * @example
+	 * ```typescript
+	 * player.on("online", () => {
+	 *   console.log("player online now!", player.name);
+	 *   console.assert(player.online);
+	 * })
+	 * ```
+	 */
 	online: []
+	/**
+	 * player goes offline
+	 * @example
+	 * ```typescript
+	 * player.on("offline", () => {
+	 *   console.log("player offline now!", player.name);
+	 *   console.assert(!player.online);
+	 * })
+	 * ```
+	 */
 	offline: []
 }
-const Player = class Player {
+class Player {
 	readonly #name: string
 	readonly #controller: any
-	readonly #eventBox = new EventBox<PlayerEvents, this>(this);
+	readonly #eventBox = new EventEmitter<PlayerEvents>();
 	constructor(name: string, controller: any) {
 		this.#name = name;
 		this.#controller = controller;
 		controller.registerEvents(this, this.#eventBox);
 	}
+	/**
+	 * player's name
+	 */
 	get name(): string {return String(this.#name)}
 	
+	/**
+	 * get all player's connections
+	 */
 	get connections(): Set<Connection> {return new Set(this.#controller.getConnectionsOf(this))}
+	/**
+	 * player is online (has at least one opened connection)
+	 */
 	get online(): boolean {return this.#controller.getConnectionsOf(this).size > 0}
+	/**
+	 * player is registered in list of players
+	 */
 	get registered(): boolean {return this.#controller.isRegistered(this)}
-	
+	/**
+	 * get player's group
+	 */
 	get group(): string|undefined {return this.#controller.getGroupOf(this)}
+	/**
+	 * set player's group
+	 */
 	set group(value: string|undefined) {this.#controller.setGroupOf(this, value)}
 	
+	/**
+	 * @event
+	 * @template {keyof PlayerEvents} T
+	 * subscribe on event
+	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
+	 */
 	on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
-		this.#eventBox.subscriber.on(eventName, handler);
+		this.#eventBox.on.call(this, eventName, handler as any);
 		return this;
 	}
+	/**
+	 * @event
+	 * @template {keyof PlayerEvents} T
+	 * subscribe on event once
+	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
+	 */
 	once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
-		this.#eventBox.subscriber.once(eventName, handler);
+		this.#eventBox.once.call(this, eventName, handler as any);
 		return this;
 	}
+	/**
+	 * @event
+	 * @template {keyof PlayerEvents} T
+	 * unsubscribe from event
+	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
+	 */
 	off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this {
-		this.#eventBox.subscriber.off(eventName, handler);
+		this.#eventBox.off.call(this, eventName, handler as any);
 		return this;
 	}
 	
+	/**
+	 * kick player and close all player's connections
+	 * @param reason
+	 */
 	kick(reason: string|null = null): void {
 		this.#controller.kick(this, reason);
 	}
@@ -186,9 +382,12 @@ const Player = class Player {
 		return this.#name
 	}
 	
+	/**
+	 * iterate on all player's connections
+	 */
 	[Symbol.iterator](): SetIterator<Connection> {
 		return this.connections[Symbol.iterator]()
 	}
 }
-export type Player = InstanceType<typeof Player>;
+export type { Player };
 // end of file

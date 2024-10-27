@@ -1,21 +1,60 @@
-import { EventBox } from "./EventBox.js";
 import type { XJData } from "@flinbein/xjmapper";
+import EventEmitter from "./EventEmitter.js";
 import type { VarhubClient } from "./VarhubClient.js";
 
 
-type RPCChannelEvents<S> =
-	S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>
+type RPCChannelEvents<S> = S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>;
 
-type RPCChannelEventWithState<S> = {
-	close: [reason: string|null]
+export type RPCChannelEventStateless = {
+	/**
+	 * channel is closed
+	 * @example
+	 * ```typescript
+	 * const rpc = new RPCChannel(client);
+	 * rpc.on("close", (reason) => {
+	 *   console.log("channel closed with reason:", reason);
+	 *    console.assert(rpc.closed);
+	 * });
+	 * ```
+	 */
+	close: [reason: XJData]
+	/**
+	 * channel is closed
+	 * @example
+	 * ```typescript
+	 * const rpc = new RPCChannel(client);
+	 * rpc.on("init", (reason) => {
+	 *   console.log("channel initialized");
+	 *   console.assert(rpc.ready);
+	 * });
+	 * ```
+	 */
 	init: []
-	error: [Error]
-	state: [S]
+	/**
+	 * channel is closed before was open
+	 * @example
+	 * ```typescript
+	 * const rpc = new RPCChannel(client);
+	 * rpc.on("error", (reason) => {
+	 *   console.log("can not open channel", reason);
+	 *   console.assert(rpc.closed);
+	 * });
+	 * ```
+	 */
+	error: [error: XJData]
 }
-type RPCChannelEventStateless = {
-	close: [reason: string|null]
-	init: []
-	error: [Error]
+export type RPCChannelEventWithState<S> = RPCChannelEventStateless & {
+	/**
+	 * state is changed
+	 * @example
+	 * ```typescript
+	 * const rpc = new RPCChannel(client);
+	 * rpc.on("state", (newState, oldState) => {
+	 *   console.log("state changed", newState);
+	 * });
+	 * ```
+	 */
+	state: [newState: S, oldState: S]
 }
 
 const enum CLIENT_ACTION {
@@ -38,7 +77,10 @@ type KeyOfArray<T, K = keyof T> = K extends keyof T ? (
 
 type KeyOfNotArray<T> = Exclude<keyof T, KeyOfArray<T>>
 
-interface RpcInstance<S> extends Disposable {
+/**
+ * Instance of RPC channel
+ */
+export interface RpcInstance<S> extends Disposable {
 	then<R1 = [this], R2 = never>(
 		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
 		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null,
@@ -70,15 +112,30 @@ type RpcMapper<M, E = never> = (
 	never
 ) & (KeyOfArray<E> extends never ? unknown : RpcEmitter<E>);
 
-export const RPCChannel = (function(client: VarhubClient, key: string): {foo: string}{
+/**
+ * Constructor for new RPC channel
+ * @group Classes
+ */
+export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): {foo: string}{
 	const manager = new ChannelManager(client, key);
 	return manager.defaultChannel.proxy;
-} as any as {
-	new(client: VarhubClient, key: string): RPCChannel<{}, unknown>,
-	new<M>(client: VarhubClient, key: string): M extends MetaScope<infer METHODS, infer EVENTS, unknown> ? RPCChannel<METHODS, EVENTS, undefined> : RPCChannel<M>,
-	new<M, E>(client: VarhubClient, key: string): RPCChannel<MetaScope<M, E, undefined>>
-	new<M, E, S>(client: VarhubClient, key: string): RPCChannel<MetaScope<M, E, S>>
-});
+} as any as (
+	{
+		/** @hidden */
+		new(client: VarhubClient, options?: {key?: string}): RPCChannel<{}, unknown>,
+		/**
+		 * Create new channel for RPC
+		 * @typeParam M - typeof RPCSource
+		 * @param {VarhubClient} client - varhub client. Client may not be ready.
+		 * @param options
+		 * @param options.key - Default: `"$rpc"`
+		 * @returns {RpcInstance<undefined>} - stateless channel
+		 */
+		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, unknown> ? RPCChannel<METHODS, EVENTS, undefined> : RPCChannel<M>,
+		/** @hidden */
+		new<M, E>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, undefined>>
+	}
+));
 
 type MetaScope<M, E, S> = { [Symbol.unscopables]: {__rpc_methods: M, __rpc_events: E, __rpc_state: S}}
 
@@ -89,15 +146,6 @@ export type RPCChannel<M = any, E = any, S = undefined> = (
 		RpcInstance<S> & RpcMapper<M, E & RPCChannelEvents<S>>
 	)
 );
-// CALL	-> key:$rpc, channelId, 0, callId:number, 0:call, path:string[], args[]
-// CLOC	-> key:$rpc, channelId, 1, reason
-// CHAN	-> key:$rpc, channelId, 2, newChannelId:number, path:string[], args[]
-// RESP <- key:$rpc, channelId, 0, callId:number, result
-// CLOS <- key:$rpc, channelId, 1, reason:string|null
-// INIT	<- key:$rpc, channelId, 2, initArg
-// RESE <- key:$rpc, channelId, 3, callId:number, error
-// EVNT <- key:$rpc, channelId, 4, path:string[], args[]
-
 
 class ChannelManager {
 	currentChannelId: number = 0;
@@ -142,7 +190,7 @@ const proxyTarget = function(){};
 class Channel {
 	proxy: any;
 	state: any = undefined;
-	eventBox: EventBox<any, any>;
+	events = new EventEmitter();
 	resolver = Promise.withResolvers<void>();
 	ready = false;
 	closed = false;
@@ -152,7 +200,6 @@ class Channel {
 	constructor(public manager: ChannelManager, public channelId: any) {
 		this.proxy = this.createProxy();
 		this.resolver.promise.catch(() => {});
-		this.eventBox = new EventBox(this.proxy);
 		if (channelId === undefined) {
 			if (manager.client.ready) {
 				this.onInit();
@@ -165,16 +212,17 @@ class Channel {
 	
 	onInit(state?: any){
 		if (this.closed) return;
+		const oldState = this.state;
 		const sameState = this.state === state;
 		const wasReady = this.ready;
 		this.state = state;
 		this.ready = true;
 		if (!wasReady) {
-			this.eventBox.dispatch("init", []);
+			this.events.emit("init");
 			this.resolver.resolve();
 		}
 		if (!sameState) {
-			this.eventBox.dispatch("state", [state]);
+			this.events.emit("state", state, oldState);
 		}
 		
 	}
@@ -184,16 +232,15 @@ class Channel {
 		const wasReady = this.ready;
 		this.ready = false;
 		this.closed = true;
-		if (!wasReady) this.eventBox.dispatch("error", [reason]);
-		this.eventBox.dispatch("close", [reason]);
+		if (!wasReady) this.events.emit("error", reason);
+		this.events.emit("close", reason);
 		this.resolver.reject(reason);
 		this.manager.channels.delete(this.channelId);
-		this.eventBox.clear();
 	}
 	
 	onEvent(path: string[], args: XJData[]){
 		const eventName = JSON.stringify(path);
-		this.eventBox.dispatch(eventName, args);
+		this.events.emit(eventName, ...args);
 	}
 	
 	onResponse(operationCode: any, callId: any, data: any){
@@ -214,11 +261,11 @@ class Channel {
 			}
 			const clear = <T extends (...args: any[]) => any>(fn: T, ...args: Parameters<T>) => {
 				this.responseEventTarget.removeEventListener(callId as any, onResponse);
-				this.eventBox.subscriber.off("close", onClose);
+				this.events.off("close", onClose);
 				fn(...args);
 			}
 			this.responseEventTarget.addEventListener(callId as any, onResponse, {once: true});
-			this.eventBox.subscriber.once("close", onClose);
+			this.events.once("close", onClose);
 			this.send(CLIENT_ACTION.CALL, callId, path, args);
 		});
 	}
@@ -247,38 +294,32 @@ class Channel {
 		} else {
 			this.send(CLIENT_ACTION.CLOSE, reason)
 		}
-		this.eventBox.dispatch("close", [reason]);
+		this.events.emit("close", reason);
 		this.resolver.reject(reason);
 		this.manager.channels.delete(this.channelId);
-		this.eventBox.clear();
 	}
 	
 	[Symbol.dispose] = () => {
 		this.close("disposed");
 	}
 	
-	getEventCode(path: string[], e: string){
-		if (path.length > 0) return JSON.stringify([...path, e]);
-		if (e === "close" || e === "init" || e === "error" || e === "state") return e;
-		return JSON.stringify([e]);
-	}
-	
 	createProxy(path: string[] = []){
 		const children = new Map<string|number, any>();
+		const events = this.events;
 		const subscribers = {
-			on: (eventName: string, handler: (...args: any) => void) => {
-				return this.eventBox.subscriber.on(this.getEventCode(path, eventName), handler);
+			on: function(eventName: string, handler: (...args: any) => void) {
+				return events.on.call(this, getEventCode(path, eventName), handler);
 			},
-			once: (eventName: string, handler: (...args: any) => void) => {
-				return this.eventBox.subscriber.once(this.getEventCode(path, eventName), handler);
+			once: function(eventName: string, handler: (...args: any) => void) {
+				return events.once.call(this, getEventCode(path, eventName), handler);
 			},
-			off: (eventName: string, handler: (...args: any) => void) => {
-				return this.eventBox.subscriber.off(this.getEventCode(path, eventName), handler);
+			off: function(eventName: string, handler: (...args: any) => void) {
+				return events.off.call(this, getEventCode(path, eventName), handler);
 			}
 		}
 		
 		const proxyHandler = {
-			get: (target: any, prop: string|symbol) => {
+			get: (_target: any, prop: string|symbol) => {
 				if (path.length === 0) {
 					if (prop === Symbol.dispose) return this[Symbol.dispose];
 					if (prop === "ready") return this.ready;
@@ -291,7 +332,6 @@ class Channel {
 				}
 				if (prop in subscribers) return (subscribers as any)[prop];
 				if (typeof prop !== "string") return undefined;
-				// on, once, off
 				if (children.has(prop)) return children.get(prop);
 				const handler = this.createProxy([...path, prop]);
 				children.set(prop, handler);
@@ -314,4 +354,10 @@ class Channel {
 		}
 		return new Proxy(proxyTarget, proxyHandler);
 	}
+}
+
+function getEventCode(path: string[], e: string){
+	if (path.length > 0) return JSON.stringify([...path, e]);
+	if (e === "close" || e === "init" || e === "error" || e === "state") return e;
+	return JSON.stringify([e]);
 }

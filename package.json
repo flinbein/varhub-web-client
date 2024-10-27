@@ -1,6 +1,6 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
@@ -8,7 +8,8 @@
   "author": "dpohvar@gmail.com",
   "scripts": {
     "build": "tsc",
-    "test": "node --experimental-websocket --import=./test/register.js --test --test-reporter spec tests/**/*.test.ts",
+    "doc": "typedoc",
+    "test": "node --experimental-websocket --import=./tests/register.js --test --test-reporter spec ./tests/**/*.test.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -16,8 +17,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
-    "typescript": "^5.6.2",
     "husky": "^9.1.6",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.26.10",
+    "typedoc-plugin-markdown": "^4.2.9",
+    "typescript": "^5.6.2"
   }
 }

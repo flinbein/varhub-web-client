@@ -72,10 +72,10 @@ export interface RoomJoinOptions {
  * Varhub instance to manage rooms, create clients
  */
 export class Varhub {
-	#baseUrl: URL;
+	readonly #baseUrl: URL;
 	
-	constructor(url: string) {
-		this.#baseUrl = new URL(url);
+	constructor(url: string|URL) {
+		this.#baseUrl = url instanceof URL ? url : new URL(url);
 	}
 	
 	/**
@@ -133,7 +133,7 @@ export class Varhub {
 	 *
 	 * @param roomId room id
 	 *
-	 * @param [options] options
+	 * @param {RoomJoinOptions} [options] options
 	 *
 	 * @param [options.integrity] check room integrity before join.
 	 *
@@ -143,9 +143,7 @@ export class Varhub {
 	 *
 	 * @param [options.params] additional data of client.
 	 *
-	 * 	it can be used in `room.getPlayerData(name)`.
-	 *
-	 * 	data is set only in first connection.
+	 * 	it can be used in `roomConnection.parameters`.
 	 *
 	 * @returns client
 	 */
@@ -155,11 +153,15 @@ export class Varhub {
 	}
 	
 	/**
+	 * Create websocket connection for qjs logger or ivm inspector
+	 *
+	 *
 	 * example to generate random id
+	 * @example
 	 * ```js
 	 * Array.from({length:10}).map(() => Math.random().toString(36).substring(2)).join("")
 	 * ```
-	 * @param loggerId
+	 * @param {string} loggerId
 	 */
 	createLogger(loggerId: string): WebSocket {
 		return this.#createWebsocket(`log/${encodeURIComponent(String(loggerId))}`)

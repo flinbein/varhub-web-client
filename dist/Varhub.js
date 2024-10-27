@@ -3,7 +3,7 @@ import { RoomSocketHandler } from "./RoomSocketHandler.js";
 export class Varhub {
     #baseUrl;
     constructor(url) {
-        this.#baseUrl = new URL(url);
+        this.#baseUrl = url instanceof URL ? url : new URL(url);
     }
     get url() {
         return this.#baseUrl.href;

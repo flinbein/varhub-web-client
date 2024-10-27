@@ -1,4 +1,4 @@
-export class EventEmitter<M extends Record<string, any[]> = Record<string, any[]>> {
+export default class EventEmitter<M extends Record<string, any[]> = Record<string, any[]>> {
 	#eventMap: {[E in keyof M]?: {listener: (...args: M[E]) => void, context: any, once?: boolean}[]} = {};
 	constructor(){
 		const emitter = this;

@@ -1,5 +1,5 @@
-import { EventBox } from "./EventBox.js";
-export const RPCChannel = function (client, key) {
+import EventEmitter from "./EventEmitter.js";
+export const RPCChannel = function (client, { key = "$rpc" } = {}) {
     const manager = new ChannelManager(client, key);
     return manager.defaultChannel.proxy;
 };
@@ -51,7 +51,7 @@ class Channel {
     channelId;
     proxy;
     state = undefined;
-    eventBox;
+    events = new EventEmitter();
     resolver = Promise.withResolvers();
     ready = false;
     closed = false;
@@ -62,7 +62,6 @@ class Channel {
         this.channelId = channelId;
         this.proxy = this.createProxy();
         this.resolver.promise.catch(() => { });
-        this.eventBox = new EventBox(this.proxy);
         if (channelId === undefined) {
             if (manager.client.ready) {
                 this.onInit();
@@ -76,16 +75,17 @@ class Channel {
     onInit(state) {
         if (this.closed)
             return;
+        const oldState = this.state;
         const sameState = this.state === state;
         const wasReady = this.ready;
         this.state = state;
         this.ready = true;
         if (!wasReady) {
-            this.eventBox.dispatch("init", []);
+            this.events.emit("init");
             this.resolver.resolve();
         }
         if (!sameState) {
-            this.eventBox.dispatch("state", [state]);
+            this.events.emit("state", state, oldState);
         }
     }
     onClose(reason) {
@@ -95,15 +95,14 @@ class Channel {
         this.ready = false;
         this.closed = true;
         if (!wasReady)
-            this.eventBox.dispatch("error", [reason]);
-        this.eventBox.dispatch("close", [reason]);
+            this.events.emit("error", reason);
+        this.events.emit("close", reason);
         this.resolver.reject(reason);
         this.manager.channels.delete(this.channelId);
-        this.eventBox.clear();
     }
     onEvent(path, args) {
         const eventName = JSON.stringify(path);
-        this.eventBox.dispatch(eventName, args);
+        this.events.emit(eventName, ...args);
     }
     onResponse(operationCode, callId, data) {
         this.responseEventTarget.dispatchEvent(new CustomEvent(callId, { detail: [operationCode, data] }));
@@ -124,11 +123,11 @@ class Channel {
             };
             const clear = (fn, ...args) => {
                 this.responseEventTarget.removeEventListener(callId, onResponse);
-                this.eventBox.subscriber.off("close", onClose);
+                this.events.off("close", onClose);
                 fn(...args);
             };
             this.responseEventTarget.addEventListener(callId, onResponse, { once: true });
-            this.eventBox.subscriber.once("close", onClose);
+            this.events.once("close", onClose);
             this.send(0, callId, path, args);
         });
     };
@@ -156,36 +155,29 @@ class Channel {
         else {
             this.send(1, reason);
         }
-        this.eventBox.dispatch("close", [reason]);
+        this.events.emit("close", reason);
         this.resolver.reject(reason);
         this.manager.channels.delete(this.channelId);
-        this.eventBox.clear();
     };
     [Symbol.dispose] = () => {
         this.close("disposed");
     };
-    getEventCode(path, e) {
-        if (path.length > 0)
-            return JSON.stringify([...path, e]);
-        if (e === "close" || e === "init" || e === "error" || e === "state")
-            return e;
-        return JSON.stringify([e]);
-    }
     createProxy(path = []) {
         const children = new Map();
+        const events = this.events;
         const subscribers = {
-            on: (eventName, handler) => {
-                return this.eventBox.subscriber.on(this.getEventCode(path, eventName), handler);
+            on: function (eventName, handler) {
+                return events.on.call(this, getEventCode(path, eventName), handler);
             },
-            once: (eventName, handler) => {
-                return this.eventBox.subscriber.once(this.getEventCode(path, eventName), handler);
+            once: function (eventName, handler) {
+                return events.once.call(this, getEventCode(path, eventName), handler);
             },
-            off: (eventName, handler) => {
-                return this.eventBox.subscriber.off(this.getEventCode(path, eventName), handler);
+            off: function (eventName, handler) {
+                return events.off.call(this, getEventCode(path, eventName), handler);
             }
         };
         const proxyHandler = {
-            get: (target, prop) => {
+            get: (_target, prop) => {
                 if (path.length === 0) {
                     if (prop === Symbol.dispose)
                         return this[Symbol.dispose];
@@ -231,5 +223,12 @@ class Channel {
         };
         return new Proxy(proxyTarget, proxyHandler);
     }
+}
+function getEventCode(path, e) {
+    if (path.length > 0)
+        return JSON.stringify([...path, e]);
+    if (e === "close" || e === "init" || e === "error" || e === "state")
+        return e;
+    return JSON.stringify([e]);
 }
 //# sourceMappingURL=RPCChannel.js.map

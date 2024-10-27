@@ -1,11 +1,11 @@
 import { parse, serialize } from "@flinbein/xjmapper";
-import { EventBox } from "./EventBox.js";
+import EventEmitter from "./EventEmitter.js";
 export class RoomSocketHandler {
     #ws;
     #id = null;
     #integrity = null;
-    #wsEventBox = new EventBox(this);
-    #selfEventBox = new EventBox(this);
+    #wsEventBox = new EventEmitter();
+    #selfEventBox = new EventEmitter();
     #publicMessage = null;
     #initResolver = Promise.withResolvers();
     #ready = false;
@@ -18,47 +18,47 @@ export class RoomSocketHandler {
         this.#connectionsLayer = new ConnectionsLayer(this.#selfEventBox, this.#action);
         ws.addEventListener("message", (event) => {
             const [eventName, ...params] = parse(event.data);
-            this.#wsEventBox.dispatch(String(eventName), params);
+            this.#wsEventBox.emit(String(eventName), ...params);
         });
         ws.addEventListener("close", (event) => {
             this.#closed = true;
             this.#ready = false;
-            this.#selfEventBox.dispatch("close", []);
+            this.#selfEventBox.emit("close");
             this.#initResolver.reject(new Error(event.reason));
         });
         ws.addEventListener("error", () => {
             this.#closed = true;
             this.#ready = false;
-            this.#selfEventBox.dispatch("error", []);
+            this.#selfEventBox.emit("error");
             this.#initResolver.reject(new Error("unknown websocket error"));
         });
-        this.#wsEventBox.subscriber.on("connectionEnter", (conId, ...args) => {
+        this.#wsEventBox.on("connectionEnter", (conId, ...args) => {
             this.#connectionsLayer.onEnter(conId, ...args);
         });
-        this.#wsEventBox.subscriber.on("connectionJoin", (conId) => {
+        this.#wsEventBox.on("connectionJoin", (conId) => {
             this.#connectionsLayer.onJoin(conId);
         });
-        this.#wsEventBox.subscriber.on("connectionClosed", (conId, wasOnline, message) => {
+        this.#wsEventBox.on("connectionClosed", (conId, wasOnline, message) => {
             this.#connectionsLayer.onClose(conId, wasOnline, message);
         });
-        this.#wsEventBox.subscriber.on("connectionMessage", (conId, ...args) => {
+        this.#wsEventBox.on("connectionMessage", (conId, ...args) => {
             this.#connectionsLayer.onMessage(conId, ...args);
         });
-        this.#wsEventBox.subscriber.on("init", (roomId, publicMessage, integrity) => {
+        this.#wsEventBox.on("init", (roomId, publicMessage, integrity) => {
             this.#id = roomId;
             this.#publicMessage = publicMessage ?? null;
             this.#integrity = integrity ?? null;
             this.#initResolver.resolve();
             this.#ready = true;
-            this.#selfEventBox.dispatch("init", []);
+            this.#selfEventBox.emit("init");
         });
     }
     then(onfulfilled, onrejected) {
         return this.#initResolver.promise.then(() => [this]).then(onfulfilled, onrejected);
     }
     ;
-    getConnections(arg) {
-        return this.#connectionsLayer.getConnections(arg);
+    getConnections(filter) {
+        return this.#connectionsLayer.getConnections(filter);
     }
     get ready() { return this.#ready; }
     get closed() { return this.#closed; }
@@ -96,15 +96,15 @@ export class RoomSocketHandler {
         this.#ws.close();
     }
     on(event, handler) {
-        this.#selfEventBox.subscriber.on(event, handler);
+        this.#selfEventBox.on.call(this, event, handler);
         return this;
     }
     once(event, handler) {
-        this.#selfEventBox.subscriber.once(event, handler);
+        this.#selfEventBox.once.call(this, event, handler);
         return this;
     }
     off(event, handler) {
-        this.#selfEventBox.subscriber.off(event, handler);
+        this.#selfEventBox.off.call(this, event, handler);
         return this;
     }
     [Symbol.dispose]() {
@@ -135,7 +135,7 @@ class ConnectionsLayer {
     onEnter(id, ...parameters) {
         const connection = new Connection(id, parameters, this);
         this.connections.set(id, connection);
-        this.roomEmitter.dispatch("connection", [connection, ...parameters]);
+        this.roomEmitter.emit("connection", connection, ...parameters);
         if (!connection.deferred)
             connection.open();
         return connection;
@@ -147,8 +147,8 @@ class ConnectionsLayer {
         if (this.readyConnections.has(connection))
             return;
         this.readyConnections.add(connection);
-        this.getConnectionEmitter(connection).dispatch("open", []);
-        this.roomEmitter.dispatch("connectionOpen", [connection]);
+        this.getConnectionEmitter(connection).emit("open");
+        this.roomEmitter.emit("connectionOpen", connection);
     }
     onClose(conId, wasOnline, message) {
         const connection = this.connections.get(conId);
@@ -156,22 +156,26 @@ class ConnectionsLayer {
             return;
         this.connections.delete(conId);
         this.readyConnections.delete(connection);
-        this.getConnectionEmitter(connection).dispatch("close", [message, wasOnline]);
-        this.roomEmitter.dispatch("connectionClose", [connection, message, wasOnline]);
+        this.getConnectionEmitter(connection).emit("close", message, wasOnline);
+        this.roomEmitter.emit("connectionClose", connection, message, wasOnline);
     }
     onMessage(conId, ...msg) {
         const connection = this.connections.get(conId);
         if (!connection)
             return;
-        this.getConnectionEmitter(connection).dispatch("message", msg);
-        this.roomEmitter.dispatch("connectionMessage", [connection, ...msg]);
+        this.getConnectionEmitter(connection).emit("message", ...msg);
+        this.roomEmitter.emit("connectionMessage", connection, ...msg);
     }
-    getConnections({ ready } = { ready: undefined }) {
-        if (ready === undefined)
-            return new Set(this.connections.values());
-        if (ready)
-            return new Set([...this.connections.values()].filter(con => con.ready));
-        return new Set([...this.connections.values()].filter(con => !con.ready));
+    getConnections(options) {
+        const connectionsList = [...this.connections.values()];
+        return new Set(connectionsList.filter((con) => {
+            if (options)
+                for (let key of Object.keys(options)) {
+                    if (con[key] !== options[key])
+                        return false;
+                }
+            return true;
+        }));
     }
     isReady(conId) {
         const con = this.connections.get(conId);
@@ -196,7 +200,7 @@ class ConnectionsLayer {
     getConnectionEmitter(con) {
         let emitter = this.connectionEmitters.get(con);
         if (!emitter) {
-            emitter = new EventBox(con);
+            emitter = new EventEmitter();
             this.connectionEmitters.set(con, emitter);
         }
         return emitter;
@@ -213,7 +217,7 @@ class Connection {
         this.#id = id;
         this.#handle = handle;
         this.#parameters = parameters;
-        const subscriber = this.#subscriber = this.#handle.getConnectionEmitter(this)?.subscriber;
+        const subscriber = this.#subscriber = this.#handle.getConnectionEmitter(this);
         subscriber.on("open", () => this.#initResolver.resolve());
         subscriber.on("close", (reason) => this.#initResolver.reject(reason));
         this.#initResolver.promise.catch(() => { });
@@ -228,10 +232,10 @@ class Connection {
     get deferred() {
         return this.#deferred && !this.ready && !this.closed;
     }
-    defer(fn) {
+    defer(handler, ...args) {
         this.#deferred = true;
         try {
-            const result = fn.call(this, this);
+            const result = handler.call(this, this, ...args);
             if (result && typeof result === "object" && "then" in result && typeof result.then === "function") {
                 return result.then((val) => {
                     if (this.deferred)
@@ -260,8 +264,8 @@ class Connection {
         this.#handle.join(this.#id);
         return this;
     }
-    send(...args) {
-        this.#handle.send(this.#id, ...args);
+    send(...data) {
+        this.#handle.send(this.#id, ...data);
         return this;
     }
     on(eventName, handler) {

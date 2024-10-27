@@ -1,5 +1,5 @@
-import { EventBox } from "./EventBox.js";
-export class Players {
+import EventEmitter from "./EventEmitter.js";
+export default class Players {
     #playerMap = new Map();
     #playerConnections = new WeakMap();
     #playerGroups = new WeakMap();
@@ -25,13 +25,13 @@ export class Players {
             for (let connection of connections)
                 connection.close(reason);
             connections.clear();
-            this.#playerEvents.get(player)?.dispatch("leave", []);
-            this.#eventBox.dispatch("leave", [player]);
+            this.#playerEvents.get(player)?.emit("leave");
+            this.#eventBox.emit("leave", player);
         }
     };
-    #eventBox = new EventBox(this);
-    constructor(room, registerPlayer) {
-        this.#registerPlayer = registerPlayer;
+    #eventBox = new EventEmitter();
+    constructor(room, registerPlayerHandler) {
+        this.#registerPlayer = registerPlayerHandler;
         room.on("connection", this.#onConnection);
         room.on("connectionOpen", this.#onConnectionOpen);
         room.on("connectionClose", this.#onConnectionClose);
@@ -67,15 +67,15 @@ export class Players {
             const connections = this.#playerConnections.get(existsPlayer);
             connections.add(connection);
             if (connections.size === 1) {
-                this.#eventBox.dispatch("online", [existsPlayer]);
-                this.#playerEvents.get(existsPlayer).dispatch("online", []);
+                this.#eventBox.emit("online", existsPlayer);
+                this.#playerEvents.get(existsPlayer)?.emit("online");
             }
             return;
         }
         const player = new Player(playerName, this.#controller);
         this.#playerConnections.set(player, new Set([connection]));
         this.#playerMap.set(playerName, player);
-        this.#eventBox.dispatch("join", [player]);
+        this.#eventBox.emit("join", player);
     };
     #onConnectionClose = (connection) => {
         const playerName = this.#connectionPlayerNameMap.get(connection);
@@ -89,8 +89,8 @@ export class Players {
         connections.delete(connection);
         const online = connections.size > 0;
         if (wasOnline && !online) {
-            this.#eventBox.dispatch("offline", [existsPlayer]);
-            this.#playerEvents.get(existsPlayer).dispatch("offline", []);
+            this.#eventBox.emit("offline", existsPlayer);
+            this.#playerEvents.get(existsPlayer)?.emit("offline");
         }
     };
     get(nameOrConnection) {
@@ -110,25 +110,25 @@ export class Players {
         return new Set(this.#playerMap.values());
     }
     on(eventName, handler) {
-        this.#eventBox.subscriber.on(eventName, handler);
+        this.#eventBox.on.call(this, eventName, handler);
         return this;
     }
     once(eventName, handler) {
-        this.#eventBox.subscriber.once(eventName, handler);
+        this.#eventBox.once.call(this, eventName, handler);
         return this;
     }
     off(eventName, handler) {
-        this.#eventBox.subscriber.off(eventName, handler);
+        this.#eventBox.off.call(this, eventName, handler);
         return this;
     }
     [Symbol.iterator]() {
         return this.#playerMap.values();
     }
 }
-const Player = class Player {
+class Player {
     #name;
     #controller;
-    #eventBox = new EventBox(this);
+    #eventBox = new EventEmitter();
     constructor(name, controller) {
         this.#name = name;
         this.#controller = controller;
@@ -141,15 +141,15 @@ const Player = class Player {
     get group() { return this.#controller.getGroupOf(this); }
     set group(value) { this.#controller.setGroupOf(this, value); }
     on(eventName, handler) {
-        this.#eventBox.subscriber.on(eventName, handler);
+        this.#eventBox.on.call(this, eventName, handler);
         return this;
     }
     once(eventName, handler) {
-        this.#eventBox.subscriber.once(eventName, handler);
+        this.#eventBox.once.call(this, eventName, handler);
         return this;
     }
     off(eventName, handler) {
-        this.#eventBox.subscriber.off(eventName, handler);
+        this.#eventBox.off.call(this, eventName, handler);
         return this;
     }
     kick(reason = null) {
@@ -164,5 +164,5 @@ const Player = class Player {
     [Symbol.iterator]() {
         return this.connections[Symbol.iterator]();
     }
-};
+}
 //# sourceMappingURL=Players.js.map

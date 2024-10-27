@@ -1,4 +1,4 @@
-import { EventEmitter } from "./EventEmitter.js";
+import EventEmitter from "./EventEmitter.js";
 const isConstructable = (fn) => {
     try {
         return Boolean(class E extends fn {
@@ -12,9 +12,9 @@ const isESClass = (fn) => (typeof fn === 'function' && isConstructable(fn) &&
     Function.prototype.toString.call(fn).startsWith("class"));
 class RPCSourceChannel {
     #source;
-    #closed = false;
     #connection;
     #closeHook;
+    #closed = false;
     constructor(source, connection, closeHook) {
         this.#source = source;
         this.#connection = connection;
@@ -85,17 +85,19 @@ export default class RPCSource {
     setState(state) {
         if (this.disposed)
             throw new Error("disposed");
-        const newState = typeof state === "function" ? state(this.#state) : state;
+        const oldState = this.#state;
+        const newState = typeof state === "function" ? state(oldState) : state;
         const stateChanged = this.#state !== newState;
         this.#state = newState;
         if (stateChanged) {
-            this.#innerEvents.emit("state", newState);
-            this.#events.emit("state", newState);
+            this.#innerEvents.emit("state", newState, oldState);
+            this.#events.emit("state", newState, oldState);
         }
         return this;
     }
-    withState(state) {
-        this.#state = state;
+    withState(...stateArgs) {
+        if (stateArgs.length > 0)
+            this.#state = stateArgs[0];
         return this;
     }
     #disposed = false;
@@ -118,13 +120,13 @@ export default class RPCSource {
     [Symbol.dispose]() {
         this.dispose("disposed");
     }
-    static start(rpcSource, room, baseKey, options = { maxChannelsPerClient: Infinity }) {
+    static start(rpcSource, room, { maxChannelsPerClient = Infinity, key = "$rpc" } = {}) {
         const channels = new WeakMap;
         const onConnectionMessage = async (con, ...args) => {
             if (args.length < 4)
                 return;
             const [incomingKey, channelId, operationId, ...msgArgs] = args;
-            if (incomingKey !== baseKey)
+            if (incomingKey !== key)
                 return;
             const source = channelId === undefined ? rpcSource : channels.get(con)?.get(channelId)?.source;
             if (!source) {
@@ -168,7 +170,7 @@ export default class RPCSource {
                         let map = channels.get(con);
                         if (!map)
                             channels.set(con, map = new Map());
-                        if (map.size >= options.maxChannelsPerClient)
+                        if (map.size >= maxChannelsPerClient)
                             throw new Error("channels limit");
                         const result = await source.#handler(con, path, callArgs, true);
                         if (!(result instanceof RPCSource))
