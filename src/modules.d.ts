@@ -289,7 +289,7 @@ declare module "varhub:room" {
 }
 
 declare module "varhub:events" {
-	export class EventEmitter<M extends Record<any, any[]>> {
+	export default class EventEmitter<M extends Record<any, any[]>> {
 		on<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		once<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		off<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
