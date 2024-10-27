@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:rpc"](../README.md) / RPCSourceEvents
+[@flinbein/varhub-web-clent](../../../../README.md) / [modules](../../../README.md) / ["varhub:rpc"](../README.md) / RPCSourceEvents
 
 # Type Alias: RPCSourceEvents\<STATE, C\>
 
@@ -88,4 +88,4 @@ rpc.setState("state2");
 
 ## Defined in
 
-[src/modules.d.ts:582](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L582)
+[src/modules.d.ts:582](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L582)

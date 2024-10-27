@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../modules.md) / [index](../README.md) / PlayersEvents
+[@flinbein/varhub-web-clent](../../README.md) / [index](../README.md) / PlayersEvents
 
 # Type Alias: PlayersEvents
 
@@ -85,4 +85,4 @@ players.on("online", (player) => {
 
 ## Defined in
 
-[src/Players.ts:6](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/Players.ts#L6)
+[src/Players.ts:6](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/Players.ts#L6)

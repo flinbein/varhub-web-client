@@ -2,6 +2,7 @@
   "plugin": ["typedoc-plugin-markdown", "./markdown-plugin.mjs"],
   "entryPoints": ["./src/index.ts", "./src/modules.d.ts"],
   "out": "doc",
+  "readme": "none",
   "navigation": {
     "includeGroups": true,
     "includeFolders": true

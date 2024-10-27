@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../modules.md) / [modules](../../README.md) / "varhub:room"
+[@flinbein/varhub-web-clent](../../../README.md) / [modules](../../README.md) / "varhub:room"
 
 # "varhub:room"
 

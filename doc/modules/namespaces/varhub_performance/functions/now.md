@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:performance"](../README.md) / now
+[@flinbein/varhub-web-clent](../../../../README.md) / [modules](../../../README.md) / ["varhub:performance"](../README.md) / now
 
 # Function: now()
 
@@ -16,4 +16,4 @@ performance.now()
 
 ## Defined in
 
-[src/modules.d.ts:784](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L784)
+[src/modules.d.ts:784](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L784)

@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../modules.md) / [modules](../../README.md) / "varhub:api/network"
+[@flinbein/varhub-web-clent](../../../README.md) / [modules](../../README.md) / "varhub:api/network"
 
 # "varhub:api/network"
 

@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:players"](../README.md) / Player
+[@flinbein/varhub-web-clent](../../../../README.md) / [modules](../../../README.md) / ["varhub:players"](../README.md) / Player
 
 # Interface: Player
 
@@ -20,7 +20,7 @@ get all player's connections
 
 #### Defined in
 
-[src/modules.d.ts:358](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L358)
+[src/modules.d.ts:358](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L358)
 
 ***
 
@@ -44,7 +44,7 @@ set player's group
 
 #### Defined in
 
-[src/modules.d.ts:371](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L371)
+[src/modules.d.ts:371](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L371)
 
 ***
 
@@ -60,7 +60,7 @@ player's name
 
 #### Defined in
 
-[src/modules.d.ts:354](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L354)
+[src/modules.d.ts:354](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L354)
 
 ***
 
@@ -76,7 +76,7 @@ player is online (has at least one opened connection)
 
 #### Defined in
 
-[src/modules.d.ts:363](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L363)
+[src/modules.d.ts:363](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L363)
 
 ***
 
@@ -92,7 +92,7 @@ player is registered in list of players
 
 #### Defined in
 
-[src/modules.d.ts:367](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L367)
+[src/modules.d.ts:367](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L367)
 
 ## Methods
 
@@ -108,7 +108,7 @@ iterate on all player's connections
 
 #### Defined in
 
-[src/modules.d.ts:411](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L411)
+[src/modules.d.ts:411](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L411)
 
 ***
 
@@ -128,7 +128,7 @@ kick player and close all player's connections
 
 #### Defined in
 
-[src/modules.d.ts:404](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L404)
+[src/modules.d.ts:404](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L404)
 
 ***
 
@@ -142,7 +142,7 @@ kick player and close all player's connections
 
 #### Defined in
 
-[src/modules.d.ts:405](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L405)
+[src/modules.d.ts:405](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L405)
 
 ***
 
@@ -156,7 +156,7 @@ kick player and close all player's connections
 
 #### Defined in
 
-[src/modules.d.ts:406](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L406)
+[src/modules.d.ts:406](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L406)
 
 ## Events
 
@@ -186,7 +186,7 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:399](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L399)
+[src/modules.d.ts:399](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L399)
 
 ***
 
@@ -216,7 +216,7 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:383](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L383)
+[src/modules.d.ts:383](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L383)
 
 ***
 
@@ -246,4 +246,4 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:391](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L391)
+[src/modules.d.ts:391](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L391)

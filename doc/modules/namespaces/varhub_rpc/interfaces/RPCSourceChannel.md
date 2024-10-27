@@ -2,7 +2,7 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:rpc"](../README.md) / RPCSourceChannel
+[@flinbein/varhub-web-clent](../../../../README.md) / [modules](../../../README.md) / ["varhub:rpc"](../README.md) / RPCSourceChannel
 
 # Interface: RPCSourceChannel\<S\>
 
@@ -26,7 +26,7 @@ channel is closed
 
 #### Defined in
 
-[src/modules.d.ts:561](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L561)
+[src/modules.d.ts:561](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L561)
 
 ***
 
@@ -42,7 +42,7 @@ get client's connection
 
 #### Defined in
 
-[src/modules.d.ts:569](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L569)
+[src/modules.d.ts:569](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L569)
 
 ***
 
@@ -58,7 +58,7 @@ get rpc source
 
 #### Defined in
 
-[src/modules.d.ts:565](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L565)
+[src/modules.d.ts:565](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L565)
 
 ## Methods
 
@@ -78,4 +78,4 @@ close this communication channel
 
 #### Defined in
 
-[src/modules.d.ts:574](https://github.com/flinbein/varhub-web-client/blob/b4c6fcf02a5379525d4b3a67611612cbdf92318f/src/modules.d.ts#L574)
+[src/modules.d.ts:574](https://github.com/flinbein/varhub-web-client/blob/4a94dc210f3c914d7323a6335e147e209d01f647/src/modules.d.ts#L574)
