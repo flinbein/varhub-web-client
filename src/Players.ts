@@ -2,7 +2,10 @@ import EventEmitter from "./EventEmitter.js";
 import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
 import type { XJData } from "@flinbein/xjmapper";
 
-/** @group Events */
+/**
+ * events of {@link Players} object
+ * @event
+ * */
 export type PlayersEvents = {
 	/**
 	 * new player joined
@@ -62,6 +65,10 @@ export type PlayersEvents = {
 	 */
 	offline: [Player]
 }
+
+/**
+ * List of players based on named connections.
+ */
 export default class Players {
 	readonly #playerMap = new Map<string, Player>();
 	readonly #playerConnections = new WeakMap<Player, Set<Connection>>();
@@ -251,7 +258,10 @@ export default class Players {
 	}
 }
 
-/** @group Events */
+/**
+ * Events of {@link Player}
+ * @event
+ * */
 export type PlayerEvents = {
 	/**
 	 * player leaves the game
@@ -297,10 +307,15 @@ export type PlayerEvents = {
 	 */
 	offline: []
 }
+
+/**
+ * Player represents a list of {@link Connection}s with same name.
+ */
 class Player {
 	readonly #name: string
 	readonly #controller: any
 	readonly #eventBox = new EventEmitter<PlayerEvents>();
+	/** @hidden */
 	constructor(name: string, controller: any) {
 		this.#name = name;
 		this.#controller = controller;

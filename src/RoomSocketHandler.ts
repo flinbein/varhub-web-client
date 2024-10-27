@@ -1,7 +1,10 @@
 import { parse, serialize, XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
 
-/** @group Events */
+/**
+ * {@link RoomSocketHandler} events
+ * @group Events
+ * */
 export type RoomSocketHandlerEvents = {
 	connection: [connection: Connection, ...args: XJData[]];
 	connectionOpen: [connection: Connection];
@@ -11,6 +14,20 @@ export type RoomSocketHandlerEvents = {
 	init: [];
 	close: [];
 }
+
+/**
+ * Client-side room handler.
+ * It allows you to handle room events and send messages to connected clients.
+ * @example
+ * ```typescript
+ * import {Varhub} from "@flinbein/varhub-web-client";
+ *
+ * const hub = new Varhub("https://example.com/varhub/");
+ * const room: RoomSocketHandler = hub.createRoomSocket();
+ * await room;
+ * console.log(room.id);
+ * ```
+ */
 export class RoomSocketHandler {
 	#ws: WebSocket;
 	#id: string|null = null;
@@ -238,6 +255,7 @@ export class RoomSocketHandler {
 	}
 }
 
+/** @hidden */
 class ConnectionsLayer {
 	connections: Map<number, Connection> = new Map();
 	readyConnections: WeakSet<Connection> = new Set();
@@ -325,7 +343,10 @@ class ConnectionsLayer {
 	}
 }
 
-/** @event */
+/**
+ * Events of {@link Connection}
+ * @event
+ * */
 export type ConnectionEvents = {
 	/**
 	 * connection successfully opened
@@ -364,6 +385,7 @@ export type ConnectionEvents = {
 }
 
 /**
+ * Handler of room connection
  * @group Classes
  */
 class Connection {

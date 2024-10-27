@@ -1,4 +1,36 @@
+/**
+ * API for Varhub VM
+ * @example
+ * ```typescript
+ * import room from "varhub:room";
+ *
+ * room.on("connectionOpen", (con) => {
+ *     room.broadcast("user joined", com.parameters[0]);
+ *     con.send("welcome!");
+ * })
+ *
+ * room.on("connectionClose", (con) => {
+ *     room.broadcast("user left", com.parameters[0]);
+ * })
+ *
+ * room.on("connectionMessage", (con, ...args) => {
+ *     room.broadcast("user said", com.parameters[0], ...args);
+ * })
+ * ```
+ * @module VM API
+ */
+
+/**
+ * This module allows you to get a controller of current {@link Room}.
+ * @example
+ * ```javascript
+ * import room from "varhub:room"
+ * // room is a singleton object
+ * ```
+ * @module
+ */
 declare module "varhub:room" {
+	
 	/** @event */
 	export type ConnectionEvents = {
 		/**
@@ -279,24 +311,45 @@ declare module "varhub:room" {
 		[Symbol.asyncDispose](): Promise<void>;
 	}
 	export type { Room };
+	const room: Room;
 	/**
 	 * Controller of this room.
 	 * Singleton instance of type {@link Room }
 	 * @see Room
 	 */
-	const room: Room;
 	export default room;
 }
 
+/**
+ * provides class {@link EventEmitter}
+ * @module
+ */
 declare module "varhub:events" {
+	/**
+	 * @example
+	 * ```javascript
+	 * import EventEmitter from "varhub:event";
+	 * const events = new EventEmitter();
+	 * events.on("message", (...args) => console.log(...args));
+	 * events.emit("message", 1, 2, 3);
+	 * ```
+	 */
 	export default class EventEmitter<M extends Record<any, any[]>> {
 		on<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		once<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
 		off<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
-		emit<T extends keyof M>(event: T, ...args: M[T]): boolean
+		emit<T extends keyof M>(event: T, ...args: M[T]): boolean;
+		/**
+		 * like {@link EventEmitter#emit}, but ignore handler errors
+		 */
+		emitWithTry<T extends keyof M>(event: T, ...args: M[T]): boolean;
 	}
 }
 
+/**
+ * provides class {@link Players} to combine connections by name
+ * @module
+ */
 declare module "varhub:players" {
 	import type { Connection, Room } from "varhub:room"
 	/**
@@ -347,6 +400,10 @@ declare module "varhub:players" {
 		 */
 		offline: []
 	}
+	
+	/**
+	 * Player represents a list of {@link Connection}s with same name.
+	 */
 	export interface Player {
 		/**
 		 * player's name
@@ -545,6 +602,21 @@ declare module "varhub:players" {
 	}
 }
 
+/**
+ * provides class {@link RPCSource} that allows you to handle remote procedure calls
+ * @example
+ * ```javascript
+ * import room from "varhub:room";
+ * import RPCSource from "varhub:rpc";
+ *
+ * const mathSource = new RPCSource({
+ *   sum: (x, y) => x + y,
+ *   mul: (x, y) => x * y,
+ * })
+ * RPCSource.start(mathSource, room);
+ * ```
+ * @module
+ */
 declare module "varhub:rpc" {
 	import type { Connection, Room } from "varhub:room";
 	export type RPCHandler = ((connection: Connection, path: string[], args: any[], openChannel: boolean) => any);
@@ -636,6 +708,9 @@ declare module "varhub:rpc" {
 		dispose: [reason: any],
 	}
 	
+	/**
+	 * Remote procedure call handler
+	 */
 	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 		#private;
 		/** @hidden */
@@ -768,6 +843,15 @@ declare module "varhub:rpc" {
 	}
 }
 
+/**
+ * source of room config
+ * @example
+ * ```javascript
+ * import config from "varhub:config";
+ * console.log("Room config", config);
+ * ```
+ * @module
+ */
 declare module "varhub:config" {
 	/**
 	 * config of this room. Config is created with room.
@@ -776,14 +860,38 @@ declare module "varhub:config" {
 	export default config;
 }
 
+/**
+ * `performance.now()`
+ * @example
+ * ```javascript
+ * import * as performance from "varhub:performance";
+ * console.log(performance.now());
+ * ```
+ * @example
+ * ```javascript
+ * import {now} from "varhub:performance";
+ * console.log(now());
+ * ```
+ * @module
+ */
 declare module "varhub:performance" {
 	/**
 	 * performance.now()
-	 * @returns { number }
+	 * @returns { number } - time in milliseconds since room initialized
 	 * */
 	export const now: () => number;
 }
 
+/**
+ * network module
+ * @example
+ * ```javascript
+ * import network from "varhub:api/network";
+ * const response = await network.fetch("https://example.com");
+ * console.log(response.body);
+ * ```
+ * @module
+ */
 declare module "varhub:api/network" {
 	export interface NetworkApi {
 		fetch<T extends keyof BodyType>(url: string, params?: FetchParams<T>): Promise<FetchResult<T>>

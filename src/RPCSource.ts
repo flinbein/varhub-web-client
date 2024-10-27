@@ -2,13 +2,24 @@ import EventEmitter from "./EventEmitter.js";
 import type { XJData } from "@flinbein/xjmapper";
 import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
 
-export type RPCHandler = ((
+/**
+ * remote call handler for {@link RPCSource}
+ * @param connection - client's connection
+ * @param path - path of remote function.
+ * For example, when client call `rpc.math.sum(1, 2)` path will be `["math", "summ"]`.
+ * @param args - arguments with which the remote function was called
+ * For example, when client call `rpc.math.sum(1, 2)` args will be `[1, 2]`.
+ * @param openChannel - true if the client called rpc as constructor (with `new`).
+ * In this case the handler must return a {@link RPCSource} or {@link Promise}<{@link RPCSource}>.
+ */
+export type RPCHandler = (
 	connection: Connection,
 	path: string[],
 	args: XJData[],
 	openChannel: boolean,
-) => XJData | Promise<XJData> | RPCSource);
+) => XJData | Promise<XJData> | RPCSource;
 
+/** @hidden */
 type EventPath<T, K extends keyof T = keyof T> = (
 	K extends string ? (
 		T[K] extends any[] ? (K | [K]) : [K, ...(
@@ -19,6 +30,7 @@ type EventPath<T, K extends keyof T = keyof T> = (
 	) : never
 )
 
+/** @hidden */
 type EventPathArgs<PATH, FORM> = (
 	PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) :
 	PATH extends [] ? (FORM extends any[] ? FORM : never) :
@@ -95,6 +107,7 @@ class RPCSourceChannel<S = RPCSource> {
 export type { RPCSourceChannel };
 
 /**
+ * Events of {@link RPCSource}
  * @event
  * @template {any} STATE
  * @template {RPCSourceChannel} C
@@ -156,6 +169,9 @@ export type RPCSourceEvents<STATE, C> = {
 	dispose: [reason: XJData],
 }
 
+/**
+ * Remote procedure call handler
+ */
 export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 	#handler: RPCHandler
 	#innerEvents = new EventEmitter<{

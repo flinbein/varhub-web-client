@@ -3,6 +3,21 @@
   "entryPoints": ["./src/index.ts", "./src/modules.d.ts"],
   "out": "doc",
   "readme": "none",
+  "indexFormat": "htmlTable",
+  "parametersFormat": "htmlTable",
+  "interfacePropertiesFormat": "htmlTable",
+  "classPropertiesFormat": "htmlTable",
+  "enumMembersFormat": "htmlTable",
+  "typeDeclarationFormat": "htmlTable",
+  "propertyMembersFormat": "htmlTable",
+  "externalSymbolLinkMappings": {
+    "global": {
+      "XJData": "https://github.com/flinbein/xjmapper/blob/main/src/index.ts#L15"
+    },
+    "typescript": {
+      "XJData": "https://github.com/flinbein/xjmapper/blob/main/src/index.ts#L15"
+    }
+  },
   "navigation": {
     "includeGroups": true,
     "includeFolders": true

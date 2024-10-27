@@ -1,7 +1,10 @@
 import { parse, serialize, type XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
 
-/** @group Events */
+/**
+ * Events of {@link VarhubClient }
+ * @event
+ * */
 export type VarhubClientEvents = {
 	/**
 	 * client received a message from the room
@@ -49,6 +52,18 @@ export type VarhubClientEvents = {
 	error: []
 }
 
+/**
+ * Represents a user-controlled connection to the room;
+ * @example
+ * ```typescript
+ * import { Varhub } from "@flinbein/varhub-web-client";
+ *
+ * const hub = new Varhub("https://example.com");
+ * const client: VarhubClient = hub.join(roomId);
+ * await client;
+ * client.send("some message");
+ * ```
+ */
 export class VarhubClient {
 	readonly #ws: WebSocket;
 	

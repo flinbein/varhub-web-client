@@ -2,10 +2,13 @@ import type { XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
 import type { VarhubClient } from "./VarhubClient.js";
 
+/**
+ * Basic events of {@link RPCChannel}
+ * @event
+ */
+export type RPCChannelEvents<S = undefined> = S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>;
 
-type RPCChannelEvents<S> = S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>;
-
-export type RPCChannelEventStateless = {
+type RPCChannelEventStateless = {
 	/**
 	 * channel is closed
 	 * @example
@@ -43,7 +46,7 @@ export type RPCChannelEventStateless = {
 	 */
 	error: [error: XJData]
 }
-export type RPCChannelEventWithState<S> = RPCChannelEventStateless & {
+type RPCChannelEventWithState<S> = RPCChannelEventStateless & {
 	/**
 	 * state is changed
 	 * @example
@@ -78,9 +81,9 @@ type KeyOfArray<T, K = keyof T> = K extends keyof T ? (
 type KeyOfNotArray<T> = Exclude<keyof T, KeyOfArray<T>>
 
 /**
- * Instance of RPC channel
+ * Methods and properties of {@link RPCChannel}
  */
-export interface RpcInstance<S> extends Disposable {
+export interface RPCInstance<S> extends Disposable {
 	then<R1 = [this], R2 = never>(
 		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
 		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null,
@@ -88,12 +91,15 @@ export interface RpcInstance<S> extends Disposable {
 	ready: boolean,
 	closed: boolean,
 	call: (path: string[], ...args: any[]) => Promise<any>,
-	create: (path: string[], ...args: any[]) => RpcInstance<any> & RpcEmitter<never>,
+	create: (path: string[], ...args: any[]) => RPCInstance<any> & RpcEmitter<never>,
 	close: (reason?: string) => void,
 	state: S
 }
 
-interface RpcEmitter<E> {
+/**
+ * Methods to handle events of {@link RPCChannel}
+ */
+export interface RpcEmitter<E> {
 	on<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
 	once<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
 	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
@@ -113,7 +119,7 @@ type RpcMapper<M, E = never> = (
 ) & (KeyOfArray<E> extends never ? unknown : RpcEmitter<E>);
 
 /**
- * Constructor for new RPC channel
+ * Constructor for new RPC channel based on {@link VarhubClient}
  * @group Classes
  */
 export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): {foo: string}{
@@ -125,11 +131,17 @@ export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): 
 		new(client: VarhubClient, options?: {key?: string}): RPCChannel<{}, unknown>,
 		/**
 		 * Create new channel for RPC
-		 * @typeParam M - typeof RPCSource
+		 * @typeParam M - typeof current {@link RPCSource} of room (with methods, constructors and events)
 		 * @param {VarhubClient} client - varhub client. Client may not be ready.
 		 * @param options
-		 * @param options.key - Default: `"$rpc"`
-		 * @returns {RpcInstance<undefined>} - stateless channel
+		 * @param options.key default:`"$rpc"`
+		 * @returns {RPCInstance<undefined>} - stateless channel.
+		 * - result extends {@link RPCInstance}.
+		 * - result extends {@link RpcEmitter} and can subscribe on events of current {@link RPCSource} of room
+		 * - result has all methods of current {@link RPCSource} in room.
+		 * - all methods are asynchronous and return a {@link Promise}<{@link XJData}>
+		 * - result has constructors for all constructable methods of {@link RPCSource} in room.
+		 * - all constructors are synchronous and return a new {@link RPCChannel}
 		 */
 		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, unknown> ? RPCChannel<METHODS, EVENTS, undefined> : RPCChannel<M>,
 		/** @hidden */
@@ -139,14 +151,16 @@ export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): 
 
 type MetaScope<M, E, S> = { [Symbol.unscopables]: {__rpc_methods: M, __rpc_events: E, __rpc_state: S}}
 
+/** @hidden */
 export type RPCChannel<M = any, E = any, S = undefined> = (
 	M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? (
-		RpcInstance<STATE> & RpcMapper<METHODS, EVENTS & RPCChannelEvents<STATE>>
+		RPCInstance<STATE> & RpcMapper<METHODS, EVENTS & RPCChannelEvents<STATE>>
 	) : (
-		RpcInstance<S> & RpcMapper<M, E & RPCChannelEvents<S>>
+		RPCInstance<S> & RpcMapper<M, E & RPCChannelEvents<S>>
 	)
 );
 
+/** @hidden */
 class ChannelManager {
 	currentChannelId: number = 0;
 	defaultChannel: Channel;
@@ -186,7 +200,10 @@ class ChannelManager {
 	}
 }
 
+/** @hidden */
 const proxyTarget = function(){};
+
+/** @hidden */
 class Channel {
 	proxy: any;
 	state: any = undefined;
@@ -356,6 +373,7 @@ class Channel {
 	}
 }
 
+/** @hidden */
 function getEventCode(path: string[], e: string){
 	if (path.length > 0) return JSON.stringify([...path, e]);
 	if (e === "close" || e === "init" || e === "error" || e === "state") return e;
