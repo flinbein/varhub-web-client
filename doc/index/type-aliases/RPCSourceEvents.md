@@ -88,4 +88,4 @@ rpc.setState("state2");
 
 ## Defined in
 
-[src/RPCSource.ts:102](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/RPCSource.ts#L102)
+[src/RPCSource.ts:102](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/RPCSource.ts#L102)

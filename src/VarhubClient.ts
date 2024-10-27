@@ -68,7 +68,7 @@ export class VarhubClient {
 			ws.addEventListener("open", () => {
 				this.#ready = true;
 				this.#closed = false;
-				this.#selfEvents.emit("open");
+				this.#selfEvents.emitWithTry("open");
 			})
 			this.#readyPromise = new Promise<void>((resolve, reject) => {
 				this.on("open", () => {resolve()});
@@ -79,18 +79,18 @@ export class VarhubClient {
 			this.#readyPromise = Promise.resolve();
 		}
 		ws.addEventListener("message", (event) => {
-			this.#selfEvents.emit("message", ...parse(event.data));
+			this.#selfEvents.emitWithTry("message", ...parse(event.data));
 		})
 		ws.addEventListener("close", (event) => {
 			const wasReady = this.#ready;
 			this.#ready = false;
 			this.#closed = true;
-			this.#selfEvents.emit("close", event.reason, wasReady);
+			this.#selfEvents.emitWithTry("close", event.reason, wasReady);
 		})
 		ws.addEventListener("error", () => {
 			this.#ready = false;
 			this.#closed = true;
-			this.#selfEvents.emit("error");
+			this.#selfEvents.emitWithTry("error");
 		})
 		this.#readyPromise.catch(() => {})
 	}

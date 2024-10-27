@@ -2,9 +2,9 @@
 
 ***
 
-[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:events"](../README.md) / EventEmitter
+[@flinbein/varhub-web-clent](../../../../modules.md) / [modules](../../../README.md) / ["varhub:events"](../README.md) / default
 
-# Class: EventEmitter\<M\>
+# Class: default\<M\>
 
 ## Type Parameters
 
@@ -12,13 +12,13 @@
 
 ## Constructors
 
-### new EventEmitter()
+### new default()
 
-> **new EventEmitter**\<`M`\>(): [`EventEmitter`](EventEmitter.md)\<`M`\>
+> **new default**\<`M`\>(): [`default`](default.md)\<`M`\>
 
 #### Returns
 
-[`EventEmitter`](EventEmitter.md)\<`M`\>
+[`default`](default.md)\<`M`\>
 
 ## Methods
 
@@ -42,7 +42,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:296](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L296)
+[src/modules.d.ts:296](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L296)
 
 ***
 
@@ -66,7 +66,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:295](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L295)
+[src/modules.d.ts:295](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L295)
 
 ***
 
@@ -90,7 +90,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:293](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L293)
+[src/modules.d.ts:293](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L293)
 
 ***
 
@@ -114,4 +114,4 @@
 
 #### Defined in
 
-[src/modules.d.ts:294](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L294)
+[src/modules.d.ts:294](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L294)

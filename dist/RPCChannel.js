@@ -81,11 +81,11 @@ class Channel {
         this.state = state;
         this.ready = true;
         if (!wasReady) {
-            this.events.emit("init");
+            this.events.emitWithTry("init");
             this.resolver.resolve();
         }
         if (!sameState) {
-            this.events.emit("state", state, oldState);
+            this.events.emitWithTry("state", state, oldState);
         }
     }
     onClose(reason) {
@@ -95,14 +95,14 @@ class Channel {
         this.ready = false;
         this.closed = true;
         if (!wasReady)
-            this.events.emit("error", reason);
-        this.events.emit("close", reason);
+            this.events.emitWithTry("error", reason);
+        this.events.emitWithTry("close", reason);
         this.resolver.reject(reason);
         this.manager.channels.delete(this.channelId);
     }
     onEvent(path, args) {
         const eventName = JSON.stringify(path);
-        this.events.emit(eventName, ...args);
+        this.events.emitWithTry(eventName, ...args);
     }
     onResponse(operationCode, callId, data) {
         this.responseEventTarget.dispatchEvent(new CustomEvent(callId, { detail: [operationCode, data] }));
@@ -155,7 +155,7 @@ class Channel {
         else {
             this.send(1, reason);
         }
-        this.events.emit("close", reason);
+        this.events.emitWithTry("close", reason);
         this.resolver.reject(reason);
         this.manager.channels.delete(this.channelId);
     };

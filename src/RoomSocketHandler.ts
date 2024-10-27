@@ -31,18 +31,18 @@ export class RoomSocketHandler {
 		this.#connectionsLayer = new ConnectionsLayer(this.#selfEventBox, this.#action);
 		ws.addEventListener("message", (event: MessageEvent) => {
 			const [eventName, ...params] = parse(event.data);
-			this.#wsEventBox.emit(String(eventName), ...params);
+			this.#wsEventBox.emitWithTry(String(eventName), ...params);
 		});
 		ws.addEventListener("close", (event) => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEventBox.emit("close");
+			this.#selfEventBox.emitWithTry("close");
 			this.#initResolver.reject(new Error(event.reason));
 		})
 		ws.addEventListener("error", () => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEventBox.emit("error");
+			this.#selfEventBox.emitWithTry("error");
 			this.#initResolver.reject(new Error("unknown websocket error"));
 		})
 		this.#wsEventBox.on("connectionEnter", (conId, ...args) => {
@@ -63,7 +63,7 @@ export class RoomSocketHandler {
 			this.#integrity = integrity ?? null;
 			this.#initResolver.resolve();
 			this.#ready = true;
-			this.#selfEventBox.emit("init");
+			this.#selfEventBox.emitWithTry("init");
 		});
 	}
 	
@@ -250,7 +250,7 @@ class ConnectionsLayer {
 	onEnter(id: number, ...parameters: XJData[]): Connection {
 		const connection = new Connection(id, parameters, this);
 		this.connections.set(id, connection);
-		this.roomEmitter.emit("connection", connection, ...parameters);
+		this.roomEmitter.emitWithTry("connection", connection, ...parameters);
 		if (!connection.deferred) connection.open();
 		return connection;
 	}
@@ -260,8 +260,8 @@ class ConnectionsLayer {
 		if (!connection) return;
 		if (this.readyConnections.has(connection)) return;
 		this.readyConnections.add(connection);
-		this.getConnectionEmitter(connection).emit("open");
-		this.roomEmitter.emit("connectionOpen", connection);
+		this.getConnectionEmitter(connection).emitWithTry("open");
+		this.roomEmitter.emitWithTry("connectionOpen", connection);
 	}
 	
 	onClose(conId: number, wasOnline: boolean, message: string|null){
@@ -269,15 +269,15 @@ class ConnectionsLayer {
 		if (!connection) return;
 		this.connections.delete(conId);
 		this.readyConnections.delete(connection);
-		this.getConnectionEmitter(connection).emit("close", message, wasOnline);
-		this.roomEmitter.emit("connectionClose", connection, message, wasOnline);
+		this.getConnectionEmitter(connection).emitWithTry("close", message, wasOnline);
+		this.roomEmitter.emitWithTry("connectionClose", connection, message, wasOnline);
 	}
 	
 	onMessage(conId: number, ...msg: XJData[]){
 		const connection = this.connections.get(conId);
 		if (!connection) return;
-		this.getConnectionEmitter(connection).emit("message", ...msg);
-		this.roomEmitter.emit("connectionMessage", connection, ...msg);
+		this.getConnectionEmitter(connection).emitWithTry("message", ...msg);
+		this.roomEmitter.emitWithTry("connectionMessage", connection, ...msg);
 	}
 	
 	getConnections(options?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection>{

@@ -18,7 +18,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:815](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L815)
+[src/modules.d.ts:826](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L826)
 
 ***
 
@@ -28,7 +28,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:814](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L814)
+[src/modules.d.ts:825](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L825)
 
 ***
 
@@ -38,7 +38,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:809](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L809)
+[src/modules.d.ts:820](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L820)
 
 ***
 
@@ -48,7 +48,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:812](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L812)
+[src/modules.d.ts:823](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L823)
 
 ***
 
@@ -58,7 +58,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:813](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L813)
+[src/modules.d.ts:824](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L824)
 
 ***
 
@@ -68,7 +68,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:811](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L811)
+[src/modules.d.ts:822](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L822)
 
 ***
 
@@ -78,7 +78,7 @@
 
 #### Defined in
 
-[src/modules.d.ts:810](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L810)
+[src/modules.d.ts:821](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L821)
 
 ***
 
@@ -88,4 +88,4 @@
 
 #### Defined in
 
-[src/modules.d.ts:808](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L808)
+[src/modules.d.ts:819](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L819)

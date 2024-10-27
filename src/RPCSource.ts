@@ -165,6 +165,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	}>();
 	#events = new EventEmitter<RPCSourceEvents<STATE, this>>();
 	#state?: STATE;
+	/** @hidden */
 	declare public [Symbol.unscopables]: {
 		__rpc_methods: METHODS,
 		__rpc_events: EVENTS,
@@ -304,8 +305,8 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		const stateChanged = this.#state !== newState;
 		this.#state = newState;
 		if (stateChanged) {
-			this.#innerEvents.emit("state", newState, oldState as any);
-			this.#events.emit("state", newState, oldState as any);
+			this.#innerEvents.emitWithTry("state", newState, oldState as any);
+			this.#events.emitWithTry("state", newState, oldState as any);
 		}
 		return this;
 	}
@@ -325,13 +326,14 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	}
 	
 	/**
-	 * Emit event for all connected clients
+	 * Emit event for all connected clients.
+	 * Reserved event names: `close`, `init`, `error`, `state`
 	 * @param event path for event. String or array of strings.
 	 * @param args event values
 	 */
 	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this {
 		if (this.#disposed) throw new Error("disposed");
-		this.#innerEvents.emit("message", event, args);
+		this.#innerEvents.emitWithTry("message", event, args);
 		return this;
 	}
 	
@@ -342,8 +344,8 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	dispose(reason?: XJData){
 		if (this.#disposed) return;
 		this.#disposed = true;
-		this.#events.emit("dispose", reason);
-		this.#innerEvents.emit("dispose", reason);
+		this.#events.emitWithTry("dispose", reason);
+		this.#innerEvents.emitWithTry("dispose", reason);
 	}
 	
 	/**
@@ -393,7 +395,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 				const reason = msgArgs[0];
 				const channel = channels.get(con)?.get(channelId as any);
 				const deleted = channels.get(con)?.delete(channelId as any);
-				if (channel && deleted) source.#events.emit("channelClose", channel as any, reason as any);
+				if (channel && deleted) source.#events.emitWithTry("channelClose", channel as any, reason as any);
 				channel?.close(reason);
 				return;
 			}
@@ -431,7 +433,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 						
 						let channelReady = false;
 						const channel = new RPCSourceChannel(result, con, dispose);
-						result.#events.emit("channelOpen", channel as any);
+						result.#events.emitWithTry("channelOpen", channel as any);
 						if (channel.closed) {
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.CLOSE, disposeReason);
 							return;
@@ -457,11 +459,17 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 				channel.close();
 			}
 		}
+		const onMainRpcSourceMessage = (path: string|string[], args: any[]) => {
+			if (!Array.isArray(path)) path = [path];
+			room.broadcast(key, undefined, REMOTE_ACTION.EVENT, path, args);
+		}
 		room.on("connectionClose", clearChannelsForConnection);
 		room.on("connectionMessage", onConnectionMessage);
+		rpcSource.#innerEvents.on("message", onMainRpcSourceMessage);
 		return function dispose(){
 			room.off("connectionMessage", onConnectionMessage);
 			room.off("connectionClose", clearChannelsForConnection);
+			rpcSource.#innerEvents.off("message", onMainRpcSourceMessage);
 			for (let connection of room.getConnections()) {
 				clearChannelsForConnection(connection);
 			}

@@ -26,7 +26,7 @@ channel is closed
 
 #### Defined in
 
-[src/modules.d.ts:558](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L558)
+[src/modules.d.ts:561](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L561)
 
 ***
 
@@ -42,7 +42,7 @@ get client's connection
 
 #### Defined in
 
-[src/modules.d.ts:566](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L566)
+[src/modules.d.ts:569](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L569)
 
 ***
 
@@ -58,7 +58,7 @@ get rpc source
 
 #### Defined in
 
-[src/modules.d.ts:562](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L562)
+[src/modules.d.ts:565](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L565)
 
 ## Methods
 
@@ -78,4 +78,4 @@ close this communication channel
 
 #### Defined in
 
-[src/modules.d.ts:571](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/modules.d.ts#L571)
+[src/modules.d.ts:574](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/modules.d.ts#L574)

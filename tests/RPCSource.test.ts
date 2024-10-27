@@ -224,7 +224,7 @@ describe("RPCSource", () => {
 	
 	it("connection in RPCSource constructor", {timeout: 1000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		await room;
 		
@@ -248,6 +248,26 @@ describe("RPCSource", () => {
 		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
 		const deck = new rpcClient.Deck();
 		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
+	})
+	
+	it("RPCSource base channel events", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const rpcRoom = new RPCSource({}).withEventTypes<{test: [string]}>();
+		void RPCSource.start(rpcRoom, room);
+		
+		const clientWs = roomWs.createClientMock("Bob", "player");
+		const client = new VarhubClient(clientWs);
+		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
+		const onTest = mock.fn()
+		rpcClient.on("test", onTest);
+		rpcRoom.emit("test", "msg");
+		await new Promise(r => setTimeout(r, 60));
+		assert.equal(onTest.mock.callCount(), 1, "one event");
+		assert.deepEqual(onTest.mock.calls[0].arguments, ["msg"], "event arguments exact");
 	})
 	
 	it("RPCSource events", {timeout: 1000}, async () => {
@@ -342,7 +362,7 @@ describe("RPCSource", () => {
 		deck.dispose("dispose-reason-1");
 		deck.dispose("dispose-reason-2");
 		assert.throws(() => deck.setState(6), "setState throws on disposed");
-		assert.deepEqual(onState.mock.calls.map(c => c.arguments), [[5], [6]], "deck state events");
+		assert.deepEqual(onState.mock.calls.map(c => c.arguments), [[5, 4], [6, 5]], "deck state events");
 		assert.deepEqual(onDispose.mock.calls.map(c => c.arguments), [["dispose-reason-1"]], "dispose events");
 	});
 	

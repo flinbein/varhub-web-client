@@ -72,4 +72,4 @@ client.on("open", () => {
 
 ## Defined in
 
-[src/VarhubClient.ts:5](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/VarhubClient.ts#L5)
+[src/VarhubClient.ts:5](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/VarhubClient.ts#L5)

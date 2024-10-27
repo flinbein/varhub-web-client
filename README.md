@@ -1,7 +1,3 @@
-**@flinbein/varhub-web-clent** • [**Docs**](modules.md)
-
-***
-
 ## Install
 
 ```shell
@@ -71,6 +67,7 @@ client.on("messaage", (...data) => {
 await client;
 // "user joined", "Bob"
 // "welcome!"
+
 
 client.send("Hello from Bob!");
 // "user said", "Bob", "Hello from Bob!"

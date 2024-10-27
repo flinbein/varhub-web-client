@@ -85,4 +85,4 @@ players.on("online", (player) => {
 
 ## Defined in
 
-[src/Players.ts:6](https://github.com/flinbein/varhub-web-client/blob/aa44d85b8fc9ef58d47827a2d69f4ed0b37f6112/src/Players.ts#L6)
+[src/Players.ts:6](https://github.com/flinbein/varhub-web-client/blob/5849e057250037e1be4f38ff522ce95c9f4e116a/src/Players.ts#L6)

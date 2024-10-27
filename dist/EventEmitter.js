@@ -43,5 +43,18 @@ export default class EventEmitter {
         }
         return true;
     }
+    emitWithTry(eventName, ...args) {
+        let list = this.#eventMap[eventName];
+        if (!list || list.length === 0)
+            return false;
+        for (const { listener, once, context } of list)
+            try {
+                if (once)
+                    this.off(eventName, listener);
+                listener.apply(context, args);
+            }
+            catch { }
+        return true;
+    }
 }
 //# sourceMappingURL=EventEmitter.js.map

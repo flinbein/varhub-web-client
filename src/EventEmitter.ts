@@ -32,13 +32,23 @@ export default class EventEmitter<M extends Record<string, any[]> = Record<strin
 	declare once: <E extends keyof M>(eventName: E, listener: (...args: M[E]) => void) => this;
 	declare off: <E extends keyof M>(eventName: E, listener: (...args: M[E]) => void) => this;
 	
-	emit<E extends keyof M>(eventName: E, ...args: M[E]): boolean{
+	emit<E extends keyof M>(eventName: E, ...args: M[E]): boolean {
 		let list = this.#eventMap[eventName];
 		if (!list || list.length === 0) return false;
 		for (const {listener, once, context} of list){
 			if (once) this.off(eventName as any, listener);
 			listener.apply(context, args);
 		}
+		return true;
+	}
+	
+	emitWithTry<E extends keyof M>(eventName: E, ...args: M[E]): boolean {
+		let list = this.#eventMap[eventName];
+		if (!list || list.length === 0) return false;
+		for (const {listener, once, context} of list) try {
+			if (once) this.off(eventName as any, listener);
+			listener.apply(context, args);
+		} catch {}
 		return true;
 	}
 }

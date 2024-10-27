@@ -10,4 +10,4 @@
 
 ### Classes
 
-- [EventEmitter](classes/EventEmitter.md)
+- [default](classes/default.md)

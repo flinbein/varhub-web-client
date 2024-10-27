@@ -299,6 +299,9 @@ declare module "varhub:events" {
 
 declare module "varhub:players" {
 	import type { Connection, Room } from "varhub:room"
+	/**
+	 * @event
+	 */
 	export type PlayerEvents = {
 		/**
 		 * player leaves the game
@@ -635,6 +638,7 @@ declare module "varhub:rpc" {
 	
 	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 		#private;
+		/** @hidden */
 		[Symbol.unscopables]: {
 			__rpc_methods: METHODS;
 			__rpc_events: EVENTS;
@@ -727,7 +731,8 @@ declare module "varhub:rpc" {
 		withState<S>(state: S): RPCSource<METHODS, S, EVENTS>;
 		get disposed(): boolean;
 		/**
-		 * Emit event for all connected clients
+		 * Emit event for all connected clients.
+		 * Reserved event names: `close`, `init`, `error`, `state`
 		 * @param event path for event. String or array of strings.
 		 * @param args event values
 		 */
@@ -754,6 +759,12 @@ declare module "varhub:rpc" {
 			maxChannelsPerClient?: number;
 			key?: string
 		}): () => void;
+		
+		/**
+		 * get the current rpc source, based on exports of main module.
+		 * value is undefined while main module is executing
+		 */
+		static get current(): RPCSource<any, undefined, any> | undefined;
 	}
 }
 

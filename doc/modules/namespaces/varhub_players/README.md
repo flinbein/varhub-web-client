@@ -16,10 +16,7 @@
 
 - [Player](interfaces/Player.md)
 
-### Type Aliases
-
-- [PlayerEvents](type-aliases/PlayerEvents.md)
-
 ### Events
 
+- [PlayerEvents](type-aliases/PlayerEvents.md)
 - [PlayersEvents](type-aliases/PlayersEvents.md)
