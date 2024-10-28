@@ -429,7 +429,7 @@ declare module "varhub:players" {
 		/**
 		 * set player's group
 		 */
-		set group(value: string|undefined);
+		setGroup(value: string|undefined);
 		/**
 		 * @event
 		 * @template {keyof PlayerEvents} T
@@ -624,91 +624,6 @@ declare module "varhub:rpc" {
 	type EventPathArgs<PATH, FORM> = (PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) : PATH extends [] ? (FORM extends any[] ? FORM : never) : PATH extends [infer STEP extends string, ...infer TAIL extends string[]] ? (STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never) : never);
 	
 	/**
-	 * Communication channel established between client's {@link RPCChannel} and {@link RPCSource}
-	 */
-	export interface RPCSourceChannel<S = RPCSource> {
-		/**
-		 * channel is closed
-		 */
-		get closed(): boolean;
-		/**
-		 * get rpc source
-		 */
-		get source(): S;
-		/**
-		 * get client's connection
-		 */
-		get connection(): Connection;
-		/**
-		 * close this communication channel
-		 * @param reason
-		 */
-		close(reason?: any): void;
-	}
-	
-	/**
-	 * @event
-	 * @template {any} STATE
-	 * @template {RPCSourceChannel} C
-	 */
-	export type RPCSourceEvents<STATE, C> = {
-		/**
-		 * new channel is open
-		 * @example
-		 * ```typescript
-		 * rpc = new RPCSource({});
-		 * rpc.on("channelOpen", (sourceChannel) => {
-		 *   if (isBadClient(sourceChannel.client)) {
-		 *   	sourceChannel.close("bad!");
-		 *   }
-		 * })
-		 * ```
-		 * If you close the sourceChannel while the event is being processed,
-		 * the channel will not be created and `channelClose` event will not be triggered.
-		 */
-		channelOpen: [sourceChannel: C],
-		/**
-		 * channel is closed
-		 * @example
-		 * ```typescript
-		 * rpc = new RPCSource({});
-		 * rpc.on("channelClose", (sourceChannel, reason) => {
-		 *   console.log("client closed this channel:", sourceChannel.client, "reason:", reason);
-		 * })
-		 * ```
-		 */
-		channelClose: [sourceChannel: C, reason: any],
-		/**
-		 * state is changed
-		 * @example
-		 * ```typescript
-		 * rpc = new RPCSource({}, "state1");
-		 * console.assert(rpc.state === "state1");
-		 *
-		 * rpc.on("state", (newState, oldState) => {
-		 *   console.log("new state:", newState);
-		 *   console.log("old state:", oldState);
-		 *   console.assert(rpc.state === newState);
-		 * });
-		 * rpc.setState("state2");
-		 * ```
-		 */
-		state: [newState: STATE, oldState: STATE],
-		/**
-		 * rpc is disposed
-		 * @example
-		 * ```typescript
-		 * rpc = new RPCSource({});
-		 * rpc.on("dispose", (reason) => {
-		 *   console.log("disposed by reason:", reason);
-		 * });
-		 * rpc.dispose("reason");
-		 * ```
-		 */
-		dispose: [reason: any],
-	}
-	
-	/**
 	 * Remote procedure call handler
 	 */
 	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
@@ -719,30 +634,7 @@ declare module "varhub:rpc" {
 			__rpc_events: EVENTS;
 			__rpc_state: STATE;
 		};
-		/**
-		 * @event
-		 * @template {keyof RPCSourceEvents} T
-		 * subscribe on event
-		 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-		 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-		 */
-		on<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this;
-		/**
-		 * @event
-		 * @template {keyof RPCSourceEvents} T
-		 * subscribe on event once
-		 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-		 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-		 */
-		once<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this;
-		/**
-		 * @event
-		 * @template {keyof RPCSourceEvents} T
-		 * unsubscribe from event
-		 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-		 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-		 */
-		off<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this;
+		
 		/**
 		 * get current state
 		 */
@@ -836,10 +728,18 @@ declare module "varhub:rpc" {
 		}): () => void;
 		
 		/**
+		 * create {@link RPCHandler} based on object with methods
+		 * @param parameters
+		 * @param parameters.form object with methods.
+		 * @returns - {@link RPCHandler}
+		 */
+		static readonly createDefaultHandler(parameters: {form: any}): RPCHandler;
+		
+		/**
 		 * get the current rpc source, based on exports of main module.
 		 * value is undefined while main module is executing
 		 */
-		static get current(): RPCSource<any, undefined, any> | undefined;
+		static get default(): RPCSource<any, undefined, any>;
 	}
 }
 

@@ -126,18 +126,6 @@ Remote procedure call handler
 <tr>
 <td>
 
-[RPCSourceChannel](classes/RPCSourceChannel.md)
-
-</td>
-<td>
-
-Communication channel established between the [RPCChannel](variables/RPCChannel.md) and [RPCSource](classes/RPCSource.md)
-
-</td>
-</tr>
-<tr>
-<td>
-
 [Varhub](classes/Varhub.md)
 
 </td>
@@ -314,18 +302,6 @@ events of [Players](classes/Players.md) object
 <td>
 
 Basic events of [RPCChannel](variables/RPCChannel.md)
-
-</td>
-</tr>
-<tr>
-<td>
-
-[RPCSourceEvents](type-aliases/RPCSourceEvents.md)
-
-</td>
-<td>
-
-Events of [RPCSource](classes/RPCSource.md)
 
 </td>
 </tr>

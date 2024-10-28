@@ -31,7 +31,7 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 ### off()
 
-> **off**\<`T`\>(`eventName`, `handler`): `void`
+> **off**\<`T`\>(`eventName`, `handler`): `this`
 
 #### Type Parameters
 
@@ -91,17 +91,17 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Returns
 
-`void`
+`this`
 
 #### Defined in
 
-[src/RPCChannel.ts:105](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RPCChannel.ts#L105)
+[src/RPCChannel.ts:105](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RPCChannel.ts#L105)
 
 ***
 
 ### on()
 
-> **on**\<`T`\>(`eventName`, `handler`): `void`
+> **on**\<`T`\>(`eventName`, `handler`): `this`
 
 #### Type Parameters
 
@@ -161,17 +161,17 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Returns
 
-`void`
+`this`
 
 #### Defined in
 
-[src/RPCChannel.ts:103](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RPCChannel.ts#L103)
+[src/RPCChannel.ts:103](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RPCChannel.ts#L103)
 
 ***
 
 ### once()
 
-> **once**\<`T`\>(`eventName`, `handler`): `void`
+> **once**\<`T`\>(`eventName`, `handler`): `this`
 
 #### Type Parameters
 
@@ -231,8 +231,8 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Returns
 
-`void`
+`this`
 
 #### Defined in
 
-[src/RPCChannel.ts:104](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RPCChannel.ts#L104)
+[src/RPCChannel.ts:104](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RPCChannel.ts#L104)

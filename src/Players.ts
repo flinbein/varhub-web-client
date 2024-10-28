@@ -345,7 +345,7 @@ class Player {
 	/**
 	 * set player's group
 	 */
-	set group(value: string|undefined) {this.#controller.setGroupOf(this, value)}
+	setGroup(value: string|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
 	 * @event

@@ -168,16 +168,16 @@ test.describe("Players", () => {
 		);
 		const [alice, bob, charlie, eve] = ["Alice", "Bob", "Charlie", "Eve"].map(name => players.get(name)!);
 		
-		alice.group = "redTeam";
-		bob.group = "redTeam";
-		charlie.group = "blueTeam";
+		alice.setGroup("redTeam");
+		bob.setGroup("redTeam");
+		charlie.setGroup("blueTeam");
 		
 		assert.deepEqual(players.getGroup("redTeam"), new Set([alice, bob]));
 		assert.deepEqual(players.getGroup("blueTeam"), new Set([charlie]));
 		assert.deepEqual(players.getGroup("greenTeam"), new Set());
 		assert.deepEqual(players.getGroup(undefined), new Set(eve));
 		
-		alice.group = "blueTeam";
+		alice.setGroup("blueTeam");
 		assert.deepEqual(players.getGroup("redTeam"), new Set([bob]));
 		assert.deepEqual(players.getGroup("blueTeam"), new Set([alice, charlie]));
 		

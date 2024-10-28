@@ -48,31 +48,6 @@ Remote procedure call handler
 </tbody>
 </table>
 
-### Interfaces
-
-<table>
-<thead>
-<tr>
-<th>Interface</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-[RPCSourceChannel](interfaces/RPCSourceChannel.md)
-
-</td>
-<td>
-
-Communication channel established between client's RPCChannel and [RPCSource](classes/default.md)
-
-</td>
-</tr>
-</tbody>
-</table>
-
 ### Type Aliases
 
 <table>
@@ -111,31 +86,6 @@ Communication channel established between client's RPCChannel and [RPCSource](cl
 <td>
 
 [RPCHandler](type-aliases/RPCHandler.md)
-
-</td>
-<td>
-
-&hyphen;
-
-</td>
-</tr>
-</tbody>
-</table>
-
-### Events
-
-<table>
-<thead>
-<tr>
-<th>Type alias</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-[RPCSourceEvents](type-aliases/RPCSourceEvents.md)
 
 </td>
 <td>

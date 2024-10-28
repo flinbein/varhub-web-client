@@ -49,7 +49,7 @@ client.on("close", (reason: string|null, wasOnline: boolean) => {
 </td>
 <td>
 
-[src/VarhubClient.ts:30](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/VarhubClient.ts#L30)
+[src/VarhubClient.ts:30](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/VarhubClient.ts#L30)
 
 </td>
 </tr>
@@ -80,7 +80,7 @@ client.on("error", () => {
 </td>
 <td>
 
-[src/VarhubClient.ts:52](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/VarhubClient.ts#L52)
+[src/VarhubClient.ts:52](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/VarhubClient.ts#L52)
 
 </td>
 </tr>
@@ -111,7 +111,7 @@ client.on("message", (...data: XJData[]) => {
 </td>
 <td>
 
-[src/VarhubClient.ts:19](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/VarhubClient.ts#L19)
+[src/VarhubClient.ts:19](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/VarhubClient.ts#L19)
 
 </td>
 </tr>
@@ -142,7 +142,7 @@ client.on("open", () => {
 </td>
 <td>
 
-[src/VarhubClient.ts:41](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/VarhubClient.ts#L41)
+[src/VarhubClient.ts:41](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/VarhubClient.ts#L41)
 
 </td>
 </tr>
@@ -151,4 +151,4 @@ client.on("open", () => {
 
 ## Defined in
 
-[src/VarhubClient.ts:8](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/VarhubClient.ts#L8)
+[src/VarhubClient.ts:8](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/VarhubClient.ts#L8)

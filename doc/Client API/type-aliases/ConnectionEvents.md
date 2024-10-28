@@ -49,7 +49,7 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:373](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RoomSocketHandler.ts#L373)
+[src/RoomSocketHandler.ts:373](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RoomSocketHandler.ts#L373)
 
 </td>
 </tr>
@@ -80,7 +80,7 @@ connection.on("message", (...data) => {
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:384](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RoomSocketHandler.ts#L384)
+[src/RoomSocketHandler.ts:384](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RoomSocketHandler.ts#L384)
 
 </td>
 </tr>
@@ -112,7 +112,7 @@ connection.open();
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:362](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RoomSocketHandler.ts#L362)
+[src/RoomSocketHandler.ts:362](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RoomSocketHandler.ts#L362)
 
 </td>
 </tr>
@@ -121,4 +121,4 @@ connection.open();
 
 ## Defined in
 
-[src/RoomSocketHandler.ts:350](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/RoomSocketHandler.ts#L350)
+[src/RoomSocketHandler.ts:350](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/RoomSocketHandler.ts#L350)

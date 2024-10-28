@@ -158,7 +158,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/modules.d.ts:791](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L791)
+[src/modules.d.ts:683](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L683)
 
 ## Accessors
 
@@ -172,7 +172,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/modules.d.ts:807](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L807)
+[src/modules.d.ts:699](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L699)
 
 ***
 
@@ -188,24 +188,24 @@ get current state
 
 #### Defined in
 
-[src/modules.d.ts:749](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L749)
+[src/modules.d.ts:641](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L641)
 
 ***
 
-### current
+### default
 
-> `get` `static` **current**(): `undefined` \| [`default`](default.md)\<`any`, `undefined`, `any`\>
+> `get` `static` **default**(): [`default`](default.md)\<`any`, `undefined`, `any`\>
 
 get the current rpc source, based on exports of main module.
 value is undefined while main module is executing
 
 #### Returns
 
-`undefined` \| [`default`](default.md)\<`any`, `undefined`, `any`\>
+[`default`](default.md)\<`any`, `undefined`, `any`\>
 
 #### Defined in
 
-[src/modules.d.ts:842](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L842)
+[src/modules.d.ts:742](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L742)
 
 ## Methods
 
@@ -225,7 +225,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/modules.d.ts:823](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L823)
+[src/modules.d.ts:715](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L715)
 
 ***
 
@@ -270,7 +270,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/modules.d.ts:819](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L819)
+[src/modules.d.ts:711](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L711)
 
 ***
 
@@ -354,7 +354,7 @@ event values
 
 #### Defined in
 
-[src/modules.d.ts:814](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L814)
+[src/modules.d.ts:706](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L706)
 
 ***
 
@@ -402,7 +402,7 @@ new state value, if state is not a function.
 
 #### Defined in
 
-[src/modules.d.ts:802](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L802)
+[src/modules.d.ts:694](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L694)
 
 ***
 
@@ -443,7 +443,7 @@ apply generic types for events
 
 #### Defined in
 
-[src/modules.d.ts:793](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L793)
+[src/modules.d.ts:685](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L685)
 
 ***
 
@@ -480,7 +480,7 @@ apply generic types for state.
 
 ##### Defined in
 
-[src/modules.d.ts:804](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L804)
+[src/modules.d.ts:696](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L696)
 
 #### withState(state)
 
@@ -538,7 +538,71 @@ apply generic types for state and set new state.
 
 ##### Defined in
 
-[src/modules.d.ts:806](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L806)
+[src/modules.d.ts:698](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L698)
+
+***
+
+### createDefaultHandler()
+
+> `readonly` `static` **createDefaultHandler**(`parameters`): [`RPCHandler`](../type-aliases/RPCHandler.md)
+
+create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`parameters`
+
+</td>
+<td>
+
+`object`
+
+</td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>
+
+`parameters.form`
+
+</td>
+<td>
+
+`any`
+
+</td>
+<td>
+
+object with methods.
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+[`RPCHandler`](../type-aliases/RPCHandler.md)
+
+- [RPCHandler](../type-aliases/RPCHandler.md)
+
+#### Defined in
+
+[src/modules.d.ts:736](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L736)
 
 ***
 
@@ -655,265 +719,4 @@ set a limit on the number of opened channels
 
 #### Defined in
 
-[src/modules.d.ts:833](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L833)
-
-## Events
-
-### off()
-
-> **off**\<`T`\>(`eventName`, `handler`): `this`
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`T` *extends* keyof [`RPCSourceEvents`](../type-aliases/RPCSourceEvents.md)\<`STATE`, [`RPCSourceChannel`](../interfaces/RPCSourceChannel.md)\<`this`\>\>
-
-</td>
-<td>
-
-unsubscribe from event
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`eventName`
-
-</td>
-<td>
-
-`T`
-
-</td>
-<td>
-
-"channelOpen", "channelClose", "state" or "dispose"
-
-</td>
-</tr>
-<tr>
-<td>
-
-`handler`
-
-</td>
-<td>
-
-(...`args`) => `void`
-
-</td>
-<td>
-
-event handler
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`this`
-
-#### Defined in
-
-[src/modules.d.ts:745](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L745)
-
-***
-
-### on()
-
-> **on**\<`T`\>(`eventName`, `handler`): `this`
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`T` *extends* keyof [`RPCSourceEvents`](../type-aliases/RPCSourceEvents.md)\<`STATE`, [`RPCSourceChannel`](../interfaces/RPCSourceChannel.md)\<`this`\>\>
-
-</td>
-<td>
-
-subscribe on event
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`eventName`
-
-</td>
-<td>
-
-`T`
-
-</td>
-<td>
-
-"channelOpen", "channelClose", "state" or "dispose"
-
-</td>
-</tr>
-<tr>
-<td>
-
-`handler`
-
-</td>
-<td>
-
-(...`args`) => `void`
-
-</td>
-<td>
-
-event handler
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`this`
-
-#### Defined in
-
-[src/modules.d.ts:729](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L729)
-
-***
-
-### once()
-
-> **once**\<`T`\>(`eventName`, `handler`): `this`
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`T` *extends* keyof [`RPCSourceEvents`](../type-aliases/RPCSourceEvents.md)\<`STATE`, [`RPCSourceChannel`](../interfaces/RPCSourceChannel.md)\<`this`\>\>
-
-</td>
-<td>
-
-subscribe on event once
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`eventName`
-
-</td>
-<td>
-
-`T`
-
-</td>
-<td>
-
-"channelOpen", "channelClose", "state" or "dispose"
-
-</td>
-</tr>
-<tr>
-<td>
-
-`handler`
-
-</td>
-<td>
-
-(...`args`) => `void`
-
-</td>
-<td>
-
-event handler
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`this`
-
-#### Defined in
-
-[src/modules.d.ts:737](https://github.com/flinbein/varhub-web-client/blob/44cee252b4129e1cf923ce27478727106d4f6662/src/modules.d.ts#L737)
+[src/modules.d.ts:725](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L725)

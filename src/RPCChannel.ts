@@ -100,9 +100,9 @@ export interface RPCInstance<S> extends Disposable {
  * Methods to handle events of {@link RPCChannel}
  */
 export interface RpcEmitter<E> {
-	on<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
-	once<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
-	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): void
+	on<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
+	once<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
+	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
 }
 type RpcMapper<M, E = never> = (
 	[M] extends [{new(...args: infer PARAM): MetaScope<infer METHODS, infer EVENTS, infer STATE>}] ? (

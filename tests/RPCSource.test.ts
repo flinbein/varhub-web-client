@@ -1,6 +1,6 @@
 import * as assert from "node:assert";
 import { describe, it, mock } from "node:test";
-import { RPCSource, RPCChannel, VarhubClient, Connection, RoomSocketHandler } from "../src/index.js";
+import { RPCSource, RPCChannel, VarhubClient, Connection, RoomSocketHandler, Players } from "../src/index.js";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 
 describe("RPCSource", () => {
@@ -270,41 +270,6 @@ describe("RPCSource", () => {
 		assert.deepEqual(onTest.mock.calls[0].arguments, ["msg"], "event arguments exact");
 	})
 	
-	it("RPCSource events", {timeout: 1000}, async () => {
-		const roomWs = new WebsocketMockRoom("room-id");
-		await using room = new RoomSocketHandler(roomWs);
-		roomWs.backend.open();
-		await room;
-		
-		const onChannelClose = mock.fn();
-		class Deck extends RPCSource<{}, number> {
-			declare private static connection: Connection;
-			constructor(state: number) {
-				super({}, state);
-				this.on("channelOpen", (channel) => {
-					if (state < 5) channel.close("less");
-				})
-				this.on("channelClose", onChannelClose);
-			}
-		}
-		const rpcRoom = new RPCSource({Deck});
-		
-		RPCSource.start(rpcRoom, room);
-		
-		const clientWs = roomWs.createClientMock("Bob", "player");
-		const client = new VarhubClient(clientWs);
-		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
-		const deck1 = new rpcClient.Deck(4);
-		await assert.rejects(Promise.resolve(deck1), (v) => v === "less" , "deck closed by handler");
-		
-		const deck2 = new rpcClient.Deck(6);
-		await deck2;
-		assert.equal(deck2.state, 6, "deck ok with value 6");
-		deck2.close("deck-2-close-reason");
-		await new Promise(r => setTimeout(r, 40));
-		assert.equal(onChannelClose.mock.calls[0].arguments[1], "deck-2-close-reason", "close reason");
-	})
-	
 	it("RPCSource autoClose", {timeout: 1000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
@@ -351,26 +316,79 @@ describe("RPCSource", () => {
 		deck3.close();
 		await rpcClient.nope();
 		assert.equal(await rpcClient.getDisposed(3), false, "deck3 still not disposed");
-		
-		const onState = mock.fn();
-		const onDispose = mock.fn();
-		const deck = new Deck(4);
-		deck.on("state", onState);
-		deck.on("dispose", onDispose);
-		deck.setState(5);
-		deck.setState(6);
-		deck.dispose("dispose-reason-1");
-		deck.dispose("dispose-reason-2");
-		assert.throws(() => deck.setState(6), "setState throws on disposed");
-		assert.deepEqual(onState.mock.calls.map(c => c.arguments), [[5, 4], [6, 5]], "deck state events");
-		assert.deepEqual(onDispose.mock.calls.map(c => c.arguments), [["dispose-reason-1"]], "dispose events");
 	});
 	
-	it("RPCSource event this", {timeout: 1000}, async () => {
-		const rpc = new RPCSource({}, 10);
-		let thisValue: any;
-		rpc.on("dispose", function (this: any) {thisValue = this});
-		rpc.dispose();
-		assert.equal(thisValue, rpc, "this event value");
+	it("RPCSource emit for", {timeout: 1000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		const players = new Players(room, (_connection, arg) => arg ? String(arg) : null)
+		
+		const rpcRoom = new RPCSource({ping: () => true}).withEventTypes<{notify: [any]}>();
+		RPCSource.start(rpcRoom, room);
+		
+		const onNonameNotify = mock.fn();
+		const onAliceNotify = mock.fn();
+		const onBobNotify1 = mock.fn();
+		const onBobNotify2 = mock.fn();
+		const onCharlieNotify = mock.fn();
+		const nonameChannel = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock(undefined, 1))).on("notify", onNonameNotify);
+		const aliceChannel = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Alice"))).on("notify", onAliceNotify);
+		const bobChannel1 = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 1))).on("notify", onBobNotify1);
+		const bobChannel2 = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2))).on("notify", onBobNotify2);
+		const charlieChannel = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Charlie"))).on("notify", onCharlieNotify);
+		
+		
+		await Promise.all([nonameChannel, aliceChannel, bobChannel1, bobChannel2, charlieChannel]);
+		players.get("Alice")?.setGroup("redTeam");
+		players.get("Bob")?.setGroup("redTeam");
+		
+		rpcRoom.emit("notify", "forAll"); // n a 1 2 c
+		rpcRoom.emitFor(room.getConnections({ready: true}), "notify", "forAllConnections"); // n a 1 2 c
+		rpcRoom.emitFor(players, "notify", "forPlayers"); // - a 1 2 c
+		rpcRoom.emitFor([...players], "notify", "forPlayersArray"); // - a 1 2 c
+		rpcRoom.emitFor(players.get("Alice"), "notify", "forAlice"); // - a - - -
+		rpcRoom.emitFor(players.getGroup("redTeam"), "notify", "forRedTeam"); // - a 1 2 -
+		rpcRoom.emitFor(players.getGroup(undefined), "notify", "forNoTeam"); // - - - - c
+		
+		for (let connection of room.getConnections({ready: true})) {
+			if (connection.parameters[1] === 1) {
+				rpcRoom.emitFor(connection, "notify", "forNumberOne"); // n - 1 - -
+			}
+		}
+		
+		await charlieChannel.ping();
+		
+		assert.deepEqual(
+			onNonameNotify.mock.calls.flatMap(c => c.arguments),
+			["forAll", "forAllConnections", "forNumberOne"],
+			"events of Noname"
+		);
+		
+		assert.deepEqual(
+			onAliceNotify.mock.calls.flatMap(c => c.arguments),
+			["forAll", "forAllConnections", "forPlayers", "forPlayersArray", "forAlice",  "forRedTeam"],
+			"events of Alice"
+		);
+		
+		assert.deepEqual(
+			onBobNotify1.mock.calls.flatMap(c => c.arguments),
+			["forAll", "forAllConnections", "forPlayers", "forPlayersArray", "forRedTeam", "forNumberOne"],
+			"events of Bob 1"
+		);
+		
+		assert.deepEqual(
+			onBobNotify2.mock.calls.flatMap(c => c.arguments),
+			["forAll", "forAllConnections", "forPlayers", "forPlayersArray", "forRedTeam"],
+			"events of Bob 2"
+		);
+		
+		assert.deepEqual(
+			onCharlieNotify.mock.calls.flatMap(c => c.arguments),
+			["forAll", "forAllConnections", "forPlayers", "forPlayersArray", "forNoTeam"],
+			"events of Charlie"
+		);
+		
 	})
 });

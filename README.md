@@ -4,9 +4,10 @@
 npm install github:flinbein/varhub-web-client
 ```
 
+## [API Documentation](doc/README.md)
+
 ---
 
-## [Client API Documentation](doc/index/README.md)
 Example:
 ```javascript
 import { Varhub, RPCChannel } from "@flinbein/varhub-web-client";
@@ -36,7 +37,6 @@ await client;
 const rpc = new RPCChannel(client);
 console.log(await rpc.sum(10, 20)) // 30
 ```
-## [VM API Documentation](doc/modules/README.md)
 
 Example: using raw client
 

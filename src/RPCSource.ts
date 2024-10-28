@@ -66,9 +66,7 @@ const isESClass = (fn: any) => (
 	Function.prototype.toString.call(fn).startsWith("class")
 );
 
-/**
- * Communication channel established between the {@link RPCChannel} and {@link RPCSource}
- */
+/** @hidden */
 class RPCSourceChannel<S = RPCSource> {
 	readonly #source;
 	readonly #connection;
@@ -104,82 +102,21 @@ class RPCSourceChannel<S = RPCSource> {
 		this.#closeHook(reason);
 	}
 }
+/** @hidden */
 export type { RPCSourceChannel };
-
-/**
- * Events of {@link RPCSource}
- * @event
- * @template {any} STATE
- * @template {RPCSourceChannel} C
- */
-export type RPCSourceEvents<STATE, C> = {
-	/**
-	 * new channel is open
-	 * @example
-	 * ```typescript
-	 * rpc = new RPCSource({});
-	 * rpc.on("channelOpen", (sourceChannel) => {
-	 *   if (isBadClient(sourceChannel.client)) {
-	 *   	sourceChannel.close("bad!");
-	 *   }
-	 * })
-	 * ```
-	 * If you close the sourceChannel while the event is being processed,
-	 * the channel will not be created and `channelClose` event will not be triggered.
-	 */
-	channelOpen: [sourceChannel: C],
-	/**
-	 * channel is closed
-	 * @example
-	 * ```typescript
-	 * rpc = new RPCSource({});
-	 * rpc.on("channelClose", (sourceChannel, reason) => {
-	 *   console.log("client closed this channel:", sourceChannel.client, "reason:", reason);
-	 * })
-	 * ```
-	 */
-	channelClose: [sourceChannel: C, reason: XJData],
-	/**
-	 * state is changed
-	 * @example
-	 * ```typescript
-	 * rpc = new RPCSource({}, "state1");
-	 * console.assert(rpc.state === "state1");
-	 *
-	 * rpc.on("state", (newState, oldState) => {
-	 *   console.log("new state:", newState);
-	 *   console.log("old state:", oldState);
-	 *   console.assert(rpc.state === newState);
-	 * });
-	 * rpc.setState("state2");
-	 * ```
-	 */
-	state: [newState: STATE, oldState: STATE],
-	/**
-	 * rpc is disposed
-	 * @example
-	 * ```typescript
-	 * rpc = new RPCSource({});
-	 * rpc.on("dispose", (reason) => {
-	 *   console.log("disposed by reason:", reason);
-	 * });
-	 * rpc.dispose("reason");
-	 * ```
-	 */
-	dispose: [reason: XJData],
-}
 
 /**
  * Remote procedure call handler
  */
 export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 	#handler: RPCHandler
+	#autoDispose = false
 	#innerEvents = new EventEmitter<{
-		message: [string|string[], XJData[]],
+		message: [filter: undefined | ((connection: Connection) => boolean), eventPath: string[], eventData: XJData[]],
 		state: [STATE, STATE],
 		dispose: [XJData],
+		channel: [RPCSourceChannel],
 	}>();
-	#events = new EventEmitter<RPCSourceEvents<STATE, this>>();
 	#state?: STATE;
 	/** @hidden */
 	declare public [Symbol.unscopables]: {
@@ -187,42 +124,6 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		__rpc_events: EVENTS,
 		__rpc_state: STATE,
 	};
-	
-	/**
-	 * @event
-	 * @template {keyof RPCSourceEvents} T
-	 * subscribe on event
-	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-	 */
-	on<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this{
-		this.#events.on.call(this, eventName, handler as any);
-		return this;
-	}
-	
-	/**
-	 * @event
-	 * @template {keyof RPCSourceEvents} T
-	 * subscribe on event once
-	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-	 */
-	once<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this{
-		this.#events.on.call(this, eventName, handler as any);
-		return this;
-	}
-	
-	/**
-	 * @event
-	 * @template {keyof RPCSourceEvents} T
-	 * unsubscribe from event
-	 * @param {keyof RPCSourceEvents} eventName "channelOpen", "channelClose", "state" or "dispose"
-	 * @param {(...args: RPCSourceEvents[T]) => void} handler event handler
-	 */
-	off<T extends keyof RPCSourceEvents<STATE, RPCSourceChannel<this>>>(eventName: T, handler: (...args: RPCSourceEvents<STATE, RPCSourceChannel<this>>[T]) => void): this {
-		this.#events.on.call(this, eventName, handler as any);
-		return this;
-	}
 	
 	/**
 	 * get current state
@@ -272,32 +173,37 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 */
 	constructor(handler?: RPCHandler|METHODS, initialState?: STATE) {
 		this.#state = initialState;
-		if (typeof handler === "object") {
-			const form = handler;
-			handler = function(con: Connection, path: string[], args: XJData[], openChannel: boolean) {
-				let target: any = form;
-				for (let step of path) {
-					if (typeof target !== "object") throw new Error("wrong path");
-					if (!Object.keys(target).includes(step)) throw new Error("wrong path");
-					target = target[step];
-				}
-				if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
-					const MetaConstructor = function (...args: any){
-						return Reflect.construct(target, args, MetaConstructor);
-					}
-					MetaConstructor.prototype = target.prototype;
-					MetaConstructor.connection = con;
-					MetaConstructor.autoClose = true;
-					const result: RPCSource = MetaConstructor(...args);
-					if (MetaConstructor.autoClose) {
-						result.on("channelClose", (_channel, reason) => result.dispose(reason));
-					}
-					return result;
-				}
-				return target.apply(con, args);
-			}
-		}
+		if (typeof handler === "object") handler = RPCSource.createDefaultHandler({form: handler});
 		this.#handler = handler as any;
+	}
+	
+	/**
+	 * create {@link RPCHandler} based on object with methods
+	 * @param parameters
+	 * @param parameters.form object with methods.
+	 * @returns - {@link RPCHandler}
+	 */
+	static createDefaultHandler(parameters: {form: any}): RPCHandler {
+		return function(con: Connection, path: string[], args: XJData[], openChannel: boolean) {
+			let target: any = parameters?.form;
+			for (let step of path) {
+				if (typeof target !== "object") throw new Error("wrong path");
+				if (!Object.keys(target).includes(step)) throw new Error("wrong path");
+				target = target[step];
+			}
+			if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
+				const MetaConstructor = function (...args: any){
+					return Reflect.construct(target, args, MetaConstructor);
+				}
+				MetaConstructor.prototype = target.prototype;
+				MetaConstructor.connection = con;
+				MetaConstructor.autoClose = true;
+				const result: RPCSource = MetaConstructor(...args);
+				result.#autoDispose = MetaConstructor.autoClose
+				return result;
+			}
+			return target.apply(con, args);
+		}
 	}
 	
 	/** apply generic types for events */
@@ -322,7 +228,6 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 		this.#state = newState;
 		if (stateChanged) {
 			this.#innerEvents.emitWithTry("state", newState, oldState as any);
-			this.#events.emitWithTry("state", newState, oldState as any);
 		}
 		return this;
 	}
@@ -347,10 +252,43 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 * @param event path for event. String or array of strings.
 	 * @param args event values
 	 */
-	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this {
+	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this{
+		return this.emitFor(undefined, event, ...args);
+	}
+	
+	/**
+	 * Emit event for all connected clients.
+	 * Reserved event names: `close`, `init`, `error`, `state`
+	 * @param predicate event will be sent only to the listed connections.
+	 * @param event path for event. String or array of strings.
+	 * @param args event values
+	 */
+	emitFor<P extends EventPath<EVENTS>>(
+		predicate: Connection | Iterable<Connection> | Iterable<Iterable<Connection>> | ((con: Connection) => any) | null | undefined,
+		event: P,
+		...args: EventPathArgs<P, EVENTS>
+	): this {
 		if (this.#disposed) throw new Error("disposed");
-		this.#innerEvents.emitWithTry("message", event, args);
+		const path: string[] = (typeof event === "string") ? [event] : event;
+		this.#innerEvents.emitWithTry("message", this.#getPredicateFilter(predicate), path, args);
 		return this;
+	}
+	
+	#getPredicateFilter(
+		predicate: Connection | Iterable<Connection> | Iterable<Iterable<Connection>> | ((con: Connection) => any) | null | undefined,
+	): undefined | ((con: Connection) => boolean) {
+		if (predicate == null) return;
+		if (typeof predicate === "function") return predicate;
+		const matches = new Set<Connection>();
+		const add = (param: Connection | Iterable<Connection> | Iterable<Iterable<Connection>>) => {
+			if (Symbol.iterator in param) {
+				for (let paramElement of param) add(paramElement)
+			} else {
+				matches.add(param);
+			}
+		}
+		add(predicate);
+		return (c) => matches.has(c);
 	}
 	
 	/**
@@ -360,7 +298,6 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	dispose(reason?: XJData){
 		if (this.#disposed) return;
 		this.#disposed = true;
-		this.#events.emitWithTry("dispose", reason);
 		this.#innerEvents.emitWithTry("dispose", reason);
 	}
 	
@@ -410,8 +347,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 			if (operationId === CLIENT_ACTION.CLOSE) {
 				const reason = msgArgs[0];
 				const channel = channels.get(con)?.get(channelId as any);
-				const deleted = channels.get(con)?.delete(channelId as any);
-				if (channel && deleted) source.#events.emitWithTry("channelClose", channel as any, reason as any);
+				channels.get(con)?.delete(channelId as any);
 				channel?.close(reason);
 				return;
 			}
@@ -429,34 +365,24 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.CLOSE, disposeReason);
 							channels.get(con)?.delete(newChannelId as any);
 						}
-						const onSourceMessage = (path: string|string[], args: XJData[]) => {
-							if (!Array.isArray(path)) path = [path];
+						const onSourceMessage = (filter: undefined | ((con: Connection) => boolean), path: string[], args: XJData[]) => {
+							if (filter && !filter(con)) return;
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.EVENT, path, args);
 						}
 						const onSourceState = (state: XJData) => {
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.CREATE, state);
 						}
-						let disposeReason: XJData;
 						const dispose = (reason: XJData) => {
-							disposeReason = reason;
 							result.#innerEvents.off("dispose", onSourceDispose);
 							result.#innerEvents.off("message", onSourceMessage);
 							result.#innerEvents.off("state", onSourceState);
-							if (!channelReady) return;
 							const deleted = channels.get(con)?.delete(newChannelId as any);
 							if (deleted) con.send(incomingKey, newChannelId, REMOTE_ACTION.CLOSE, reason);
+							if (result.#autoDispose) result.dispose(reason);
 						}
 						
-						let channelReady = false;
 						const channel = new RPCSourceChannel(result, con, dispose);
-						result.#events.emitWithTry("channelOpen", channel as any);
-						if (channel.closed) {
-							con.send(incomingKey, newChannelId, REMOTE_ACTION.CLOSE, disposeReason);
-							return;
-						}
-						
 						con.send(incomingKey, newChannelId, REMOTE_ACTION.CREATE, result.#state);
-						channelReady = true;
 						map.set(newChannelId as any, channel);
 						result.#innerEvents.once("dispose", onSourceDispose);
 						result.#innerEvents.on("message", onSourceMessage);
@@ -475,9 +401,11 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 				channel.close();
 			}
 		}
-		const onMainRpcSourceMessage = (path: string|string[], args: any[]) => {
-			if (!Array.isArray(path)) path = [path];
-			room.broadcast(key, undefined, REMOTE_ACTION.EVENT, path, args);
+		const onMainRpcSourceMessage = (filter: ((con: Connection) => boolean) | undefined, path: string[], args: any[]) => {
+			for (let connection of room.getConnections({ready: true})) {
+				if (filter && !filter(connection)) continue;
+				connection.send(key, undefined, REMOTE_ACTION.EVENT, path, args)
+			}
 		}
 		room.on("connectionClose", clearChannelsForConnection);
 		room.on("connectionMessage", onConnectionMessage);
