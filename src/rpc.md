@@ -9,6 +9,7 @@ type RPCMessage<T = "$rpc"> = [
     ...data: any[]
 ];
 ```
+
 ---
 
 ## Client to Handler
@@ -16,16 +17,29 @@ type RPCMessage<T = "$rpc"> = [
 ### Call remote method
 ```typescript
 type ClientMessageCall = [
-    key: string, // default: "$rpc"
-    channelId: number /* subchannel */ | undefined /* default channel */,
-    action: 0, // CLIENT_ACTION.CALL
-    responseKey: any, // room will respond with this key
-    path: string[], // path to remote function
-    arguments: any[] // call function with this arguments    
+	key: string, // default: "$rpc"
+	channelId: number /* subchannel */ | undefined /* default channel */,
+	action: 0, // CLIENT_ACTION.CALL
+	responseKey: any, // room will respond with this key
+	path: string[], // path to remote function
+	arguments: any[] // call function with this arguments    
 ]
 ```
 Handler will respond with:
 * [HandlerMessageCallResult](#method-call-result) if channel exists.
+* [HandlerMessageChannelClosed](#channel-closed) if channel closed or not exists.
+
+
+### Request state
+```typescript
+type ClientMessageCall = [
+    key: string, // default: "$rpc"
+    channelId: number /* subchannel */ | undefined /* default channel */,
+    action: 0, // CLIENT_ACTION.CALL
+]
+```
+Handler will respond with:
+* [HandlerMessageChannelState](#channel-created-or-state-updated) if channel exists.
 * [HandlerMessageChannelClosed](#channel-closed) if channel closed or not exists.
 
 
@@ -88,7 +102,7 @@ type HandlerMessageChannelClosed = [
 type HandlerMessageChannelState = [
 	key: string, // default: "$rpc"
 	channelId: number,
-	action: 2, // REMOTE_ACTION.CREATE
+	action: 2, // REMOTE_ACTION.STATE
 	state: any, // state value of channel
 ]
 ```

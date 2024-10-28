@@ -46,6 +46,11 @@ export class WebsocketMock extends (EventTarget as typeof WebSocket) implements 
 	}
 	
 	send(message: Uint8Array) {
+		if(this.readyState === WebSocket.CONNECTING) throw new Error("Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.");
+		if(this.readyState !== WebSocket.OPEN) {
+			console.error("WebSocket is already in CLOSING or CLOSED state.")
+			return;
+		}
 		convertMessageToData(message, this.backend.binaryType).then((data) => {
 			setTimeout(() => {
 				this.backend.dispatchEvent(new MockEvent("message", {data}));
@@ -103,6 +108,11 @@ class WebsocketBackendMock extends (EventTarget as typeof WebSocket) implements 
 	}
 	
 	send(message: ArrayBuffer | Blob | string | TypedArray){
+		if(this.readyState === WebSocket.CONNECTING) throw new Error("Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.");
+		if(this.readyState !== WebSocket.OPEN) {
+			console.error("WebSocket is already in CLOSING or CLOSED state.");
+			return;
+		}
 		convertMessageToData(message, this.client.binaryType).then((data) => {
 			setTimeout(() => {
 				this.client.dispatchEvent(new MockEvent("message", {data}));
@@ -230,7 +240,11 @@ export class WebsocketMockClientWithMethods<T extends Record<string, any>> exten
 	constructor(public readonly methods: T, open?: boolean) {
 		super(open);
 		this.backend.addEventListener("message", async ({data}: any) => {
-			const [/*"$rpc"*/, channelId, callCode, currentCallId, path, params] = parse(data);
+			const [/*"$rpc"*/, channelId, callCode, currentCallId, path = undefined, params = undefined] = parse(data);
+			if (path === undefined) {
+				const data = serialize("$rpc", channelId, 2, "defaultState");
+				this.backend.send(data);
+			}
 			try {
 				let target:any = methods;
 				for (const step of path as any[]) target = target[step];

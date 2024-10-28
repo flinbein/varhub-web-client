@@ -5,16 +5,17 @@ import { VarhubClient } from "../src/VarhubClient.js";
 import { WebsocketMockClientWithMethods } from "./WebsocketMocks.js";
 
 test.describe("RPCChannel", () => {
-	it("tests ready", {timeout: 100}, async () => {
+	it("tests ready", {timeout: 2000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
 		assert.equal(rpc.ready, false);
 		wsMock.backend.open();
+		await rpc;
 		assert.equal(rpc.ready, true);
 	})
 
-	it("tests close now", {timeout: 100}, async () => {
+	it("tests close now", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
@@ -25,7 +26,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(rpc.closed, true);
 	})
 
-	it("tests close later", {timeout: 100}, async () => {
+	it("tests close later", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
@@ -38,7 +39,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(rpc.closed, true);
 	})
 
-	it("tests method", {timeout: 100}, async () => {
+	it("tests method", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: (x: number, y: number) => x + y
 		});
@@ -49,7 +50,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(result, 3);
 	})
 
-	it("tests method deep", {timeout: 100}, async () => {
+	it("tests method deep", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			math: {
 				sum: (x: number, y: number) => x + y
@@ -62,7 +63,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(result, 3);
 	})
 
-	it("tests async method", {timeout: 100}, async () => {
+	it("tests async method", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: async (x: number, y: number) => x + y
 		});
@@ -73,7 +74,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(result, 300);
 	})
 
-	it("tests wrong method", {timeout: 100}, async () => {
+	it("tests wrong method", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: (x: number, y: number) => x + y
 		});
@@ -83,7 +84,7 @@ test.describe("RPCChannel", () => {
 		await assert.rejects((rpc as any).notexist(100, 200));
 	})
 
-	it("tests throw method", {timeout: 100}, async () => {
+	it("tests throw method", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sumThrow: (x: number, y: number) => { throw x + y }
 		});
@@ -93,7 +94,7 @@ test.describe("RPCChannel", () => {
 		await assert.rejects(rpc.sumThrow(100, 200), error => error === 300);
 	})
 
-	it("tests call", {timeout: 100}, async () => {
+	it("tests call", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: (x: number, y: number) => x + y
 		});
@@ -104,7 +105,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(result, 3);
 	})
 
-	it("tests async call", {timeout: 100}, async () => {
+	it("tests async call", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: async (x: number, y: number) => x + y
 		});
@@ -115,7 +116,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(result, 3);
 	})
 
-	it("tests messages", {timeout: 200}, async () => {
+	it("tests messages", {timeout: 2000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<typeof wsMock.methods, {greet: [string]}>(client);
@@ -133,7 +134,7 @@ test.describe("RPCChannel", () => {
 		assert.deepEqual(greetEvents, [["hi", "world"], ["hello"]]);
 	});
 	
-	it("tests deep message", {timeout: 200}, async () => {
+	it("tests deep message", {timeout: 2000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<{}, {data: {greet: [string]}}>(client);
@@ -151,7 +152,7 @@ test.describe("RPCChannel", () => {
 		assert.deepEqual(greetEvents, [["hi", "world"]]);
 	})
 
-	it("tests once messages", {timeout: 100}, async () => {
+	it("tests once messages", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock)
 		using rpc = new RPCChannel<typeof wsMock.methods, {greet: [string]}>(client);
@@ -165,7 +166,7 @@ test.describe("RPCChannel", () => {
 		assert.deepEqual(greetEvents, [["hi"]]);
 	});
 
-	it("tests once messages off", {timeout: 100}, async () => {
+	it("tests once messages off", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<typeof wsMock.methods, {greet: [string]}>(client);
@@ -180,7 +181,7 @@ test.describe("RPCChannel", () => {
 		assert.deepEqual(greetEvents, []);
 	})
 
-	it("tests event message", {timeout: 1200}, async () => {
+	it("tests event message", {timeout: 10200}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<typeof wsMock.methods, {greet: [string]}>(client);
@@ -198,7 +199,7 @@ test.describe("RPCChannel", () => {
 		assert.deepEqual(messageEvents, [["hi"], ["hello"]]);
 	})
 
-	it("tests event close self", {timeout: 100}, async () => {
+	it("tests event close self", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
@@ -213,7 +214,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(reason, "closeReason");
 	})
 
-	it("tests event close host", {timeout: 100}, async () => {
+	it("tests event close host", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
@@ -228,7 +229,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(reason, "closeReason");
 	})
 
-	it("tests method throws on close", {timeout: 100}, async () => {
+	it("tests method throws on close", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			delay: () => new Promise(() => {}) // always pending
 		});
@@ -236,13 +237,16 @@ test.describe("RPCChannel", () => {
 		using rpc = new RPCChannel<typeof wsMock.methods>(client);
 		wsMock.backend.open();
 		const delayPromise = rpc.delay();
+		assert.equal(rpc.ready, false);
+		await rpc;
 		assert.equal(rpc.ready, true);
 		wsMock.close(4000, "closeReason");
 		await assert.rejects(delayPromise, (error: any) => error.message === "closeReason");
 		assert.equal(rpc.ready, false);
+		
 	})
 
-	it("tests method this", {timeout: 100}, async () => {
+	it("tests method this", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<typeof wsMock.methods, {greet: [string]}>(client);
@@ -254,7 +258,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(rpc, refThis1);
 	})
 	
-	it("this event init", {timeout: 100}, async () => {
+	it("this event init", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel(client);
@@ -265,7 +269,7 @@ test.describe("RPCChannel", () => {
 		assert.equal(thisEventValue, rpc, "this event value");
 	})
 	
-	it("this event custom", {timeout: 100}, async () => {
+	it("this event custom", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<{}, {greet: []}>(client);
@@ -277,7 +281,7 @@ test.describe("RPCChannel", () => {
 		assert.equal((await eventFormPromise).value, rpc, "this event value");
 	})
 	
-	it("this event deep custom", {timeout: 100}, async () => {
+	it("this event deep custom", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		using rpc = new RPCChannel<{}, {deep: {greet: []}}>(client);

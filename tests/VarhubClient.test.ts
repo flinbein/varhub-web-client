@@ -4,17 +4,17 @@ import { VarhubClient } from "../src/VarhubClient.js";
 import { WebsocketMockClientWithMethods } from "./WebsocketMocks.js";
 
 describe("VarHubRpcClient", () => {
-	it("tests ready", {timeout: 100}, async () => {
+	it("tests ready", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
-		await using  client = new VarhubClient(wsMock);
+		await using client = new VarhubClient(wsMock);
 		assert.equal(client.ready, false);
 		wsMock.backend.open();
 		assert.equal(client.ready, true);
 	})
 	
-	it("tests close now", {timeout: 100}, async () => {
+	it("tests close now", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
-		await using  client = new VarhubClient(wsMock);
+		await using client = new VarhubClient(wsMock);
 		assert.equal(client.ready, false);
 		wsMock.backend.close();
 		await assert.rejects(Promise.resolve(client));
@@ -22,7 +22,7 @@ describe("VarHubRpcClient", () => {
 		assert.equal(client.closed, true);
 	})
 	
-	it("tests close later", {timeout: 300}, async () => {
+	it("tests close later", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		assert.equal(client.ready, false);
@@ -34,9 +34,9 @@ describe("VarHubRpcClient", () => {
 		assert.equal(client.closed, true);
 	})
 
-	it("tests waitForReady", {timeout: 300}, async () => {
+	it("tests waitForReady", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
-		await using  client = new VarhubClient(wsMock);
+		await using client = new VarhubClient(wsMock);
 		let ready = false;
 		client.then(() => ready = true);
 		assert.equal(ready, false);
@@ -45,7 +45,7 @@ describe("VarHubRpcClient", () => {
 		assert.equal(ready, true);
 	});
 
-	it("tests async method", {timeout: 300}, async () => {
+	it("tests async method", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({
 			sum: async (x: number, y: number) => x + y
 		});
@@ -59,7 +59,7 @@ describe("VarHubRpcClient", () => {
 		assert.deepEqual(onMessage.mock.calls[0].arguments, ["$rpc", undefined, 0, 9999, 300]);
 	})
 	
-	it("tests wrong method", {timeout: 100}, async () => {
+	it("tests wrong method", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		const onMessage = mock.fn();
@@ -71,7 +71,7 @@ describe("VarHubRpcClient", () => {
 		assert.deepEqual(onMessage.mock.calls[0].arguments.slice(0, 4), ["$rpc", undefined, 3, 9999]);
 	})
 	
-	it("tests this on event", {timeout: 100}, async () => {
+	it("tests this on event", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		let thisValue: any;

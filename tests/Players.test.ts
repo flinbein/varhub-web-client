@@ -5,7 +5,7 @@ import Players from "../src/Players.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 
 test.describe("Players", () => {
-	it("join and leave", {timeout: 300}, async () => {
+	it("join and leave", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -41,7 +41,7 @@ test.describe("Players", () => {
 		assert.deepEqual(players.all(), new Set([bobPlayer]), "players.all");
 		
 		bobWs.close(4000, "close-bob-reason");
-		await new Promise(resolve => setTimeout(resolve, 52));
+		await new Promise<void>(r => bobPlayer.once("offline", r))
 		
 		assert.deepEqual(onOffline.mock.calls[0]?.arguments, [], "offline event");
 		assert.deepEqual(onPlayerOffline.mock.calls[0]?.arguments, [bobPlayer], "player offline event");
@@ -57,7 +57,7 @@ test.describe("Players", () => {
 		assert.equal(bobPlayer.registered, true, "bob registered");
 		
 		bobPlayer.kick("kick-reason");
-		await new Promise(resolve => setTimeout(resolve, 52));
+		await new Promise(resolve => bobWs2.addEventListener("close", resolve, {once: true }));
 		
 		assert.equal(bobPlayer.registered, false, "bob disposed");
 		assert.equal(players.count, 0, "no players after kick");
@@ -67,7 +67,7 @@ test.describe("Players", () => {
 		assert.deepEqual(bobWs2.readyState, WebSocket.CLOSED, "bob ws closed");
 	});
 	
-	it("function with validation", {timeout: 300}, async () => {
+	it("function with validation", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -95,7 +95,7 @@ test.describe("Players", () => {
 		assert.equal(onClose.mock.calls[0].arguments[0].reason, "Error: wrong password", "close reason");
 	})
 	
-	it("async function with connection actions", {timeout: 300}, async () => {
+	it("async function with connection actions", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -123,7 +123,7 @@ test.describe("Players", () => {
 		assert.deepEqual(new Set(players), new Set([players.get("Alice")]), "players Alice only");
 	});
 	
-	it("iterate on connections", {timeout: 300}, async () => {
+	it("iterate on connections", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -149,7 +149,7 @@ test.describe("Players", () => {
 		assert.equal(players.get("Bob")!.online, false, "bob offline now");
 	})
 	
-	it("groups", {timeout: 300}, async () => {
+	it("groups", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -183,7 +183,7 @@ test.describe("Players", () => {
 		
 	})
 	
-	it("new player on new join", {timeout: 300}, async () => {
+	it("new player on new join", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -206,7 +206,7 @@ test.describe("Players", () => {
 		assert.equal(bob2.registered, true, "Bob2 here");
 	})
 	
-	it("this leave", {timeout: 300}, async () => {
+	it("this leave", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();

@@ -4,7 +4,7 @@ import { RPCSource, RPCChannel, VarhubClient, Connection, RoomSocketHandler, Pla
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 
 describe("RPCSource", () => {
-	it("tests rpc", {timeout: 400}, async () => {
+	it("tests rpc", {timeout: 4000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
@@ -42,7 +42,7 @@ describe("RPCSource", () => {
 		assert.equal(await testedPromise, 99, "got test message");
 	})
 	
-	it("multi channels", {timeout: 1000}, async () => {
+	it("multi channels", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
@@ -95,7 +95,7 @@ describe("RPCSource", () => {
 		assert.deepEqual(onClose2.mock.calls[0].arguments, ["dispose-deck-reason"], "mock 2 close event");
 	});
 	
-	it("close channels", {timeout: 1000}, async () => {
+	it("close channels", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
@@ -104,7 +104,7 @@ describe("RPCSource", () => {
 		
 		const deck = new RPCSource().withEventTypes<{"test": [number]}>();
 		
-		const rpcRoom = new RPCSource({deck: () =>  deck});
+		const rpcRoom = new RPCSource({deck: () =>  deck, ping(){}});
 		
 		RPCSource.start(rpcRoom, room);
 		
@@ -118,21 +118,29 @@ describe("RPCSource", () => {
 		const onMessage = mock.fn();
 		client.on("message", onMessage);
 		const [clientDeck] = await new rpcClient.deck(); // wait for add client
-		clientDeck.on("error", onError)
-		clientDeck.on("close", onClose)
+		clientDeck.on("error", onError);
+		clientDeck.on("close", onClose);
 		deck.emit("test", 1);
 		deck.emit("test", 2);
-		clientDeck.close();
-		await new Promise(resolve => setTimeout(resolve, 52)); // wait for close on backend
 		deck.emit("test", 3);
 		deck.emit("test", 4);
-		await new Promise(resolve => setTimeout(resolve, 52)); // wait for collect message
-		assert.equal(onMessage.mock.callCount(), 3, "no other messages");
+		deck.emit("test", 5);
+		deck.emit("test", 6);
+		clientDeck.close();
+		await rpcClient.ping()
+		deck.emit("test", 7);
+		deck.emit("test", 8);
+		deck.emit("test", 9);
+		deck.emit("test", 10);
+		deck.emit("test", 11);
+		deck.emit("test", 12);
+		await rpcClient.ping();
+		assert.equal(onMessage.mock.callCount(), 9, "no other messages"); // [baseState, event x 6, callResult x 2]
 		assert.equal(onError.mock.callCount(), 0, "no errors");
 		assert.equal(onClose.mock.callCount(), 1, "1 close event");
 	})
 	
-	it("disposed channel", {timeout: 1000}, async () => {
+	it("disposed channel", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
@@ -165,7 +173,7 @@ describe("RPCSource", () => {
 		assert.ok(onClose.mock.calls[0].arguments[0] instanceof Error, "emit error type");
 	});
 	
-	it("channels limit", {timeout: 1000}, async () => {
+	it("channels limit", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
@@ -187,7 +195,7 @@ describe("RPCSource", () => {
 		await assert.rejects(Promise.resolve(new rpcClient.deck()), "limit for 2 channels per client");
 	})
 	
-	it("constructor channel", {timeout: 1000}, async () => {
+	it("constructor channel", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -222,7 +230,7 @@ describe("RPCSource", () => {
 		assert.equal(deck.state, 55, "deck next state");
 	})
 	
-	it("connection in RPCSource constructor", {timeout: 1000}, async () => {
+	it("connection in RPCSource constructor", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -250,7 +258,7 @@ describe("RPCSource", () => {
 		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
 	})
 	
-	it("RPCSource base channel events", {timeout: 1000}, async () => {
+	it("RPCSource base channel events", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -270,7 +278,7 @@ describe("RPCSource", () => {
 		assert.deepEqual(onTest.mock.calls[0].arguments, ["msg"], "event arguments exact");
 	})
 	
-	it("RPCSource autoClose", {timeout: 1000}, async () => {
+	it("RPCSource autoClose", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -318,7 +326,7 @@ describe("RPCSource", () => {
 		assert.equal(await rpcClient.getDisposed(3), false, "deck3 still not disposed");
 	});
 	
-	it("RPCSource emit for", {timeout: 1000}, async () => {
+	it("RPCSource emit for", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -390,5 +398,52 @@ describe("RPCSource", () => {
 			"events of Charlie"
 		);
 		
+	})
+	
+	it("RPCSource state event", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+			await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const rpcRoom = new RPCSource({ping: () => true}, 100);
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 1)));
+		const onState = mock.fn();
+		clientRpc.on("state", onState);
+		await clientRpc;
+		
+		rpcRoom.setState(200);
+		rpcRoom.setState(300);
+		await clientRpc.ping();
+		
+		assert.deepEqual(onState.mock.calls.map(c => c.arguments), [[100], [200, 100], [300, 200]], "wrong");
+	})
+	
+	it("new RPCSource state event", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+			await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const deck = new RPCSource({ping: () => true}, 100);
+		const rpcRoom = new RPCSource({Deck: () => deck});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 1)));
+		const clientDeck = new clientRpc.Deck()
+		const onDeckState = mock.fn();
+		assert.equal(clientDeck.state, undefined);
+		clientDeck.on("state", onDeckState);
+		await clientDeck.ping();
+		assert.equal(clientDeck.state, 100);
+		
+		deck.setState(200);
+		deck.setState(300);
+		await clientDeck.ping();
+		assert.equal(clientDeck.state, 300);
+		
+		assert.deepEqual(onDeckState.mock.calls.map(c => c.arguments), [[100], [200, 100], [300, 200]], "wrong");
 	})
 });

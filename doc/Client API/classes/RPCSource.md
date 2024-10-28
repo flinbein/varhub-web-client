@@ -158,7 +158,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/RPCSource.ts:174](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L174)
+[src/RPCSource.ts:174](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L174)
 
 ## Accessors
 
@@ -172,7 +172,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/RPCSource.ts:245](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L245)
+[src/RPCSource.ts:242](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L242)
 
 ***
 
@@ -188,7 +188,7 @@ get current state
 
 #### Defined in
 
-[src/RPCSource.ts:131](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L131)
+[src/RPCSource.ts:131](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L131)
 
 ## Methods
 
@@ -208,7 +208,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/RPCSource.ts:307](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L307)
+[src/RPCSource.ts:304](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L304)
 
 ***
 
@@ -253,7 +253,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/RPCSource.ts:298](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L298)
+[src/RPCSource.ts:295](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L295)
 
 ***
 
@@ -337,7 +337,7 @@ event values
 
 #### Defined in
 
-[src/RPCSource.ts:255](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L255)
+[src/RPCSource.ts:252](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L252)
 
 ***
 
@@ -438,7 +438,7 @@ event values
 
 #### Defined in
 
-[src/RPCSource.ts:266](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L266)
+[src/RPCSource.ts:263](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L263)
 
 ***
 
@@ -486,7 +486,7 @@ new state value, if state is not a function.
 
 #### Defined in
 
-[src/RPCSource.ts:222](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L222)
+[src/RPCSource.ts:222](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L222)
 
 ***
 
@@ -527,7 +527,7 @@ apply generic types for events
 
 #### Defined in
 
-[src/RPCSource.ts:210](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L210)
+[src/RPCSource.ts:210](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L210)
 
 ***
 
@@ -564,7 +564,7 @@ apply generic types for state.
 
 ##### Defined in
 
-[src/RPCSource.ts:236](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L236)
+[src/RPCSource.ts:233](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L233)
 
 #### withState(state)
 
@@ -622,7 +622,7 @@ apply generic types for state and set new state.
 
 ##### Defined in
 
-[src/RPCSource.ts:238](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L238)
+[src/RPCSource.ts:235](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L235)
 
 ***
 
@@ -686,7 +686,7 @@ object with methods.
 
 #### Defined in
 
-[src/RPCSource.ts:186](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L186)
+[src/RPCSource.ts:186](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L186)
 
 ***
 
@@ -715,7 +715,7 @@ start listening for messages and processing procedure calls
 </td>
 <td>
 
-[`RPCSource`](RPCSource.md)\<`any`, `undefined`, `any`\>
+[`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\>
 
 </td>
 <td>
@@ -805,4 +805,4 @@ room
 
 #### Defined in
 
-[src/RPCSource.ts:318](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/RPCSource.ts#L318)
+[src/RPCSource.ts:315](https://github.com/flinbein/varhub-web-client/blob/c4b318448b6a624e1a6f916463a844aa4b553662/src/RPCSource.ts#L315)

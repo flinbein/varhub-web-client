@@ -42,13 +42,13 @@ type EventPathArgs<PATH, FORM> = (
 const enum CLIENT_ACTION {
 	CALL = 0,
 	CLOSE = 1,
-	CREATE = 2
+	CREATE = 2,
 }
 
 const enum REMOTE_ACTION {
 	RESPONSE_OK = 0,
 	CLOSE = 1,
-	CREATE = 2,
+	STATE = 2,
 	RESPONSE_ERROR = 3,
 	EVENT = 4
 }
@@ -113,7 +113,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	#autoDispose = false
 	#innerEvents = new EventEmitter<{
 		message: [filter: undefined | ((connection: Connection) => boolean), eventPath: string[], eventData: XJData[]],
-		state: [STATE, STATE],
+		state: [STATE],
 		dispose: [XJData],
 		channel: [RPCSourceChannel],
 	}>();
@@ -222,13 +222,10 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	setState(state: STATE extends (...args: any) => any ? never : STATE): this
 	setState(state: any): this{
 		if (this.disposed) throw new Error("disposed");
-		const oldState = this.#state;
-		const newState = typeof state === "function" ? state(oldState) : state;
-		const stateChanged = this.#state !== newState;
+		const newState = typeof state === "function" ? state(this.#state) : state;
+		if (this.#state === newState) return this;
 		this.#state = newState;
-		if (stateChanged) {
-			this.#innerEvents.emitWithTry("state", newState, oldState as any);
-		}
+		this.#innerEvents.emitWithTry("state", newState);
 		return this;
 	}
 	
@@ -315,10 +312,10 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 * @param maxChannelsPerClient set a limit on the number of opened channels
 	 * @param key Special key for listening events. Default value: `"$rpc"`
 	 */
-	static start(rpcSource: RPCSource<any, undefined, any>, room: Room, {maxChannelsPerClient = Infinity, key = "$rpc"} = {}){
+	static start(rpcSource: RPCSource<any, any, any>, room: Room, {maxChannelsPerClient = Infinity, key = "$rpc"} = {}){
 		const channels = new WeakMap<Connection, Map<number, RPCSourceChannel>>
 		const onConnectionMessage = async (con: Connection, ...args: XJData[]) => {
-			if (args.length < 4) return;
+			if (args.length < 3) return;
 			const [incomingKey, channelId, operationId, ...msgArgs] = args;
 			if (incomingKey !== key) return;
 			const source = channelId === undefined ? rpcSource : channels.get(con)?.get(channelId as any)?.source;
@@ -330,6 +327,14 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 				return;
 			}
 			if (operationId === CLIENT_ACTION.CALL) {
+				if (msgArgs.length === 0) /*request state*/ {
+					try {
+						con.send(incomingKey, channelId, REMOTE_ACTION.STATE, source.state);
+					} catch {
+						con.send(incomingKey, channelId, REMOTE_ACTION.STATE, new Error("state parse error"));
+					}
+					return;
+				}
 				const [callId, path, callArgs] = msgArgs;
 				try {
 					try {
@@ -370,7 +375,11 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.EVENT, path, args);
 						}
 						const onSourceState = (state: XJData) => {
-							con.send(incomingKey, newChannelId, REMOTE_ACTION.CREATE, state);
+							try {
+								con.send(incomingKey, newChannelId, REMOTE_ACTION.STATE, state);
+							} catch {
+								con.send(incomingKey, newChannelId, REMOTE_ACTION.STATE, new Error("state parse error"));
+							}
 						}
 						const dispose = (reason: XJData) => {
 							result.#innerEvents.off("dispose", onSourceDispose);
@@ -382,7 +391,12 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 						}
 						
 						const channel = new RPCSourceChannel(result, con, dispose);
-						con.send(incomingKey, newChannelId, REMOTE_ACTION.CREATE, result.#state);
+						try {
+							con.send(incomingKey, newChannelId, REMOTE_ACTION.STATE, result.#state);
+						} catch {
+							con.send(incomingKey, newChannelId, REMOTE_ACTION.STATE, new Error("state parse error"));
+						}
+						
 						map.set(newChannelId as any, channel);
 						result.#innerEvents.once("dispose", onSourceDispose);
 						result.#innerEvents.on("message", onSourceMessage);
@@ -407,13 +421,22 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 				connection.send(key, undefined, REMOTE_ACTION.EVENT, path, args)
 			}
 		}
+		const onMainRpcState = (state: XJData) => {
+			for (let connection of room.getConnections({ready: true})) try {
+				connection.send(key, undefined, REMOTE_ACTION.STATE, state)
+			} catch {
+				connection.send(key, undefined, REMOTE_ACTION.STATE, new Error("state parse error"))
+			}
+		}
 		room.on("connectionClose", clearChannelsForConnection);
 		room.on("connectionMessage", onConnectionMessage);
 		rpcSource.#innerEvents.on("message", onMainRpcSourceMessage);
+		rpcSource.#innerEvents.on("state", onMainRpcState);
 		return function dispose(){
 			room.off("connectionMessage", onConnectionMessage);
 			room.off("connectionClose", clearChannelsForConnection);
 			rpcSource.#innerEvents.off("message", onMainRpcSourceMessage);
+			rpcSource.#innerEvents.off("state", onMainRpcState);
 			for (let connection of room.getConnections()) {
 				clearChannelsForConnection(connection);
 			}

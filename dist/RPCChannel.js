@@ -23,7 +23,7 @@ class ChannelManager {
         return channel;
     }
     onMessage = (...args) => {
-        if (args.length < 4)
+        if (args.length < 3)
             return;
         const [key, channelId, operationCode, ...messageArgs] = args;
         if (key !== this.key)
@@ -35,7 +35,7 @@ class ChannelManager {
             return channel.onResponse(operationCode, messageArgs[0], messageArgs[1]);
         }
         if (operationCode === 2) {
-            return channel.onInit(messageArgs[0]);
+            return channel.onState(messageArgs[0]);
         }
         if (operationCode === 1) {
             return channel.onClose(messageArgs[0]);
@@ -64,27 +64,29 @@ class Channel {
         this.resolver.promise.catch(() => { });
         if (channelId === undefined) {
             if (manager.client.ready) {
-                this.onInit();
+                this.send(0);
             }
             else {
-                manager.client.once("open", () => this.onInit());
+                manager.client.once("open", () => {
+                    this.send(0);
+                });
             }
         }
         manager.client.once("close", (reason) => this.onClose(reason));
     }
-    onInit(state) {
+    onState(state) {
         if (this.closed)
             return;
         const oldState = this.state;
-        const sameState = this.state === state;
         const wasReady = this.ready;
         this.state = state;
         this.ready = true;
         if (!wasReady) {
             this.events.emitWithTry("init");
+            this.events.emitWithTry("state", state);
             this.resolver.resolve();
         }
-        if (!sameState) {
+        else {
             this.events.emitWithTry("state", state, oldState);
         }
     }
@@ -138,7 +140,9 @@ class Channel {
         this.send(2, channel.channelId, path, args);
         return channel.proxy;
     };
-    send(callCode, ...args) {
+    async send(callCode, ...args) {
+        if (!this.manager.client.ready)
+            await this.manager.client;
         this.manager.client.send(this.manager.key, this.channelId, callCode, ...args);
     }
     then = (res, rej) => {

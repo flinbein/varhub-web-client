@@ -6,9 +6,18 @@ import type { VarhubClient } from "./VarhubClient.js";
  * Basic events of {@link RPCChannel}
  * @event
  */
-export type RPCChannelEvents<S = undefined> = S extends undefined ? RPCChannelEventStateless : RPCChannelEventWithState<S>;
-
-type RPCChannelEventStateless = {
+export type RPCChannelEvents<S> = {
+	/**
+	 * state is changed
+	 * @example
+	 * ```typescript
+	 * const rpc = new RPCChannel(client);
+	 * rpc.on("state", (newState, oldState) => {
+	 *   console.log("state changed", newState);
+	 * });
+	 * ```
+	 */
+	state: [newState: S, oldState?: S]
 	/**
 	 * channel is closed
 	 * @example
@@ -46,19 +55,6 @@ type RPCChannelEventStateless = {
 	 */
 	error: [error: XJData]
 }
-type RPCChannelEventWithState<S> = RPCChannelEventStateless & {
-	/**
-	 * state is changed
-	 * @example
-	 * ```typescript
-	 * const rpc = new RPCChannel(client);
-	 * rpc.on("state", (newState, oldState) => {
-	 *   console.log("state changed", newState);
-	 * });
-	 * ```
-	 */
-	state: [newState: S, oldState: S]
-}
 
 const enum CLIENT_ACTION {
 	CALL = 0,
@@ -69,7 +65,7 @@ const enum CLIENT_ACTION {
 const enum REMOTE_ACTION {
 	RESPONSE_OK = 0,
 	CLOSE = 1,
-	CREATE = 2,
+	STATE = 2,
 	RESPONSE_ERROR = 3,
 	EVENT = 4
 }
@@ -180,7 +176,7 @@ class ChannelManager {
 	}
 	
 	onMessage = (...args: XJData[]) => {
-		if (args.length < 4) return;
+		if (args.length < 3) return;
 		const [key, channelId, operationCode, ...messageArgs] = args;
 		if (key !== this.key) return;
 		const channel = this.channels.get(channelId as any);
@@ -188,8 +184,8 @@ class ChannelManager {
 		if (operationCode === REMOTE_ACTION.RESPONSE_ERROR || operationCode === REMOTE_ACTION.RESPONSE_OK) {
 			return channel.onResponse(operationCode, messageArgs[0], messageArgs[1]);
 		}
-		if (operationCode === REMOTE_ACTION.CREATE) {
-			return channel.onInit(messageArgs[0]);
+		if (operationCode === REMOTE_ACTION.STATE) {
+			return channel.onState(messageArgs[0]);
 		}
 		if (operationCode === REMOTE_ACTION.CLOSE) {
 			return channel.onClose(messageArgs[0]);
@@ -219,26 +215,27 @@ class Channel {
 		this.resolver.promise.catch(() => {});
 		if (channelId === undefined) {
 			if (manager.client.ready) {
-				this.onInit();
+				this.send(CLIENT_ACTION.CALL);
 			} else {
-				manager.client.once("open", () => this.onInit());
+				manager.client.once("open", () => {
+					this.send(CLIENT_ACTION.CALL)
+				});
 			}
 		}
 		manager.client.once("close", (reason) => this.onClose(reason));
 	}
 	
-	onInit(state?: any){
+	onState(state?: any){
 		if (this.closed) return;
 		const oldState = this.state;
-		const sameState = this.state === state;
 		const wasReady = this.ready;
 		this.state = state;
 		this.ready = true;
 		if (!wasReady) {
 			this.events.emitWithTry("init");
+			this.events.emitWithTry("state", state);
 			this.resolver.resolve();
-		}
-		if (!sameState) {
+		} else {
 			this.events.emitWithTry("state", state, oldState);
 		}
 		
@@ -294,7 +291,8 @@ class Channel {
 		return channel.proxy;
 	}
 	
-	send(callCode: CLIENT_ACTION, ...args: XJData[]) {
+	async send(callCode: CLIENT_ACTION, ...args: XJData[]) {
+		if (!this.manager.client.ready) await this.manager.client;
 		this.manager.client.send(this.manager.key, this.channelId, callCode, ...args);
 	}
 	
