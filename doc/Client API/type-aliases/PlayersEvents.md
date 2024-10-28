@@ -49,7 +49,7 @@ players.on("join", (player) => {
 </td>
 <td>
 
-[src/Players.ts:20](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/Players.ts#L20)
+[src/Players.ts:20](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/Players.ts#L20)
 
 </td>
 </tr>
@@ -91,7 +91,7 @@ players.on("offline", player => player.kick("disconnected"))
 </td>
 <td>
 
-[src/Players.ts:42](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/Players.ts#L42)
+[src/Players.ts:42](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/Players.ts#L42)
 
 </td>
 </tr>
@@ -123,7 +123,7 @@ players.on("offline", (player) => {
 </td>
 <td>
 
-[src/Players.ts:66](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/Players.ts#L66)
+[src/Players.ts:66](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/Players.ts#L66)
 
 </td>
 </tr>
@@ -155,7 +155,7 @@ players.on("online", (player) => {
 </td>
 <td>
 
-[src/Players.ts:54](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/Players.ts#L54)
+[src/Players.ts:54](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/Players.ts#L54)
 
 </td>
 </tr>
@@ -164,4 +164,4 @@ players.on("online", (player) => {
 
 ## Defined in
 
-[src/Players.ts:9](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/Players.ts#L9)
+[src/Players.ts:9](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/Players.ts#L9)
