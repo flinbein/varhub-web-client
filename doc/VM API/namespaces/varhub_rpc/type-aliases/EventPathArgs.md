@@ -36,4 +36,4 @@
 
 ## Defined in
 
-[src/modules.d.ts:624](https://github.com/flinbein/varhub-web-client/blob/aa083d0edbc5407bd7a683b04a67f4c55c217aa3/src/modules.d.ts#L624)
+[src/modules.d.ts:624](https://github.com/flinbein/varhub-web-client/blob/5e789e48d34c1b3a28fc8322cbb077cc651a1ead/src/modules.d.ts#L624)
