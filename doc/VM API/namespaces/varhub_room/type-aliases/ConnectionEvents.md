@@ -47,7 +47,7 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 </td>
 <td>
 
-[src/modules.d.ts:58](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L58)
+[src/modules.d.ts:58](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L58)
 
 </td>
 </tr>
@@ -78,7 +78,7 @@ connection.on("message", (...data) => {
 </td>
 <td>
 
-[src/modules.d.ts:69](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L69)
+[src/modules.d.ts:69](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L69)
 
 </td>
 </tr>
@@ -110,7 +110,7 @@ connection.open();
 </td>
 <td>
 
-[src/modules.d.ts:47](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L47)
+[src/modules.d.ts:47](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L47)
 
 </td>
 </tr>
@@ -119,4 +119,4 @@ connection.open();
 
 ## Defined in
 
-[src/modules.d.ts:35](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L35)
+[src/modules.d.ts:35](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L35)

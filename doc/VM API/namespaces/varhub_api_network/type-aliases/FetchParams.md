@@ -57,7 +57,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:818](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L818)
+[src/modules.d.ts:818](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L818)
 
 </td>
 </tr>
@@ -74,7 +74,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:820](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L820)
+[src/modules.d.ts:820](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L820)
 
 </td>
 </tr>
@@ -91,7 +91,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:817](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L817)
+[src/modules.d.ts:817](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L817)
 
 </td>
 </tr>
@@ -108,7 +108,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:816](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L816)
+[src/modules.d.ts:816](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L816)
 
 </td>
 </tr>
@@ -125,7 +125,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:821](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L821)
+[src/modules.d.ts:821](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L821)
 
 </td>
 </tr>
@@ -142,7 +142,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:819](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L819)
+[src/modules.d.ts:819](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L819)
 
 </td>
 </tr>
@@ -159,7 +159,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:822](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L822)
+[src/modules.d.ts:822](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L822)
 
 </td>
 </tr>
@@ -176,7 +176,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:823](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L823)
+[src/modules.d.ts:823](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L823)
 
 </td>
 </tr>
@@ -193,7 +193,7 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:815](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L815)
+[src/modules.d.ts:815](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L815)
 
 </td>
 </tr>
@@ -202,4 +202,4 @@ keyof `BodyType`
 
 ## Defined in
 
-[src/modules.d.ts:814](https://github.com/flinbein/varhub-web-client/blob/0dd408e7e150a62f2a8fb7d2359caa924714cc8d/src/modules.d.ts#L814)
+[src/modules.d.ts:814](https://github.com/flinbein/varhub-web-client/blob/9ecf9faa0473dfd9f06f675501d3dfc1416cf094/src/modules.d.ts#L814)

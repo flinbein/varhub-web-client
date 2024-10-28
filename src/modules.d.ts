@@ -739,7 +739,7 @@ declare module "varhub:rpc" {
 		 * get the current rpc source, based on exports of main module.
 		 * value is undefined while main module is executing
 		 */
-		static get default(): RPCSource<any, undefined, any>;
+		static get default(): RPCSource<any, any, any>;
 	}
 }
 
