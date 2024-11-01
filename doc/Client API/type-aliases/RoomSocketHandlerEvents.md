@@ -34,7 +34,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:15](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L15)
+[src/RoomSocketHandler.ts:32](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L32)
 
 </td>
 </tr>
@@ -51,7 +51,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:9](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L9)
+[src/RoomSocketHandler.ts:26](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L26)
 
 </td>
 </tr>
@@ -68,7 +68,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:11](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L11)
+[src/RoomSocketHandler.ts:28](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L28)
 
 </td>
 </tr>
@@ -85,7 +85,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:12](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L12)
+[src/RoomSocketHandler.ts:29](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L29)
 
 </td>
 </tr>
@@ -102,7 +102,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:10](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L10)
+[src/RoomSocketHandler.ts:27](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L27)
 
 </td>
 </tr>
@@ -119,7 +119,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:13](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L13)
+[src/RoomSocketHandler.ts:30](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L30)
 
 </td>
 </tr>
@@ -136,7 +136,7 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:14](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L14)
+[src/RoomSocketHandler.ts:31](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L31)
 
 </td>
 </tr>
@@ -145,4 +145,4 @@
 
 ## Defined in
 
-[src/RoomSocketHandler.ts:8](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/RoomSocketHandler.ts#L8)
+[src/RoomSocketHandler.ts:25](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RoomSocketHandler.ts#L25)

@@ -112,7 +112,7 @@ events.emit("message", 1, 2, 3);
 
 #### Defined in
 
-[src/modules.d.ts:341](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/modules.d.ts#L341)
+[src/modules.d.ts:341](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/modules.d.ts#L341)
 
 ***
 
@@ -184,7 +184,7 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Defined in
 
-[src/modules.d.ts:345](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/modules.d.ts#L345)
+[src/modules.d.ts:345](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/modules.d.ts#L345)
 
 ***
 
@@ -254,7 +254,7 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Defined in
 
-[src/modules.d.ts:340](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/modules.d.ts#L340)
+[src/modules.d.ts:340](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/modules.d.ts#L340)
 
 ***
 
@@ -324,7 +324,7 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Defined in
 
-[src/modules.d.ts:338](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/modules.d.ts#L338)
+[src/modules.d.ts:338](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/modules.d.ts#L338)
 
 ***
 
@@ -394,4 +394,4 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Defined in
 
-[src/modules.d.ts:339](https://github.com/flinbein/varhub-web-client/blob/b2c7452db78660a1bdfa3d020ebdb763c07db886/src/modules.d.ts#L339)
+[src/modules.d.ts:339](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/modules.d.ts#L339)

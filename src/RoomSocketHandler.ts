@@ -1,6 +1,23 @@
 import { parse, serialize, XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
 
+const enum ROOM_EVENT {
+	INIT = 0,
+	MESSAGE_CHANGE = 1,
+	CONNECTION_JOIN = 2,
+	CONNECTION_ENTER = 3,
+	CONNECTION_MESSAGE = 4,
+	CONNECTION_CLOSED = 5,
+}
+const enum ROOM_ACTION {
+	JOIN = 0,
+	KICK = 1,
+	PUBLIC_MESSAGE = 2,
+	DESTROY = 3,
+	SEND = 4,
+	BROADCAST = 5,
+}
+
 /**
  * {@link RoomSocketHandler} events
  * @group Events
@@ -32,8 +49,8 @@ export class RoomSocketHandler {
 	#ws: WebSocket;
 	#id: string|null = null;
 	#integrity: string|null = null;
-	#wsEventBox = new EventEmitter<any>();
-	#selfEventBox = new EventEmitter<RoomSocketHandlerEvents>();
+	#wsEvents = new EventEmitter<any>();
+	#selfEvents = new EventEmitter<RoomSocketHandlerEvents>();
 	#publicMessage: string|null = null;
 	#initResolver = Promise.withResolvers<void>();
 	#ready = false;
@@ -45,42 +62,42 @@ export class RoomSocketHandler {
 		this.#ws = ws;
 		this.#initResolver.promise.catch(() => {});
 		ws.binaryType = "arraybuffer";
-		this.#connectionsLayer = new ConnectionsLayer(this.#selfEventBox, this.#action);
+		this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action);
 		ws.addEventListener("message", (event: MessageEvent) => {
 			const [eventName, ...params] = parse(event.data);
-			this.#wsEventBox.emitWithTry(String(eventName), ...params);
+			this.#wsEvents.emitWithTry(eventName as any, ...params);
 		});
 		ws.addEventListener("close", (event) => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEventBox.emitWithTry("close");
+			this.#selfEvents.emitWithTry("close");
 			this.#initResolver.reject(new Error(event.reason));
 		})
 		ws.addEventListener("error", () => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEventBox.emitWithTry("error");
+			this.#selfEvents.emitWithTry("error");
 			this.#initResolver.reject(new Error("unknown websocket error"));
 		})
-		this.#wsEventBox.on("connectionEnter", (conId, ...args) => {
+		this.#wsEvents.on(ROOM_EVENT.CONNECTION_ENTER, (conId, ...args) => {
 			this.#connectionsLayer.onEnter(conId, ...args);
 		});
-		this.#wsEventBox.on("connectionJoin", (conId) => {
+		this.#wsEvents.on(ROOM_EVENT.CONNECTION_JOIN, (conId) => {
 			this.#connectionsLayer.onJoin(conId);
 		});
-		this.#wsEventBox.on("connectionClosed", (conId, wasOnline, message) => {
+		this.#wsEvents.on(ROOM_EVENT.CONNECTION_CLOSED, (conId, wasOnline, message) => {
 			this.#connectionsLayer.onClose(conId, wasOnline, message);
 		});
-		this.#wsEventBox.on("connectionMessage", (conId, ...args) => {
+		this.#wsEvents.on(ROOM_EVENT.CONNECTION_MESSAGE, (conId, ...args) => {
 			this.#connectionsLayer.onMessage(conId, ...args);
 		});
-		this.#wsEventBox.on("init", (roomId: string, publicMessage?: string, integrity?: string) => {
+		this.#wsEvents.on(ROOM_EVENT.INIT, (roomId: string, publicMessage?: string, integrity?: string) => {
 			this.#id = roomId;
 			this.#publicMessage = publicMessage ?? null;
 			this.#integrity = integrity ?? null;
 			this.#initResolver.resolve();
 			this.#ready = true;
-			this.#selfEventBox.emitWithTry("init");
+			this.#selfEvents.emitWithTry("init");
 		});
 	}
 	
@@ -156,10 +173,10 @@ export class RoomSocketHandler {
 		const oldMsg = this.#publicMessage;
 		if (oldMsg === msg) return;
 		this.#publicMessage = msg;
-		this.#action("publicMessage", msg);
+		this.#action(ROOM_ACTION.PUBLIC_MESSAGE, msg);
 	}
 	
-	#action = (cmd: string, ...args: any) => {
+	#action = (cmd: ROOM_ACTION, ...args: any) => {
 		this.#ws.send(serialize(cmd, ...args));
 	}
 	
@@ -182,7 +199,7 @@ export class RoomSocketHandler {
 	 */
 	broadcast(...msg: any[]) {
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("websocket is not ready");
-		this.#ws.send(serialize("broadcast", ...msg));
+		this.#action(ROOM_ACTION.BROADCAST, ...msg);
 		return this;
 	}
 	
@@ -191,7 +208,7 @@ export class RoomSocketHandler {
 	 */
 	destroy() {
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("websocket is not ready");
-		this.#ws.send(serialize("destroy"));
+		this.#action(ROOM_ACTION.DESTROY);
 		this.#ws.close();
 	}
 	
@@ -204,7 +221,7 @@ export class RoomSocketHandler {
 	 * @see RoomSocketHandlerEvents
 	 */
 	on<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
-		this.#selfEventBox.on.call(this, event, handler as any);
+		this.#selfEvents.on.call(this, event, handler as any);
 		return this;
 	}
 	
@@ -217,7 +234,7 @@ export class RoomSocketHandler {
 	 * @see RoomSocketHandlerEvents
 	 */
 	once<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
-		this.#selfEventBox.once.call(this, event, handler as any);
+		this.#selfEvents.once.call(this, event, handler as any);
 		return this;
 	}
 	
@@ -230,7 +247,7 @@ export class RoomSocketHandler {
 	 * @see RoomSocketHandlerEvents
 	 */
 	off<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
-		this.#selfEventBox.off.call(this, event, handler as any);
+		this.#selfEvents.off.call(this, event, handler as any);
 		return this;
 	}
 	
@@ -261,9 +278,7 @@ class ConnectionsLayer {
 	readyConnections: WeakSet<Connection> = new Set();
 	connectionEmitters: WeakMap<Connection, EventEmitter<any>> = new WeakMap();
 	
-	constructor(public roomEmitter: EventEmitter<any>, public roomAction: (...args: any) => void) {
-	
-	}
+	constructor(public roomEmitter: EventEmitter<any>, public roomAction: (arg: ROOM_ACTION, ...args: any) => void) {}
 	
 	onEnter(id: number, ...parameters: XJData[]): Connection {
 		const connection = new Connection(id, parameters, this);
@@ -315,7 +330,7 @@ class ConnectionsLayer {
 	
 	join(conId: number){
 		this.onJoin(conId);
-		this.roomAction("join", conId);
+		this.roomAction(ROOM_ACTION.JOIN, conId);
 	}
 	
 	isClosed(conId: number) {
@@ -323,14 +338,14 @@ class ConnectionsLayer {
 	}
 	
 	send(id: number, ...args: XJData[]) {
-		this.roomAction("send", id, ...args);
+		this.roomAction(ROOM_ACTION.SEND, id, ...args);
 	}
 	
 	close(id: number, reason?: string|null) {
 		const connection = this.connections.get(id);
 		const wasOnline = connection && this.readyConnections.has(connection);
 		this.onClose(id, Boolean(wasOnline), reason ?? null);
-		this.roomAction("kick", id, reason ?? null);
+		this.roomAction(ROOM_ACTION.KICK, id, reason ?? null);
 	}
 	
 	getConnectionEmitter(con: Connection){

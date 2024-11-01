@@ -4,8 +4,8 @@ export class RoomSocketHandler {
     #ws;
     #id = null;
     #integrity = null;
-    #wsEventBox = new EventEmitter();
-    #selfEventBox = new EventEmitter();
+    #wsEvents = new EventEmitter();
+    #selfEvents = new EventEmitter();
     #publicMessage = null;
     #initResolver = Promise.withResolvers();
     #ready = false;
@@ -15,42 +15,42 @@ export class RoomSocketHandler {
         this.#ws = ws;
         this.#initResolver.promise.catch(() => { });
         ws.binaryType = "arraybuffer";
-        this.#connectionsLayer = new ConnectionsLayer(this.#selfEventBox, this.#action);
+        this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action);
         ws.addEventListener("message", (event) => {
             const [eventName, ...params] = parse(event.data);
-            this.#wsEventBox.emitWithTry(String(eventName), ...params);
+            this.#wsEvents.emitWithTry(eventName, ...params);
         });
         ws.addEventListener("close", (event) => {
             this.#closed = true;
             this.#ready = false;
-            this.#selfEventBox.emitWithTry("close");
+            this.#selfEvents.emitWithTry("close");
             this.#initResolver.reject(new Error(event.reason));
         });
         ws.addEventListener("error", () => {
             this.#closed = true;
             this.#ready = false;
-            this.#selfEventBox.emitWithTry("error");
+            this.#selfEvents.emitWithTry("error");
             this.#initResolver.reject(new Error("unknown websocket error"));
         });
-        this.#wsEventBox.on("connectionEnter", (conId, ...args) => {
+        this.#wsEvents.on(3, (conId, ...args) => {
             this.#connectionsLayer.onEnter(conId, ...args);
         });
-        this.#wsEventBox.on("connectionJoin", (conId) => {
+        this.#wsEvents.on(2, (conId) => {
             this.#connectionsLayer.onJoin(conId);
         });
-        this.#wsEventBox.on("connectionClosed", (conId, wasOnline, message) => {
+        this.#wsEvents.on(5, (conId, wasOnline, message) => {
             this.#connectionsLayer.onClose(conId, wasOnline, message);
         });
-        this.#wsEventBox.on("connectionMessage", (conId, ...args) => {
+        this.#wsEvents.on(4, (conId, ...args) => {
             this.#connectionsLayer.onMessage(conId, ...args);
         });
-        this.#wsEventBox.on("init", (roomId, publicMessage, integrity) => {
+        this.#wsEvents.on(0, (roomId, publicMessage, integrity) => {
             this.#id = roomId;
             this.#publicMessage = publicMessage ?? null;
             this.#integrity = integrity ?? null;
             this.#initResolver.resolve();
             this.#ready = true;
-            this.#selfEventBox.emitWithTry("init");
+            this.#selfEvents.emitWithTry("init");
         });
     }
     then(onfulfilled, onrejected) {
@@ -72,7 +72,7 @@ export class RoomSocketHandler {
         if (oldMsg === msg)
             return;
         this.#publicMessage = msg;
-        this.#action("publicMessage", msg);
+        this.#action(2, msg);
     }
     #action = (cmd, ...args) => {
         this.#ws.send(serialize(cmd, ...args));
@@ -86,25 +86,25 @@ export class RoomSocketHandler {
     broadcast(...msg) {
         if (this.#ws.readyState !== WebSocket.OPEN)
             throw new Error("websocket is not ready");
-        this.#ws.send(serialize("broadcast", ...msg));
+        this.#action(5, ...msg);
         return this;
     }
     destroy() {
         if (this.#ws.readyState !== WebSocket.OPEN)
             throw new Error("websocket is not ready");
-        this.#ws.send(serialize("destroy"));
+        this.#action(3);
         this.#ws.close();
     }
     on(event, handler) {
-        this.#selfEventBox.on.call(this, event, handler);
+        this.#selfEvents.on.call(this, event, handler);
         return this;
     }
     once(event, handler) {
-        this.#selfEventBox.once.call(this, event, handler);
+        this.#selfEvents.once.call(this, event, handler);
         return this;
     }
     off(event, handler) {
-        this.#selfEventBox.off.call(this, event, handler);
+        this.#selfEvents.off.call(this, event, handler);
         return this;
     }
     [Symbol.dispose]() {
@@ -183,19 +183,19 @@ class ConnectionsLayer {
     }
     join(conId) {
         this.onJoin(conId);
-        this.roomAction("join", conId);
+        this.roomAction(0, conId);
     }
     isClosed(conId) {
         return !this.connections.has(conId);
     }
     send(id, ...args) {
-        this.roomAction("send", id, ...args);
+        this.roomAction(4, id, ...args);
     }
     close(id, reason) {
         const connection = this.connections.get(id);
         const wasOnline = connection && this.readyConnections.has(connection);
         this.onClose(id, Boolean(wasOnline), reason ?? null);
-        this.roomAction("kick", id, reason ?? null);
+        this.roomAction(1, id, reason ?? null);
     }
     getConnectionEmitter(con) {
         let emitter = this.connectionEmitters.get(con);

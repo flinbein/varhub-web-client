@@ -7,6 +7,23 @@ type TypedArray =
 	| Float32Array  /*0e*/ | Float64Array  /*0f*/ | BigInt64Array  /*10*/ | BigUint64Array  /*11*/
 ;
 
+const enum ROOM_EVENT {
+	INIT = 0,
+	MESSAGE_CHANGE = 1,
+	CONNECTION_JOIN = 2,
+	CONNECTION_ENTER = 3,
+	CONNECTION_MESSAGE = 4,
+	CONNECTION_CLOSED = 5,
+}
+const enum ROOM_ACTION {
+	JOIN = 0,
+	KICK = 1,
+	PUBLIC_MESSAGE = 2,
+	DESTROY = 3,
+	SEND = 4,
+	BROADCAST = 5,
+}
+
 export class MockEvent extends Event {
 	constructor(type: string, fields: Record<string, any> = {}) {
 		super(type);
@@ -144,17 +161,18 @@ export class WebsocketMockRoom extends WebsocketMock {
 	#publicMessage: string|null = null;
 	
 	#serverMethods = {
-		join: (...args: number[]) => {
+		[ROOM_ACTION.JOIN]: (...args: number[]) => {
 			for (let clientId of args) {
 				const client = this.#lobbyClientMap.get(clientId);
 				if (!client) continue;
 				this.#lobbyClientMap.delete(clientId);
 				this.#onlineClientMap.set(clientId, client);
 				client.backend.open();
-				this.#roomSend("connectionJoin", clientId);
+				
+				this.#roomSend(ROOM_EVENT.CONNECTION_JOIN, clientId);
 			}
 		},
-		kick: (connectionIdList: number|number[], message: string) => {
+		[ROOM_ACTION.KICK]: (connectionIdList: number|number[], message: string) => {
 			if (typeof connectionIdList === "number") connectionIdList = [connectionIdList];
 			for (let clientId of connectionIdList) {
 				const client = this.#lobbyClientMap.get(clientId) ?? this.#onlineClientMap.get(clientId);
@@ -162,16 +180,16 @@ export class WebsocketMockRoom extends WebsocketMock {
 				this.#lobbyClientMap.delete(clientId);
 				const clientOnline = this.#onlineClientMap.delete(clientId);
 				client.backend.close(4000, message);
-				this.#roomSend("connectionClosed", clientId, clientOnline, message);
+				this.#roomSend(ROOM_EVENT.CONNECTION_CLOSED, clientId, clientOnline, message);
 			}
 		},
-		publicMessage: (msg: string) => {
+		[ROOM_ACTION.PUBLIC_MESSAGE]: (msg: string) => {
 			if (this.#publicMessage === msg) return;
 			const old = this.#publicMessage;
 			this.#publicMessage = msg;
-			this.#roomSend("publicMessage", msg, old);
+			this.#roomSend(ROOM_EVENT.MESSAGE_CHANGE, msg, old);
 		},
-		destroy: () => {
+		[ROOM_ACTION.DESTROY]: () => {
 			this.backend.close(4000, "room destroyed");
 			for (let ws of this.#lobbyClientMap.values()) {
 				ws.backend.close(4000, "room destroyed")
@@ -182,14 +200,14 @@ export class WebsocketMockRoom extends WebsocketMock {
 			this.#lobbyClientMap.clear();
 			this.#onlineClientMap.clear();
 		},
-		send: (idList: number|number[], ...sendArgs: XJData[]) => {
+		[ROOM_ACTION.SEND]: (idList: number|number[], ...sendArgs: XJData[]) => {
 			if (!Array.isArray(idList)) idList = [idList];
 			const binData = serialize(...sendArgs);
 			for (let conId of idList) {
 				this.#onlineClientMap.get(conId)?.backend.send(binData);
 			}
 		},
-		broadcast: (...sendArgs: XJData[]) => {
+		[ROOM_ACTION.BROADCAST]: (...sendArgs: XJData[]) => {
 			const binData = serialize(...sendArgs);
 			for (let ws of this.#onlineClientMap.values()) {
 				ws.backend.send(binData);
@@ -197,19 +215,19 @@ export class WebsocketMockRoom extends WebsocketMock {
 		}
 	} as const;
 	
-	#roomSend(...args: XJData[]) {
-		this.backend.send(serialize(...args));
+	#roomSend(cmd: ROOM_EVENT, ...args: XJData[]) {
+		this.backend.send(serialize(cmd, ...args));
 	}
 	
 	constructor(roomId: string, roomPublicMessage?: string, roomIntegrity?: string) {
 		super(false);
 		this.backend.addEventListener("open", () => {
-			this.backend.send(serialize("init", roomId, roomPublicMessage, roomIntegrity));
+			this.backend.send(serialize(ROOM_EVENT.INIT, roomId, roomPublicMessage, roomIntegrity));
 		});
 		
 		this.backend.addEventListener("message", async ({data}: any) => {
 			const [cmd, ...args] = parse(data);
-			if (typeof cmd === "string" && cmd in this.#serverMethods) (this.#serverMethods as any)[cmd](...args)
+			if (typeof cmd === "number" && cmd in this.#serverMethods) (this.#serverMethods as any)[cmd](...args)
 		})
 	}
 	
@@ -223,14 +241,14 @@ export class WebsocketMockRoom extends WebsocketMock {
 			const clientInLobby = this.#lobbyClientMap.delete(clientId);
 			const clientOnline = this.#onlineClientMap.delete(clientId);
 			if (clientInLobby || clientOnline) {
-				this.#roomSend("connectionClosed", clientId, clientOnline, reason);
+				this.#roomSend(ROOM_EVENT.CONNECTION_CLOSED, clientId, clientOnline, reason);
 			}
 		})
 		clientMock.backend.addEventListener("message", async ({data}: any) => {
 			if (!this.#onlineClientMap.has(clientId)) return;
-			this.#roomSend("connectionMessage", clientId, ...parse(data));
+			this.#roomSend(ROOM_EVENT.CONNECTION_MESSAGE, clientId, ...parse(data));
 		})
-		this.#roomSend("connectionEnter", clientId, ...args);
+		this.#roomSend(ROOM_EVENT.CONNECTION_ENTER, clientId, ...args);
 		(clientMock as any)["mockId"] = clientId;
 		return clientMock as any;
 	};
