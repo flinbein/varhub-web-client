@@ -329,8 +329,8 @@ class ConnectionsLayer {
 	}
 	
 	join(conId: number){
-		this.onJoin(conId);
 		this.roomAction(ROOM_ACTION.JOIN, conId);
+		this.onJoin(conId);
 	}
 	
 	isClosed(conId: number) {
@@ -344,8 +344,8 @@ class ConnectionsLayer {
 	close(id: number, reason?: string|null) {
 		const connection = this.connections.get(id);
 		const wasOnline = connection && this.readyConnections.has(connection);
-		this.onClose(id, Boolean(wasOnline), reason ?? null);
 		this.roomAction(ROOM_ACTION.KICK, id, reason ?? null);
+		this.onClose(id, Boolean(wasOnline), reason ?? null);
 	}
 	
 	getConnectionEmitter(con: Connection){

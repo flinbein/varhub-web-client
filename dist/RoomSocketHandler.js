@@ -182,8 +182,8 @@ class ConnectionsLayer {
         return con ? this.readyConnections.has(con) : false;
     }
     join(conId) {
-        this.onJoin(conId);
         this.roomAction(0, conId);
+        this.onJoin(conId);
     }
     isClosed(conId) {
         return !this.connections.has(conId);
@@ -194,8 +194,8 @@ class ConnectionsLayer {
     close(id, reason) {
         const connection = this.connections.get(id);
         const wasOnline = connection && this.readyConnections.has(connection);
-        this.onClose(id, Boolean(wasOnline), reason ?? null);
         this.roomAction(1, id, reason ?? null);
+        this.onClose(id, Boolean(wasOnline), reason ?? null);
     }
     getConnectionEmitter(con) {
         let emitter = this.connectionEmitters.get(con);

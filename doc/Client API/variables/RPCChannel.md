@@ -89,4 +89,4 @@ default:`"$rpc"`
 
 ## Defined in
 
-[src/RPCChannel.ts:121](https://github.com/flinbein/varhub-web-client/blob/a1652e820774a8313aee5216c904cce8bc3308f5/src/RPCChannel.ts#L121)
+[src/RPCChannel.ts:121](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L121)
