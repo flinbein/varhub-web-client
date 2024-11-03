@@ -12,8 +12,8 @@ export class Varhub {
         return this.#fetch("POST", `room/${encodeURIComponent(type)}`, JSON.stringify(options));
     }
     createRoomSocket(options = {}) {
-        const ws = this.#createWebsocket("room/ws", options);
-        return new RoomSocketHandler(ws);
+        const [ws, getErrorLog] = this.#createWebsocketWithErrorLoader("room/ws", options);
+        return new RoomSocketHandler(ws, getErrorLog);
     }
     async findRooms(integrity) {
         return this.#fetch("GET", `rooms/${encodeURIComponent(integrity)}`);
@@ -22,11 +22,11 @@ export class Varhub {
         return this.#fetch("GET", `room/${encodeURIComponent(roomId)}`);
     }
     join(roomId, options = {}) {
-        const ws = this.#createWebsocket(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
-        return new VarhubClient(ws);
+        const [ws, getErrorLog] = this.#createWebsocketWithErrorLoader(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
+        return new VarhubClient(ws, getErrorLog);
     }
     createLogger(loggerId) {
-        return this.#createWebsocket(`log/${encodeURIComponent(String(loggerId))}`);
+        return this.#createWebsocketWithErrorLoader(`log/${encodeURIComponent(String(loggerId))}`)[0];
     }
     async #fetch(method, path, body) {
         const getRoomsUrl = new URL(path, this.#baseUrl);
@@ -40,7 +40,7 @@ export class Varhub {
         }
         return response.json();
     }
-    #createWebsocket(path, options, stringifyKeys) {
+    #createWebsocketWithErrorLoader(path, options, stringifyKeys) {
         const wsUrl = new URL(this.#baseUrl);
         wsUrl.protocol = this.#baseUrl.protocol.replace("http", "ws");
         const joinRoomUrl = new URL(path, wsUrl);
@@ -52,9 +52,14 @@ export class Varhub {
                     value = JSON.stringify(value);
                 joinRoomUrl.searchParams.set(key, value);
             }
+        const errorId = Array(5).fill(0).map(() => Math.random().toString(36).substring(2)).join("");
+        const getError = () => {
+            return this.#fetch("GET", `/log/${encodeURIComponent(errorId)}`);
+        };
+        joinRoomUrl.searchParams.set("errorLog", errorId);
         const ws = new WebSocket(joinRoomUrl);
         ws.binaryType = "arraybuffer";
-        return ws;
+        return [ws, getError];
     }
 }
 //# sourceMappingURL=Varhub.js.map

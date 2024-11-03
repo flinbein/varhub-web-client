@@ -17,6 +17,7 @@
 <tr>
 <th>Name</th>
 <th>Type</th>
+<th>Description</th>
 <th>Defined in</th>
 </tr>
 </thead>
@@ -34,7 +35,12 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:32](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L32)
+&hyphen;
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:81](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L81)
 
 </td>
 </tr>
@@ -51,7 +57,23 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:26](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L26)
+new connection initialized
+
+**Example**
+
+```ts
+room.on("connection", (connection, ...params) => {
+  connection.open(); // need to open before call con.send()
+  console.log("someone connected with params", params);
+  connection.send("Welcome!");
+})
+```
+After the event is processed, the connection will be automatically opened (if [Connection#close](../classes/Connection.md#close) or [Connection#defer](../classes/Connection.md#defer) was not called).
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:38](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L38)
 
 </td>
 </tr>
@@ -68,7 +90,20 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:28](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L28)
+connection closed
+
+**Example**
+
+```ts
+room.on("connectionClose", (con, reason, wasOpen) => {
+  console.log("connection closed by reason:", reason);
+})
+```
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:58](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L58)
 
 </td>
 </tr>
@@ -85,7 +120,20 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:29](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L29)
+received a message from connection
+
+**Example**
+
+```ts
+room.on("connectionMessage", (con, ...data) => {
+  console.log("got message:", data);
+})
+```
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:68](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L68)
 
 </td>
 </tr>
@@ -102,7 +150,20 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:27](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L27)
+connection successfully opened
+
+**Example**
+
+```ts
+room.on("connectionOpen", (con) => {
+  con.send("Welcome!");
+})
+```
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:48](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L48)
 
 </td>
 </tr>
@@ -114,12 +175,26 @@
 </td>
 <td>
 
-[]
+[`Promise`\<`any`\>]
 
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:30](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L30)
+error creating room
+
+**Example**
+
+```typescript
+client.on("error", (asyncError) => {
+  console.log("room can not be created because:", await asyncError );
+  console.assert(room.closed);
+})
+```
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:79](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L79)
 
 </td>
 </tr>
@@ -136,7 +211,12 @@
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:31](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L31)
+&hyphen;
+
+</td>
+<td>
+
+[src/RoomSocketHandler.ts:80](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L80)
 
 </td>
 </tr>
@@ -145,4 +225,4 @@
 
 ## Defined in
 
-[src/RoomSocketHandler.ts:25](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RoomSocketHandler.ts#L25)
+[src/RoomSocketHandler.ts:25](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RoomSocketHandler.ts#L25)

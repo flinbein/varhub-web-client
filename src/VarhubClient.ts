@@ -43,14 +43,16 @@ export type VarhubClientEvents = {
 	 * client connection was closed while trying to connect
 	 * @example
 	 * ```typescript
-	 * client.on("error", () => {
-	 *   console.log("client can not be connected" );
+	 * client.on("error", (asyncError) => {
+	 *   console.log("client can not be connected because:", await asyncError );
 	 *   console.assert(client.closed);
 	 * })
 	 * ```
 	 */
-	error: []
+	error: [asyncError: Promise<any>]
 }
+
+const getNoError = async () => undefined;
 
 /**
  * Represents a user-controlled connection to the room;
@@ -73,7 +75,7 @@ export class VarhubClient {
 	#closed = false;
 	
 	/** @hidden */
-	constructor(ws: WebSocket) {
+	constructor(ws: WebSocket, getErrorLog: () => Promise<any> = getNoError) {
 		this.#ws = ws;
 		ws.binaryType = "arraybuffer";
 		if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
@@ -105,9 +107,9 @@ export class VarhubClient {
 		ws.addEventListener("error", () => {
 			this.#ready = false;
 			this.#closed = true;
-			this.#selfEvents.emitWithTry("error");
+			this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
 		})
-		this.#readyPromise.catch(() => {})
+		this.#readyPromise.catch(() => {});
 	}
 	
 	/**

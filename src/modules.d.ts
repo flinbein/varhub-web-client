@@ -193,11 +193,12 @@ declare module "varhub:room" {
 		 * @example
 		 * ```ts
 		 * room.on("connection", (con, ...params) => {
-		 *   con.open();
+		 *   con.open(); // need to open before call con.send()
 		 *   console.log("someone connected with params", params);
 		 *   con.send("Welcome!");
 		 * })
 		 * ```
+		 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
 		 * */
 		connection: [connection: Connection, ...params: any[]];
 		/**

@@ -23,11 +23,60 @@ const enum ROOM_ACTION {
  * @group Events
  * */
 export type RoomSocketHandlerEvents = {
+	/**
+	 * new connection initialized
+	 * @example
+	 * ```ts
+	 * room.on("connection", (connection, ...params) => {
+	 *   connection.open(); // need to open before call con.send()
+	 *   console.log("someone connected with params", params);
+	 *   connection.send("Welcome!");
+	 * })
+	 * ```
+	 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
+	 * */
 	connection: [connection: Connection, ...args: XJData[]];
+	/**
+	 * connection successfully opened
+	 * @example
+	 * ```ts
+	 * room.on("connectionOpen", (con) => {
+	 *   con.send("Welcome!");
+	 * })
+	 * ```
+	 * */
 	connectionOpen: [connection: Connection];
+	/**
+	 * connection closed
+	 * @example
+	 * ```ts
+	 * room.on("connectionClose", (con, reason, wasOpen) => {
+	 *   console.log("connection closed by reason:", reason);
+	 * })
+	 * ```
+	 * */
 	connectionClose: [connection: Connection, reason: string | null, wasOnline: boolean];
+	/**
+	 * received a message from connection
+	 * @example
+	 * ```ts
+	 * room.on("connectionMessage", (con, ...data) => {
+	 *   console.log("got message:", data);
+	 * })
+	 * ```
+	 * */
 	connectionMessage: [connection: Connection, ...args: XJData[]];
-	error: [];
+	/**
+	 * error creating room
+	 * @example
+	 * ```typescript
+	 * client.on("error", (asyncError) => {
+	 *   console.log("room can not be created because:", await asyncError );
+	 *   console.assert(room.closed);
+	 * })
+	 * ```
+	 */
+	error: [asyncError: Promise<any>];
 	init: [];
 	close: [];
 }
@@ -58,7 +107,7 @@ export class RoomSocketHandler {
 	#connectionsLayer: ConnectionsLayer;
 	
 	/** @hidden */
-	constructor(ws: WebSocket) {
+	constructor(ws: WebSocket, getErrorLog?: () => Promise<any>) {
 		this.#ws = ws;
 		this.#initResolver.promise.catch(() => {});
 		ws.binaryType = "arraybuffer";
@@ -76,7 +125,7 @@ export class RoomSocketHandler {
 		ws.addEventListener("error", () => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEvents.emitWithTry("error");
+			this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
 			this.#initResolver.reject(new Error("unknown websocket error"));
 		})
 		this.#wsEvents.on(ROOM_EVENT.CONNECTION_ENTER, (conId, ...args) => {

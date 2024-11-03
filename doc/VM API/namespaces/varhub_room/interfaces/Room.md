@@ -53,7 +53,7 @@ change public message of the room. Set null to make room private.
 
 #### Defined in
 
-[src/modules.d.ts:255](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L255)
+[src/modules.d.ts:256](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L256)
 
 ## Methods
 
@@ -67,7 +67,7 @@ change public message of the room. Set null to make room private.
 
 #### Defined in
 
-[src/modules.d.ts:311](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L311)
+[src/modules.d.ts:312](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L312)
 
 ***
 
@@ -81,7 +81,7 @@ change public message of the room. Set null to make room private.
 
 #### Defined in
 
-[src/modules.d.ts:310](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L310)
+[src/modules.d.ts:311](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L311)
 
 ***
 
@@ -122,7 +122,7 @@ send message to all ready connections.
 
 #### Defined in
 
-[src/modules.d.ts:270](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L270)
+[src/modules.d.ts:271](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L271)
 
 ***
 
@@ -138,7 +138,7 @@ destroy this room.
 
 #### Defined in
 
-[src/modules.d.ts:265](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L265)
+[src/modules.d.ts:266](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L266)
 
 ***
 
@@ -238,7 +238,7 @@ connections found
 
 #### Defined in
 
-[src/modules.d.ts:280](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L280)
+[src/modules.d.ts:281](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L281)
 
 ## Events
 
@@ -329,7 +329,7 @@ RoomEvents
 
 #### Defined in
 
-[src/modules.d.ts:308](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L308)
+[src/modules.d.ts:309](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L309)
 
 ***
 
@@ -420,7 +420,7 @@ RoomEvents
 
 #### Defined in
 
-[src/modules.d.ts:290](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L290)
+[src/modules.d.ts:291](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L291)
 
 ***
 
@@ -511,4 +511,4 @@ RoomEvents
 
 #### Defined in
 
-[src/modules.d.ts:299](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L299)
+[src/modules.d.ts:300](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L300)

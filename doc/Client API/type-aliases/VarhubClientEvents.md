@@ -49,7 +49,7 @@ client.on("close", (reason: string|null, wasOnline: boolean) => {
 </td>
 <td>
 
-[src/VarhubClient.ts:30](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/VarhubClient.ts#L30)
+[src/VarhubClient.ts:30](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/VarhubClient.ts#L30)
 
 </td>
 </tr>
@@ -61,7 +61,7 @@ client.on("close", (reason: string|null, wasOnline: boolean) => {
 </td>
 <td>
 
-[]
+[`Promise`\<`any`\>]
 
 </td>
 <td>
@@ -71,8 +71,8 @@ client connection was closed while trying to connect
 **Example**
 
 ```typescript
-client.on("error", () => {
-  console.log("client can not be connected" );
+client.on("error", (asyncError) => {
+  console.log("client can not be connected because:", await asyncError );
   console.assert(client.closed);
 })
 ```
@@ -80,7 +80,7 @@ client.on("error", () => {
 </td>
 <td>
 
-[src/VarhubClient.ts:52](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/VarhubClient.ts#L52)
+[src/VarhubClient.ts:52](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/VarhubClient.ts#L52)
 
 </td>
 </tr>
@@ -111,7 +111,7 @@ client.on("message", (...data: XJData[]) => {
 </td>
 <td>
 
-[src/VarhubClient.ts:19](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/VarhubClient.ts#L19)
+[src/VarhubClient.ts:19](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/VarhubClient.ts#L19)
 
 </td>
 </tr>
@@ -142,7 +142,7 @@ client.on("open", () => {
 </td>
 <td>
 
-[src/VarhubClient.ts:41](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/VarhubClient.ts#L41)
+[src/VarhubClient.ts:41](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/VarhubClient.ts#L41)
 
 </td>
 </tr>
@@ -151,4 +151,4 @@ client.on("open", () => {
 
 ## Defined in
 
-[src/VarhubClient.ts:8](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/VarhubClient.ts#L8)
+[src/VarhubClient.ts:8](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/VarhubClient.ts#L8)

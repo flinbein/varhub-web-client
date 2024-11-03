@@ -269,7 +269,9 @@ describe("Room events", async () => {
 		const onClose = mock.fn();
 		const onError = mock.fn();
 		const wsMock = new WebsocketMockRoom("room-id");
-		await using room = new RoomSocketHandler(wsMock);
+		const errorPromise = Promise.resolve("error-message");
+		const getError = () => errorPromise;
+		await using room = new RoomSocketHandler(wsMock, getError);
 		room.on("close", onClose);
 		room.on("error", onError);
 		assert.equal(onClose.mock.callCount(), 0);
@@ -279,7 +281,7 @@ describe("Room events", async () => {
 		assert.equal(onClose.mock.callCount(), 1);
 		assert.equal(onError.mock.callCount(), 1);
 		assert.deepEqual(onClose.mock.calls[0].arguments, []);
-		assert.deepEqual(onError.mock.calls[0].arguments, []);
+		assert.deepEqual(onError.mock.calls[0].arguments, [errorPromise]);
 	})
 	
 	

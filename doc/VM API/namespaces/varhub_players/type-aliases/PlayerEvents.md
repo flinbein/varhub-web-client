@@ -57,7 +57,7 @@ players.on("offline", player => player.kick("disconnected"));
 </td>
 <td>
 
-[src/modules.d.ts:379](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L379)
+[src/modules.d.ts:380](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L380)
 
 </td>
 </tr>
@@ -88,7 +88,7 @@ player.on("offline", () => {
 </td>
 <td>
 
-[src/modules.d.ts:401](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L401)
+[src/modules.d.ts:402](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L402)
 
 </td>
 </tr>
@@ -119,7 +119,7 @@ player.on("online", () => {
 </td>
 <td>
 
-[src/modules.d.ts:390](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L390)
+[src/modules.d.ts:391](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L391)
 
 </td>
 </tr>
@@ -128,4 +128,4 @@ player.on("online", () => {
 
 ## Defined in
 
-[src/modules.d.ts:358](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L358)
+[src/modules.d.ts:359](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L359)

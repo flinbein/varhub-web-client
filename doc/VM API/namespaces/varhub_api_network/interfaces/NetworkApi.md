@@ -74,4 +74,4 @@
 
 #### Defined in
 
-[src/modules.d.ts:797](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L797)
+[src/modules.d.ts:798](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L798)

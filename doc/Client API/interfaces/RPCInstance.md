@@ -35,12 +35,12 @@ Methods and properties of [RPCChannel](../variables/RPCChannel.md)
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| `call` | (`path`: `string`[], ...`args`: `any`[]) => `Promise`\<`any`\> | [src/RPCChannel.ts:89](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L89) |
-| `close` | (`reason`?: `string`) => `void` | [src/RPCChannel.ts:91](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L91) |
-| `closed` | `boolean` | [src/RPCChannel.ts:88](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L88) |
-| `create` | (`path`: `string`[], ...`args`: `any`[]) => [`RPCInstance`](RPCInstance.md)\<`any`\> & [`RpcEmitter`](RpcEmitter.md)\<`never`\> | [src/RPCChannel.ts:90](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L90) |
-| `ready` | `boolean` | [src/RPCChannel.ts:87](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L87) |
-| `state` | `S` | [src/RPCChannel.ts:92](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L92) |
+| `call` | (`path`: `string`[], ...`args`: `any`[]) => `Promise`\<`any`\> | [src/RPCChannel.ts:89](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L89) |
+| `close` | (`reason`?: `string`) => `void` | [src/RPCChannel.ts:91](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L91) |
+| `closed` | `boolean` | [src/RPCChannel.ts:88](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L88) |
+| `create` | (`path`: `string`[], ...`args`: `any`[]) => [`RPCInstance`](RPCInstance.md)\<`any`\> & [`RpcEmitter`](RpcEmitter.md)\<`never`\> | [src/RPCChannel.ts:90](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L90) |
+| `ready` | `boolean` | [src/RPCChannel.ts:87](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L87) |
+| `state` | `S` | [src/RPCChannel.ts:92](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L92) |
 
 ## Methods
 
@@ -164,4 +164,4 @@ node\_modules/@types/node/globals.d.ts:282
 
 #### Defined in
 
-[src/RPCChannel.ts:83](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/RPCChannel.ts#L83)
+[src/RPCChannel.ts:83](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/RPCChannel.ts#L83)

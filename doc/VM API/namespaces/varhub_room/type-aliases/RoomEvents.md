@@ -41,16 +41,17 @@ new connection initialized
 
 ```ts
 room.on("connection", (con, ...params) => {
-  con.open();
+  con.open(); // need to open before call con.send()
   console.log("someone connected with params", params);
   con.send("Welcome!");
 })
 ```
+After the event is processed, the connection will be automatically opened (if [Connection#close](../interfaces/Connection.md#close) or [Connection#defer](../interfaces/Connection.md#defer) was not called).
 
 </td>
 <td>
 
-[src/modules.d.ts:202](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L202)
+[src/modules.d.ts:203](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L203)
 
 </td>
 </tr>
@@ -80,7 +81,7 @@ room.on("connectionClose", (con, reason, wasOpen) => {
 </td>
 <td>
 
-[src/modules.d.ts:222](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L222)
+[src/modules.d.ts:223](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L223)
 
 </td>
 </tr>
@@ -110,7 +111,7 @@ room.on("connectionMessage", (con, ...data) => {
 </td>
 <td>
 
-[src/modules.d.ts:232](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L232)
+[src/modules.d.ts:233](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L233)
 
 </td>
 </tr>
@@ -140,7 +141,7 @@ room.on("connectionOpen", (con) => {
 </td>
 <td>
 
-[src/modules.d.ts:212](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L212)
+[src/modules.d.ts:213](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L213)
 
 </td>
 </tr>
@@ -149,4 +150,4 @@ room.on("connectionOpen", (con) => {
 
 ## Defined in
 
-[src/modules.d.ts:190](https://github.com/flinbein/varhub-web-client/blob/d93ec9e7d9f0967b9f3ecbfd0f70f402d58e0bea/src/modules.d.ts#L190)
+[src/modules.d.ts:190](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L190)

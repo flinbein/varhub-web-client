@@ -1,12 +1,13 @@
 import { parse, serialize } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
+const getNoError = async () => undefined;
 export class VarhubClient {
     #ws;
     #selfEvents = new EventEmitter();
     #readyPromise;
     #ready = false;
     #closed = false;
-    constructor(ws) {
+    constructor(ws, getErrorLog = getNoError) {
         this.#ws = ws;
         ws.binaryType = "arraybuffer";
         if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
@@ -39,7 +40,7 @@ export class VarhubClient {
         ws.addEventListener("error", () => {
             this.#ready = false;
             this.#closed = true;
-            this.#selfEvents.emitWithTry("error");
+            this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
         });
         this.#readyPromise.catch(() => { });
     }

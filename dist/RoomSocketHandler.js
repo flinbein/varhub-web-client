@@ -11,7 +11,7 @@ export class RoomSocketHandler {
     #ready = false;
     #closed = false;
     #connectionsLayer;
-    constructor(ws) {
+    constructor(ws, getErrorLog) {
         this.#ws = ws;
         this.#initResolver.promise.catch(() => { });
         ws.binaryType = "arraybuffer";
@@ -29,7 +29,7 @@ export class RoomSocketHandler {
         ws.addEventListener("error", () => {
             this.#closed = true;
             this.#ready = false;
-            this.#selfEvents.emitWithTry("error");
+            this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
             this.#initResolver.reject(new Error("unknown websocket error"));
         });
         this.#wsEvents.on(3, (conId, ...args) => {
