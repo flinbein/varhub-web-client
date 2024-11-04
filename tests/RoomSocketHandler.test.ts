@@ -284,6 +284,16 @@ describe("Room events", async () => {
 		assert.deepEqual(onError.mock.calls[0].arguments, [errorPromise]);
 	})
 	
+	await it("async error", {timeout: 2000}, async () => {
+		const wsMock = new WebsocketMockRoom("room-id");
+		const errorPromise = Promise.resolve("error-message");
+		const getError = () => errorPromise;
+		await using room = new RoomSocketHandler(wsMock, getError);
+		wsMock.backend.close();
+		const [roomPromiseResult] = await Promise.allSettled([room]);
+		assert.equal(roomPromiseResult.status, "rejected");
+		assert.equal(await (roomPromiseResult as any).reason.cause, "error-message");
+	})
 	
 	await it("emit close only", {timeout: 2000}, async () => {
 		const onClose = mock.fn();

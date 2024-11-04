@@ -12,4 +12,4 @@ config of this room. Config is created with room.
 
 ## Defined in
 
-[src/modules.d.ts:760](https://github.com/flinbein/varhub-web-client/blob/80de56149525d89cae98259b8f2326dc12362fbf/src/modules.d.ts#L760)
+[src/modules.d.ts:760](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/modules.d.ts#L760)

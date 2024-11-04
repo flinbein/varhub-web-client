@@ -423,7 +423,7 @@ describe("RPCSource", () => {
 	
 	it("new RPCSource state event", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		await room;
 		

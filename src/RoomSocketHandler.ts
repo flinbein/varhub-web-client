@@ -101,7 +101,7 @@ export class RoomSocketHandler {
 	#wsEvents = new EventEmitter<any>();
 	#selfEvents = new EventEmitter<RoomSocketHandlerEvents>();
 	#publicMessage: string|null = null;
-	#initResolver = Promise.withResolvers<void>();
+	#initResolver = Promise.withResolvers<[this]>();
 	#ready = false;
 	#closed = false;
 	#connectionsLayer: ConnectionsLayer;
@@ -120,13 +120,13 @@ export class RoomSocketHandler {
 			this.#closed = true;
 			this.#ready = false;
 			this.#selfEvents.emitWithTry("close");
-			this.#initResolver.reject(new Error(event.reason));
 		})
 		ws.addEventListener("error", () => {
 			this.#closed = true;
 			this.#ready = false;
-			this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
-			this.#initResolver.reject(new Error("unknown websocket error"));
+			const errorPromise = getErrorLog ? getErrorLog() : Promise.resolve(undefined);
+			this.#selfEvents.emitWithTry("error", errorPromise);
+			this.#initResolver.reject(new Error("websocket closed", {cause: errorPromise}));
 		})
 		this.#wsEvents.on(ROOM_EVENT.CONNECTION_ENTER, (conId, ...args) => {
 			this.#connectionsLayer.onEnter(conId, ...args);
@@ -144,7 +144,7 @@ export class RoomSocketHandler {
 			this.#id = roomId;
 			this.#publicMessage = publicMessage ?? null;
 			this.#integrity = integrity ?? null;
-			this.#initResolver.resolve();
+			this.#initResolver.resolve([this]);
 			this.#ready = true;
 			this.#selfEvents.emitWithTry("init");
 		});
@@ -182,7 +182,7 @@ export class RoomSocketHandler {
 		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
 		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
 	): PromiseLike<R1 | R2> {
-		return this.#initResolver.promise.then(() => [this] as [this]).then(onfulfilled, onrejected);
+		return this.#initResolver.promise.then(onfulfilled, onrejected);
 	};
 	
 	/**

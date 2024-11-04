@@ -70,13 +70,14 @@ export class VarhubClient {
 	readonly #ws: WebSocket;
 	
 	readonly #selfEvents = new EventEmitter<VarhubClientEvents>();
-	readonly #readyPromise: Promise<void>;
+	#initResolver = Promise.withResolvers<[this]>();
 	#ready = false;
 	#closed = false;
 	
 	/** @hidden */
 	constructor(ws: WebSocket, getErrorLog: () => Promise<any> = getNoError) {
 		this.#ws = ws;
+		this.#initResolver.promise.catch(() => {});
 		ws.binaryType = "arraybuffer";
 		if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
 			throw new Error("websocket is closed");
@@ -86,14 +87,11 @@ export class VarhubClient {
 				this.#ready = true;
 				this.#closed = false;
 				this.#selfEvents.emitWithTry("open");
-			})
-			this.#readyPromise = new Promise<void>((resolve, reject) => {
-				this.on("open", () => {resolve()});
-				this.on("close", () => {reject()});
+				this.#initResolver.resolve([this]);
 			})
 		} else {
 			this.#ready = true;
-			this.#readyPromise = Promise.resolve();
+			this.#initResolver.resolve([this]);
 		}
 		ws.addEventListener("message", (event) => {
 			this.#selfEvents.emitWithTry("message", ...parse(event.data));
@@ -107,16 +105,17 @@ export class VarhubClient {
 		ws.addEventListener("error", () => {
 			this.#ready = false;
 			this.#closed = true;
-			this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
+			const errorPromise = getErrorLog ? getErrorLog() : Promise.resolve(undefined);
+			this.#selfEvents.emitWithTry("error", errorPromise);
+			this.#initResolver.reject(new Error("websocket closed", {cause: errorPromise}));
 		})
-		this.#readyPromise.catch(() => {});
 	}
 	
 	/**
 	 * Promise like for events "open", "error"
-	 * ### Using in async context
 	 * @example
 	 * ```typescript
+	 * // Using in async context
 	 * const client = varhub.join(roomId);
 	 * try {
 	 *   await client;
@@ -127,11 +126,12 @@ export class VarhubClient {
 	 * ```
 	 * @example
 	 * ```typescript
+	 * // Using in async context
 	 * const [client] = await varhub.join(roomId);
 	 * ```
-	 * ### Using in sync context
 	 * @example
 	 * ```typescript
+	 * // Using in sync context
 	 * varhub.join(roomId).then(([client]) => {
 	 *   console.log("client connected");
 	 * });
@@ -143,7 +143,7 @@ export class VarhubClient {
 		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
 		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
 	): PromiseLike<R1 | R2> {
-		return this.#readyPromise.then(() => [this] as [this]).then(onfulfilled, onrejected);
+		return this.#initResolver.promise.then(onfulfilled, onrejected);
 	};
 	
 	/**

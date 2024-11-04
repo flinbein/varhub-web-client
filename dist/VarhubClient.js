@@ -4,11 +4,12 @@ const getNoError = async () => undefined;
 export class VarhubClient {
     #ws;
     #selfEvents = new EventEmitter();
-    #readyPromise;
+    #initResolver = Promise.withResolvers();
     #ready = false;
     #closed = false;
     constructor(ws, getErrorLog = getNoError) {
         this.#ws = ws;
+        this.#initResolver.promise.catch(() => { });
         ws.binaryType = "arraybuffer";
         if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
             throw new Error("websocket is closed");
@@ -18,15 +19,12 @@ export class VarhubClient {
                 this.#ready = true;
                 this.#closed = false;
                 this.#selfEvents.emitWithTry("open");
-            });
-            this.#readyPromise = new Promise((resolve, reject) => {
-                this.on("open", () => { resolve(); });
-                this.on("close", () => { reject(); });
+                this.#initResolver.resolve([this]);
             });
         }
         else {
             this.#ready = true;
-            this.#readyPromise = Promise.resolve();
+            this.#initResolver.resolve([this]);
         }
         ws.addEventListener("message", (event) => {
             this.#selfEvents.emitWithTry("message", ...parse(event.data));
@@ -40,12 +38,13 @@ export class VarhubClient {
         ws.addEventListener("error", () => {
             this.#ready = false;
             this.#closed = true;
-            this.#selfEvents.emitWithTry("error", getErrorLog ? getErrorLog() : Promise.resolve(undefined));
+            const errorPromise = getErrorLog ? getErrorLog() : Promise.resolve(undefined);
+            this.#selfEvents.emitWithTry("error", errorPromise);
+            this.#initResolver.reject(new Error("websocket closed", { cause: errorPromise }));
         });
-        this.#readyPromise.catch(() => { });
     }
     then(onfulfilled, onrejected) {
-        return this.#readyPromise.then(() => [this]).then(onfulfilled, onrejected);
+        return this.#initResolver.promise.then(onfulfilled, onrejected);
     }
     ;
     get ready() { return this.#ready; }
