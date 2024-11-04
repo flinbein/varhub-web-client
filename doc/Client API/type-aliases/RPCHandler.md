@@ -101,4 +101,4 @@ In this case the handler must return a [RPCSource](../classes/RPCSource.md) or P
 
 ## Defined in
 
-[src/RPCSource.ts:15](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCSource.ts#L15)
+[src/RPCSource.ts:15](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/RPCSource.ts#L15)

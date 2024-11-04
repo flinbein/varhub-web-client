@@ -1,6 +1,7 @@
 | [API Documentation](doc/README.md) 
 | [Codepen examples](https://codepen.io/collection/PoqYRg)
 |
+
 ---
 
 # Install
@@ -724,4 +725,34 @@ let tickNumber = 0;
 setInterval(() => {
   RPCSource.default.emit("tick", tickNumber++);
 }, 1000);
+```
+
+## Use RPC with TypeScript
+```typescript
+// roomHandler.js
+export const rpcBase = new RPCSource({
+  ping(){
+    return "pong"
+  }
+}, 100 ).withEventTypes<{tick: [number]}>();
+let tickNumber = 0;
+setInterval(() => {
+  rpcBase.emit("tick", tickNumber++);
+}, 1000);
+RPCSource.start(rpcBase, room);
+```
+```typescript
+// client.js
+
+// need to import rpcBase as type from room handler side code
+import type { rpcBase } from "./roomHandler.js";
+// ...
+const client = hub.join(roomId);
+const rpc = new RPCChannel<typeof rpcBase>(client);
+
+// now rpc is well-typed object
+await rpc.ping(); // correct function types
+rpc.on("tick", (tick /* number */) => {
+  // correct event types
+})
 ```

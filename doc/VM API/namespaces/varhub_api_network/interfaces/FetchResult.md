@@ -35,11 +35,11 @@ keyof `BodyType`
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| `body` | `BodyType`\[`T`\] | [src/modules.d.ts:835](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L835) |
-| `headers` | `Record`\<`string`, `string`\> | [src/modules.d.ts:834](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L834) |
-| `ok` | `boolean` | [src/modules.d.ts:829](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L829) |
-| `redirected` | `boolean` | [src/modules.d.ts:832](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L832) |
-| `status` | `number` | [src/modules.d.ts:833](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L833) |
-| `statusText` | `string` | [src/modules.d.ts:831](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L831) |
-| `type` | `string` | [src/modules.d.ts:830](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L830) |
-| `url` | `string` | [src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/modules.d.ts#L828) |
+| `body` | `BodyType`\[`T`\] | [src/modules.d.ts:835](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L835) |
+| `headers` | `Record`\<`string`, `string`\> | [src/modules.d.ts:834](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L834) |
+| `ok` | `boolean` | [src/modules.d.ts:829](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L829) |
+| `redirected` | `boolean` | [src/modules.d.ts:832](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L832) |
+| `status` | `number` | [src/modules.d.ts:833](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L833) |
+| `statusText` | `string` | [src/modules.d.ts:831](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L831) |
+| `type` | `string` | [src/modules.d.ts:830](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L830) |
+| `url` | `string` | [src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/modules.d.ts#L828) |
