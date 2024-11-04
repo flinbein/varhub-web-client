@@ -411,8 +411,8 @@ room.on("connectionOpen", (connection) => {
   connection.send("Welcome!");
 })
 ```
-[Room](/doc/VM%20API/namespaces/varhub_room/interfaces/Room.md) is similar 
-to [RoomSocketHandler](/doc/Client%20API/classes/RoomSocketHandler.md),
+[Room](doc/VM%20API/namespaces/varhub_room/interfaces/Room.md) is similar 
+to [RoomSocketHandler](doc/Client%20API/classes/RoomSocketHandler.md),
 with the differences:
 - no `init`, `close`, `error` events. 
 - `room` is immediately initialized.
@@ -490,7 +490,7 @@ create new instance:
 const players = new Players(room, (connection, name) => name);
 ```
 `new Players(room, registerPlayerHandler)`
-- `room` ([Room](doc/VM%20API/namespaces/varhub_room/interfaces/Room.md) or [RoomSocketHandler](/doc/Client%20API/classes/RoomSocketHandler.md))
+- `room` ([Room](doc/VM%20API/namespaces/varhub_room/interfaces/Room.md) or [RoomSocketHandler](doc/Client%20API/classes/RoomSocketHandler.md))
 - `registerPlayerHandler`: (`(connection, ...args) => ?`) function to get the player's name
   - `connection`: ([Connection](doc/Client%20API/classes/Connection.md))
   - `...args`: (`any[]`)

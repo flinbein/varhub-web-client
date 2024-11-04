@@ -69,7 +69,7 @@ rpc.on("close", (reason) => {
 </td>
 <td>
 
-[src/RPCChannel.ts:32](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/RPCChannel.ts#L32)
+[src/RPCChannel.ts:32](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCChannel.ts#L32)
 
 </td>
 </tr>
@@ -101,7 +101,7 @@ rpc.on("error", (reason) => {
 </td>
 <td>
 
-[src/RPCChannel.ts:56](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/RPCChannel.ts#L56)
+[src/RPCChannel.ts:56](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCChannel.ts#L56)
 
 </td>
 </tr>
@@ -133,7 +133,7 @@ rpc.on("init", (reason) => {
 </td>
 <td>
 
-[src/RPCChannel.ts:44](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/RPCChannel.ts#L44)
+[src/RPCChannel.ts:44](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCChannel.ts#L44)
 
 </td>
 </tr>
@@ -164,7 +164,7 @@ rpc.on("state", (newState, oldState) => {
 </td>
 <td>
 
-[src/RPCChannel.ts:20](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/RPCChannel.ts#L20)
+[src/RPCChannel.ts:20](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCChannel.ts#L20)
 
 </td>
 </tr>
@@ -173,4 +173,4 @@ rpc.on("state", (newState, oldState) => {
 
 ## Defined in
 
-[src/RPCChannel.ts:9](https://github.com/flinbein/varhub-web-client/blob/9db988520cfb0824522e6c6d1698d44de5ef3f92/src/RPCChannel.ts#L9)
+[src/RPCChannel.ts:9](https://github.com/flinbein/varhub-web-client/blob/e65e01813e5de867041177e674157476c2502975/src/RPCChannel.ts#L9)
