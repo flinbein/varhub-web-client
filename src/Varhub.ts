@@ -66,6 +66,7 @@ interface RoomModule {
 export interface RoomJoinOptions {
 	integrity?: string
 	params?: any[],
+	allowInspect?: boolean,
 }
 
 /**

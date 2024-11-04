@@ -375,6 +375,7 @@ client.send("Hello")
 - `options?`
   - `options.integrity?` (`string`) - room integrity. It is required if room was created with `integrity` param.
   - `options.params?` (`Array`) - additional parameters to join room. 
+  - `options.allowInspect?` (`boolean`) - allow to join room with attached inspector. `false` by default
 
 returns
   - [VarhubClient](doc/Client%20API/classes/VarhubClient.md)
@@ -555,6 +556,9 @@ RPC allows clients to:
 - call remote methods defined in VM or room handler
 - receive custom events
 
+The RPC protocol is built on top of the messaging between the client and the room.
+You can see the [detailed description](src/rpc.md) of the messages
+
 ## default RPC in VM
 
 You can export methods or structures with methods from entrypoint:
@@ -726,6 +730,31 @@ setInterval(() => {
   RPCSource.default.emit("tick", tickNumber++);
 }, 1000);
 ```
+send event to specified connections only
+```javascript
+const players = new Players(room, (connection, name) => name);
+
+players.on("join", player => {
+    player.setGroup(Math.random() > 0.5 ? "red" : "blue");
+})
+
+RPCSource.default.emit("message", "Hello all!");
+RPCSource.default.emitFor(players.getGroup("red"), "message", "Hello red team!");
+RPCSource.default.emitFor(players.getGroup("blue"), "message", "Hello blue team!");
+```
+`RPCSource#emitFor(connections, event, ...args)`
+
+- `connections`
+  - (`[]`) - empty array, do not send message
+  - (`null | undefined`) - send event to all connections
+  - (`Connection`) - send event to specified connection (if it is subscribed)
+  - (`(con: Connection) => boolean`) - filter connections by predicate
+  - (`Iterable<Connection>` or `Player` instance) - send event to specified connections
+  - (`Iterable<Iterable<Connection>>` or `Players` instance)
+  - ...etc
+- `event` (`string`) event name
+- `args` (`any[]`) event data
+
 
 ## Use RPC with TypeScript
 ```typescript

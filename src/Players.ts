@@ -76,6 +76,8 @@ export default class Players {
 	readonly #playerEvents = new WeakMap<Player, EventEmitter<PlayerEvents>>();
 	readonly #connectionPlayerNameMap = new WeakMap<Connection, string>();
 	readonly #registerPlayer
+	readonly #events = new EventEmitter<PlayersEvents>();
+	readonly #room;
 	readonly #controller = {
 		isRegistered: (player: Player) => this.#playerMap.get(player.name) === player,
 		getGroupOf: (player: Player) => this.#playerGroups.get(player),
@@ -96,9 +98,6 @@ export default class Players {
 			this.#events.emitWithTry("leave", player);
 		}
 	}
-	
-	
-	readonly #events = new EventEmitter<PlayersEvents>();
 	
 	/**
 	 * Create a player list based on connections.
@@ -124,10 +123,14 @@ export default class Players {
 	 */
 	constructor(room: Room, registerPlayerHandler: (connection: Connection, ...args: XJData[]) => string|void|null|undefined|Promise<string|void|null|undefined>) {
 		this.#registerPlayer = registerPlayerHandler;
+		this.#room = room;
 		room.on("connection", this.#onConnection);
 		room.on("connectionOpen", this.#onConnectionOpen);
+		room.on("connectionMessage", this.#onConnectionMessage);
 		room.on("connectionClose", this.#onConnectionClose);
 	}
+	
+	get room(){return this.#room};
 	
 	#onConnection = async (connection: Connection, ...args: XJData[]) => {
 		let registerResult;
@@ -167,6 +170,11 @@ export default class Players {
 		this.#playerConnections.set(player, new Set([connection]));
 		this.#playerMap.set(playerName, player);
 		this.#events.emitWithTry("join", player);
+	}
+	
+	#onConnectionMessage = (connection: Connection, ...args: any[]) => {
+		const player = this.get(connection);
+		if (player) this.#playerEvents.get(player)?.emitWithTry("connectionMessage", connection, ...args);
 	}
 	
 	#onConnectionClose = (connection: Connection) => {
@@ -305,7 +313,18 @@ export type PlayerEvents = {
 	 * })
 	 * ```
 	 */
-	offline: []
+	offline: [],
+	
+	/**
+	 * message from player
+	 * ```typescript
+	 * player.on("connectionMessage", (connection, ...msg) => {
+	 *   console.log(player.name, "said:", ...msg);
+	 *   connection.send("thanks for a message");
+	 * });
+	 * ```
+	 */
+	connectionMessage: [connecton: Connection, ...message: XJData[]]
 }
 
 /**
@@ -348,10 +367,21 @@ class Player {
 	setGroup(value: string|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
+	 * send message for all connections
+	 * @param args
+	 */
+	send(...args: XJData[]): this {
+		for (let connection of this.connections) {
+			connection.send(...args);
+		}
+		return this;
+	}
+	
+	/**
 	 * @event
 	 * @template {keyof PlayerEvents} T
 	 * subscribe on event
-	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
 	on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
@@ -362,7 +392,7 @@ class Player {
 	 * @event
 	 * @template {keyof PlayerEvents} T
 	 * subscribe on event once
-	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
 	once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
@@ -373,7 +403,7 @@ class Player {
 	 * @event
 	 * @template {keyof PlayerEvents} T
 	 * unsubscribe from event
-	 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
 	off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this {

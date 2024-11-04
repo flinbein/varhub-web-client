@@ -3,26 +3,26 @@
 All incoming and outgoing PRC messages extends this type:
 ```typescript
 type RPCMessage<T = "$rpc"> = [
-    key: T,
-    channelId: number | undefined,
-    action: number,
-    ...data: any[]
+  key: T,
+  channelId: number | undefined,
+  action: number,
+  ...data: any[]
 ];
 ```
 
 ---
 
-## Client to Handler
+## Client to Room
 
 ### Call remote method
 ```typescript
 type ClientMessageCall = [
-	key: string, // default: "$rpc"
-	channelId: number /* subchannel */ | undefined /* default channel */,
-	action: 0, // CLIENT_ACTION.CALL
-	responseKey: any, // room will respond with this key
-	path: string[], // path to remote function
-	arguments: any[] // call function with this arguments    
+  key: string, // default: "$rpc"
+  channelId: number /* subchannel */ | undefined /* default channel */,
+  action: 0, // CLIENT_ACTION.CALL
+  responseKey: any, // room will respond with this key
+  path: string[], // path to remote function
+  arguments: any[] // call function with this arguments  
 ]
 ```
 Handler will respond with:
@@ -33,9 +33,9 @@ Handler will respond with:
 ### Request state
 ```typescript
 type ClientMessageCall = [
-    key: string, // default: "$rpc"
-    channelId: number /* subchannel */ | undefined /* default channel */,
-    action: 0, // CLIENT_ACTION.CALL
+  key: string, // default: "$rpc"
+  channelId: number /* subchannel */ | undefined /* default channel */,
+  action: 0, // CLIENT_ACTION.CALL
 ]
 ```
 Handler will respond with:
@@ -47,10 +47,10 @@ Handler will respond with:
 default channel can not be closed;
 ```typescript
 type ClientMessageClose = [
-    key: string, // default: "$rpc"
-    channelId: number,
-    action: 1, // CLIENT_ACTION.CLOSE
-    reason: any // call function with this arguments    
+  key: string, // default: "$rpc"
+  channelId: number,
+  action: 1, // CLIENT_ACTION.CLOSE
+  reason: any // call function with this arguments
 ]
 ```
 No response is expected from the handler.
@@ -73,7 +73,7 @@ handler will respond with:
 
 ---
 
-## Handler to Client
+## Room to Client
 
 ### Method call result
 ```typescript
@@ -90,20 +90,20 @@ type HandlerMessageCallResult = [
 default channel can not be closed;
 ```typescript
 type HandlerMessageChannelClosed = [
-    key: string, // default: "$rpc"
-    channelId: number,
-    action: 1, // REMOTE_ACTION.CLOSE
-    closeReason: any, // result of function call or error    
+  key: string, // default: "$rpc"
+  channelId: number,
+  action: 1, // REMOTE_ACTION.CLOSE
+  closeReason: any, // result of function call or error
 ]
 ```
 
 ### Channel created or state updated
 ```typescript
 type HandlerMessageChannelState = [
-	key: string, // default: "$rpc"
-	channelId: number,
-	action: 2, // REMOTE_ACTION.STATE
-	state: any, // state value of channel
+  key: string, // default: "$rpc"
+  channelId: number,
+  action: 2, // REMOTE_ACTION.STATE
+  state: any, // state value of channel
 ]
 ```
 

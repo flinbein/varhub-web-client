@@ -1,7 +1,7 @@
 import * as assert from "node:assert";
 import test, { it, mock } from "node:test";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
-import Players from "../src/Players.js";
+import { Players, VarhubClient} from "../src/index.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 
 test.describe("Players", () => {
@@ -218,5 +218,78 @@ test.describe("Players", () => {
 		roomWs.createClientMock("Bob");
 		assert.equal(await joinPromiseThisValue, players, "this value is players");
 	})
+	
+	it("send", {timeout: 3000}, async () => {
+		const roomWs = new WebsocketMockRoom("test");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		
+		const players = new Players(room, (_con, name) => name ? String(name) : null);
+		
+		const onMessageBob1 = mock.fn();
+		const bobClient1 = new VarhubClient(roomWs.createClientMock("Bob"));
+		bobClient1.on("message", onMessageBob1);
+		const onMessageBob2 = mock.fn();
+		const bobClient2 = new VarhubClient(roomWs.createClientMock("Bob"));
+		bobClient2.on("message", onMessageBob2);
+		const onMessageAlice = mock.fn();
+		const aliceClient = new VarhubClient(roomWs.createClientMock("Alice"));
+		aliceClient.on("message", onMessageAlice);
+		
+		await Promise.all([bobClient1, bobClient2, aliceClient]);
+		
+		await new Promise(r => {
+			aliceClient.on("message", r);
+			players.get("Bob")?.send("hello, Bob!");
+			players.get("Alice")?.send("hello, Alice!");
+		})
+		
+		assert.deepEqual(onMessageBob1.mock.calls.map(c => c.arguments), [["hello, Bob!"]])
+		assert.deepEqual(onMessageBob2.mock.calls.map(c => c.arguments), [["hello, Bob!"]])
+		assert.deepEqual(onMessageAlice.mock.calls.map(c => c.arguments), [["hello, Alice!"]])
+	})
+	
+	it("player on connectionMessage", {timeout: 3000}, async () => {
+		const roomWs = new WebsocketMockRoom("test");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		
+		const players = new Players(room, (_con, name) => name ? String(name) : null);
+		
+		const aliceClient = new VarhubClient(roomWs.createClientMock("Alice", 1));
+		const bobClient1 = new VarhubClient(roomWs.createClientMock("Bob", 2));
+		const bobClient2 = new VarhubClient(roomWs.createClientMock("Bob", 3));
+		
+		await Promise.all([bobClient1, bobClient2, aliceClient]);
+		
+		const onAliceConnectionMessage = mock.fn();
+		const alicePlayer = players.get("Alice")!;
+		alicePlayer.on("connectionMessage", onAliceConnectionMessage);
+		
+		const onBobConnectionMessage = mock.fn();
+		const bobPlayer = players.get("Bob")!;
+		bobPlayer.on("connectionMessage", onBobConnectionMessage);
+		
+		
+		
+		await new Promise((resolve) => {
+			alicePlayer.on("connectionMessage", resolve);
+			bobClient1.send(2, "from Bob");
+			bobClient2.send(3, "from Bob");
+			aliceClient.send(1, "from Alice");
+		})
+		
+		assert.deepEqual(onAliceConnectionMessage.mock.callCount(), 1);
+		assert.deepEqual(onBobConnectionMessage.mock.callCount(), 2);
+		
+		assert.deepEqual(onAliceConnectionMessage.mock.calls[0].arguments.slice(1), [ 1, "from Alice"]);
+		assert.deepEqual(onAliceConnectionMessage.mock.calls[0].arguments[0].parameters, ["Alice", 1]);
+		
+		assert.deepEqual(onBobConnectionMessage.mock.calls[0].arguments.slice(1), [ 2, "from Bob"]);
+		assert.deepEqual(onBobConnectionMessage.mock.calls[0].arguments[0].parameters, ["Bob", 2]);
+		
+		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments.slice(1), [ 3, "from Bob"]);
+		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments[0].parameters, ["Bob", 3]);
+		
+	})
 });
-// end of file

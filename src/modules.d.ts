@@ -20,6 +20,8 @@
  * @module VM API
  */
 
+import type { XJData } from "xjmapper";
+
 /**
  * This module allows you to get a controller of current {@link Room}.
  * @example
@@ -400,6 +402,16 @@ declare module "varhub:players" {
 		 * ```
 		 */
 		offline: []
+		/**
+		 * message from player
+		 * ```typescript
+		 * player.on("connectionMessage", (connection, ...msg) => {
+		 *   console.log(player.name, "said:", ...msg);
+		 *   connection.send("thanks for a message");
+		 * });
+		 * ```
+		 */
+		connectionMessage: [connecton: Connection, ...message: XJData[]]
 	}
 	
 	/**
@@ -435,7 +447,7 @@ declare module "varhub:players" {
 		 * @event
 		 * @template {keyof PlayerEvents} T
 		 * subscribe on event
-		 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
 		on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
@@ -443,7 +455,7 @@ declare module "varhub:players" {
 		 * @event
 		 * @template {keyof PlayerEvents} T
 		 * subscribe on event once
-		 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
 		once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
@@ -451,7 +463,7 @@ declare module "varhub:players" {
 		 * @event
 		 * @template {keyof PlayerEvents} T
 		 * subscribe on event once
-		 * @param {keyof PlayerEvents} eventName "leave", "online" or "offline"
+		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
 		off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;

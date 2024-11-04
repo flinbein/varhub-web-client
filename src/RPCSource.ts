@@ -105,6 +105,8 @@ class RPCSourceChannel<S = RPCSource> {
 /** @hidden */
 export type { RPCSourceChannel };
 
+export type DeepIterable<T> = T | Iterable<DeepIterable<T>>;
+
 /**
  * Remote procedure call handler
  */
@@ -261,7 +263,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 * @param args event values
 	 */
 	emitFor<P extends EventPath<EVENTS>>(
-		predicate: Connection | Iterable<Connection> | Iterable<Iterable<Connection>> | ((con: Connection) => any) | null | undefined,
+		predicate: DeepIterable<Connection> | ((con: Connection) => any) | null | undefined,
 		event: P,
 		...args: EventPathArgs<P, EVENTS>
 	): this {
@@ -272,14 +274,14 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	}
 	
 	#getPredicateFilter(
-		predicate: Connection | Iterable<Connection> | Iterable<Iterable<Connection>> | ((con: Connection) => any) | null | undefined,
+		predicate: DeepIterable<Connection> | ((con: Connection) => any) | null | undefined,
 	): undefined | ((con: Connection) => boolean) {
 		if (predicate == null) return;
 		if (typeof predicate === "function") return predicate;
 		const matches = new Set<Connection>();
-		const add = (param: Connection | Iterable<Connection> | Iterable<Iterable<Connection>>) => {
+		const add = (param: DeepIterable<Connection>) => {
 			if (Symbol.iterator in param) {
-				for (let paramElement of param) add(paramElement)
+				for (let paramElement of param) add(paramElement);
 			} else {
 				matches.add(param);
 			}

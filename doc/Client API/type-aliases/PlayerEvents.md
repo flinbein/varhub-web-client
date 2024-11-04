@@ -25,6 +25,34 @@ Events of [Player](../classes/Player.md)
 <tr>
 <td>
 
+`connectionMessage`
+
+</td>
+<td>
+
+[[`Connection`](../classes/Connection.md), `XJData`[]]
+
+</td>
+<td>
+
+message from player
+```typescript
+player.on("connectionMessage", (connection, ...msg) => {
+  console.log(player.name, "said:", ...msg);
+  connection.send("thanks for a message");
+});
+```
+
+</td>
+<td>
+
+[src/Players.ts:327](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L327)
+
+</td>
+</tr>
+<tr>
+<td>
+
 `leave`
 
 </td>
@@ -59,7 +87,7 @@ players.on("offline", player => player.kick("disconnected"));
 </td>
 <td>
 
-[src/Players.ts:286](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L286)
+[src/Players.ts:294](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L294)
 
 </td>
 </tr>
@@ -90,7 +118,7 @@ player.on("offline", () => {
 </td>
 <td>
 
-[src/Players.ts:308](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L308)
+[src/Players.ts:316](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L316)
 
 </td>
 </tr>
@@ -121,7 +149,7 @@ player.on("online", () => {
 </td>
 <td>
 
-[src/Players.ts:297](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L297)
+[src/Players.ts:305](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L305)
 
 </td>
 </tr>
@@ -130,4 +158,4 @@ player.on("online", () => {
 
 ## Defined in
 
-[src/Players.ts:265](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L265)
+[src/Players.ts:273](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L273)

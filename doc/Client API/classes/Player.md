@@ -22,7 +22,7 @@ get all player's connections
 
 #### Defined in
 
-[src/Players.ts:332](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L332)
+[src/Players.ts:351](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L351)
 
 ***
 
@@ -38,7 +38,7 @@ get player's group
 
 #### Defined in
 
-[src/Players.ts:344](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L344)
+[src/Players.ts:363](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L363)
 
 ***
 
@@ -54,7 +54,7 @@ player's name
 
 #### Defined in
 
-[src/Players.ts:327](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L327)
+[src/Players.ts:346](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L346)
 
 ***
 
@@ -70,7 +70,7 @@ player is online (has at least one opened connection)
 
 #### Defined in
 
-[src/Players.ts:336](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L336)
+[src/Players.ts:355](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L355)
 
 ***
 
@@ -86,7 +86,7 @@ player is registered in list of players
 
 #### Defined in
 
-[src/Players.ts:340](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L340)
+[src/Players.ts:359](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L359)
 
 ## Methods
 
@@ -102,7 +102,7 @@ iterate on all player's connections
 
 #### Defined in
 
-[src/Players.ts:403](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L403)
+[src/Players.ts:433](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L433)
 
 ***
 
@@ -153,7 +153,52 @@ kick player and close all player's connections
 
 #### Defined in
 
-[src/Players.ts:388](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L388)
+[src/Players.ts:418](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L418)
+
+***
+
+### send()
+
+> **send**(...`args`): `this`
+
+send message for all connections
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+...`args`
+
+</td>
+<td>
+
+`XJData`[]
+
+</td>
+<td>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`this`
+
+#### Defined in
+
+[src/Players.ts:373](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L373)
 
 ***
 
@@ -194,7 +239,7 @@ set player's group
 
 #### Defined in
 
-[src/Players.ts:348](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L348)
+[src/Players.ts:367](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L367)
 
 ***
 
@@ -208,7 +253,7 @@ set player's group
 
 #### Defined in
 
-[src/Players.ts:392](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L392)
+[src/Players.ts:422](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L422)
 
 ***
 
@@ -222,7 +267,7 @@ set player's group
 
 #### Defined in
 
-[src/Players.ts:396](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L396)
+[src/Players.ts:426](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L426)
 
 ## Events
 
@@ -279,7 +324,7 @@ unsubscribe from event
 </td>
 <td>
 
-"leave", "online" or "offline"
+"leave", "online", "connectionMessage" or "offline"
 
 </td>
 </tr>
@@ -309,7 +354,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:379](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L379)
+[src/Players.ts:409](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L409)
 
 ***
 
@@ -366,7 +411,7 @@ subscribe on event
 </td>
 <td>
 
-"leave", "online" or "offline"
+"leave", "online", "connectionMessage" or "offline"
 
 </td>
 </tr>
@@ -396,7 +441,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:357](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L357)
+[src/Players.ts:387](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L387)
 
 ***
 
@@ -453,7 +498,7 @@ subscribe on event once
 </td>
 <td>
 
-"leave", "online" or "offline"
+"leave", "online", "connectionMessage" or "offline"
 
 </td>
 </tr>
@@ -483,4 +528,4 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:368](https://github.com/flinbein/varhub-web-client/blob/f2cfd0691254d5f14825d895a437ee15531fc39c/src/Players.ts#L368)
+[src/Players.ts:398](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Players.ts#L398)
