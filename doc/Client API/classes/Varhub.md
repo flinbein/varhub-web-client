@@ -45,7 +45,7 @@ Varhub instance to manage rooms, create clients
 
 #### Defined in
 
-[src/Varhub.ts:78](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L78)
+[src/Varhub.ts:78](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L78)
 
 ## Accessors
 
@@ -63,7 +63,7 @@ string
 
 #### Defined in
 
-[src/Varhub.ts:86](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L86)
+[src/Varhub.ts:86](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L86)
 
 ## Methods
 
@@ -116,7 +116,7 @@ Array.from({length:10}).map(() => Math.random().toString(36).substring(2)).join(
 
 #### Defined in
 
-[src/Varhub.ts:167](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L167)
+[src/Varhub.ts:167](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L167)
 
 ***
 
@@ -199,7 +199,7 @@ options
 
 #### Defined in
 
-[src/Varhub.ts:95](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L95)
+[src/Varhub.ts:95](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L95)
 
 ***
 
@@ -280,7 +280,7 @@ set public message of this room
 
 #### Defined in
 
-[src/Varhub.ts:105](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L105)
+[src/Varhub.ts:105](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L105)
 
 ***
 
@@ -331,7 +331,7 @@ record of <roomId, message>.
 
 #### Defined in
 
-[src/Varhub.ts:117](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L117)
+[src/Varhub.ts:117](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L117)
 
 ***
 
@@ -401,7 +401,7 @@ Error if room not found or room not public or integrity mismatch
 
 #### Defined in
 
-[src/Varhub.ts:128](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L128)
+[src/Varhub.ts:128](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L128)
 
 ***
 
@@ -467,4 +467,4 @@ client
 
 #### Defined in
 
-[src/Varhub.ts:151](https://github.com/flinbein/varhub-web-client/blob/3d1a27ccdae3244b9b235adccabb6f1fe678ec72/src/Varhub.ts#L151)
+[src/Varhub.ts:151](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/Varhub.ts#L151)
