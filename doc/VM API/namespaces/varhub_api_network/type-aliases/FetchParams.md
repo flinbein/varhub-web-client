@@ -8,6 +8,8 @@
 
 > **FetchParams**\<`T`\>: `object`
 
+options that can be used to configure a fetch request.
+
 ## Type Parameters
 
 <table>
@@ -40,6 +42,7 @@ keyof `BodyType`
 <tr>
 <th>Name</th>
 <th>Type</th>
+<th>Description</th>
 <th>Defined in</th>
 </tr>
 </thead>
@@ -52,12 +55,17 @@ keyof `BodyType`
 </td>
 <td>
 
-`string` \| `ArrayBuffer` \| ([`string`, `string`] \| [`string`, `FileJson`] \| [`string`, `ArrayBuffer`, `string`])[]
+[`FetchRequestBody`](FetchRequestBody.md)
 
 </td>
 <td>
 
-[src/modules.d.ts:829](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L829)
+request body. Empty by default.
+
+</td>
+<td>
+
+[src/modules.d.ts:868](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L868)
 
 </td>
 </tr>
@@ -74,7 +82,14 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:831](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L831)
+**See**
+
+[RequestInit.credentials](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials)
+
+</td>
+<td>
+
+[src/modules.d.ts:876](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L876)
 
 </td>
 </tr>
@@ -91,7 +106,12 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L828)
+add custom headers to the request
+
+</td>
+<td>
+
+[src/modules.d.ts:864](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L864)
 
 </td>
 </tr>
@@ -108,7 +128,12 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:827](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L827)
+http method. `GET` by default
+
+</td>
+<td>
+
+[src/modules.d.ts:860](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L860)
 
 </td>
 </tr>
@@ -125,7 +150,14 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:832](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L832)
+**See**
+
+[RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
+
+</td>
+<td>
+
+[src/modules.d.ts:880](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L880)
 
 </td>
 </tr>
@@ -142,7 +174,14 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:830](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L830)
+**See**
+
+[RequestInit.redirect](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#redirect)
+
+</td>
+<td>
+
+[src/modules.d.ts:872](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L872)
 
 </td>
 </tr>
@@ -159,7 +198,14 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:833](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L833)
+**See**
+
+[RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
+
+</td>
+<td>
+
+[src/modules.d.ts:884](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L884)
 
 </td>
 </tr>
@@ -176,7 +222,14 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:834](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L834)
+**See**
+
+[RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
+
+</td>
+<td>
+
+[src/modules.d.ts:888](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L888)
 
 </td>
 </tr>
@@ -193,7 +246,12 @@ keyof `BodyType`
 </td>
 <td>
 
-[src/modules.d.ts:826](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L826)
+`"json"|"text"|"arrayBuffer"|"formData"`. By default, it will define using header content-type
+
+</td>
+<td>
+
+[src/modules.d.ts:856](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L856)
 
 </td>
 </tr>
@@ -202,4 +260,4 @@ keyof `BodyType`
 
 ## Defined in
 
-[src/modules.d.ts:825](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L825)
+[src/modules.d.ts:852](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L852)

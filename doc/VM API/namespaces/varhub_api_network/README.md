@@ -36,6 +36,18 @@ console.log(response.body);
 </td>
 <td>
 
+represents the response to a fetch request.
+
+</td>
+</tr>
+<tr>
+<td>
+
+[FileJson](interfaces/FileJson.md)
+
+</td>
+<td>
+
 &hyphen;
 
 </td>
@@ -69,6 +81,42 @@ console.log(response.body);
 <td>
 
 [FetchParams](type-aliases/FetchParams.md)
+
+</td>
+<td>
+
+options that can be used to configure a fetch request.
+
+</td>
+</tr>
+<tr>
+<td>
+
+[FetchRequestBody](type-aliases/FetchRequestBody.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+[FormDataJson](type-aliases/FormDataJson.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+[FormDataJsonItem](type-aliases/FormDataJsonItem.md)
 
 </td>
 <td>

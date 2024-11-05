@@ -12,6 +12,8 @@
 
 > **fetch**\<`T`\>(`url`, `params`?): `Promise`\<[`FetchResult`](FetchResult.md)\<`T`\>\>
 
+customized fetch function
+
 #### Type Parameters
 
 <table>
@@ -38,6 +40,7 @@
 <tr>
 <th>Parameter</th>
 <th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -52,6 +55,11 @@
 `string`
 
 </td>
+<td>
+
+url to fetch as string
+
+</td>
 </tr>
 <tr>
 <td>
@@ -64,6 +72,9 @@
 [`FetchParams`](../type-aliases/FetchParams.md)\<`T`\>
 
 </td>
+<td>
+
+</td>
 </tr>
 </tbody>
 </table>
@@ -72,6 +83,16 @@
 
 `Promise`\<[`FetchResult`](FetchResult.md)\<`T`\>\>
 
+- Promise<[FetchResult](FetchResult.md)>
+
+#### See
+
+ - [RequestInit.redirect](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#redirect)
+ - [RequestInit.credentials](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials)
+ - [RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
+ - [RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
+ - [RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
+
 #### Defined in
 
-[src/modules.d.ts:808](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L808)
+[src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L828)

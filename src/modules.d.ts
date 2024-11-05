@@ -442,6 +442,11 @@ declare module "varhub:players" {
 		 */
 		setGroup(value: string|undefined);
 		/**
+		 * send message for all connections
+		 * @param args
+		 */
+		send(...args: any[]): this;
+		/**
 		 * @event
 		 * @template {keyof PlayerEvents} T
 		 * subscribe on event
@@ -805,16 +810,31 @@ declare module "varhub:performance" {
  */
 declare module "varhub:api/network" {
 	export interface NetworkApi {
+		/**
+		 * customized fetch function
+		 * @param url - url to fetch as string
+		 * @param params
+		 * @param params.method http method. `GET` by default
+		 * @param params.type - `"json"|"text"|"arrayBuffer"|"formData"`. By default, it will define using header content-type
+		 * @param params.headers - `Record<string, string>` add custom headers to the request
+		 * @param params.body - request body. Empty by default
+		 * @param params.redirect @see [RequestInit.redirect](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#redirect)
+		 * @param params.credentials @see [RequestInit.credentials](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials)
+		 * @param params.mode @see [RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
+		 * @param params.referrer @see [RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
+		 * @param params.referrerPolicy @see [RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
+		 * @returns - Promise<{@link FetchResult}>
+		 */
 		fetch<T extends keyof BodyType>(url: string, params?: FetchParams<T>): Promise<FetchResult<T>>
 	}
 	type BodyType = {
 		json: unknown;
 		text: string;
 		arrayBuffer: ArrayBuffer;
-		formData: Array<[string, string | FileJson]>
+		formData: Array<[name: string, value: string | FileJson]>
 	}
 	
-	interface FileJson {
+	export interface FileJson {
 		type: string,
 		size: number,
 		name: string,
@@ -822,26 +842,92 @@ declare module "varhub:api/network" {
 		data: ArrayBuffer
 	}
 	
+	export type FormDataJsonItem = [name: string, value: string] | [name: string, value: FileJson] | [name: string, value: ArrayBuffer, fileName: string];
+	export type FormDataJson = FormDataJsonItem[];
+	export type FetchRequestBody = string | ArrayBuffer | FormDataJson
+	
+	/**
+	 *  options that can be used to configure a fetch request.
+	 */
 	export type FetchParams<T extends keyof BodyType = keyof BodyType> = {
+		/**
+		 * `"json"|"text"|"arrayBuffer"|"formData"`. By default, it will define using header content-type
+		 */
 		type?: T
+		/**
+		 * http method. `GET` by default
+		 */
 		method?: RequestInit["method"],
+		/**
+		 * add custom headers to the request
+		 */
 		headers?: Record<string, string>,
-		body?: string | ArrayBuffer | Array<[string, string] | [string, FileJson] | [string, ArrayBuffer, string]>
+		/**
+		 * request body. Empty by default.
+		 */
+		body?: FetchRequestBody
+		/**
+		 * @see [RequestInit.redirect](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#redirect)
+		 */
 		redirect?: RequestInit["redirect"],
+		/**
+		 * @see [RequestInit.credentials](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials)
+		 */
 		credentials?: RequestInit["credentials"]
+		/**
+		 * @see [RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
+		 */
 		mode?: RequestInit["mode"]
+		/**
+		 * @see [RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
+		 */
 		referrer?: RequestInit["referrer"]
+		/**
+		 * @see [RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
+		 */
 		referrerPolicy?: RequestInit["referrerPolicy"]
 	};
 	
+	/**
+	 * represents the response to a fetch request.
+	 */
 	export interface FetchResult<T extends keyof BodyType = keyof BodyType> {
 		url: string,
+		/**
+		 * A boolean indicating whether the response was successful (status in the range 200 – 299) or not.
+		 */
 		ok: boolean,
+		/**
+		 * @see [Response.type](https://developer.mozilla.org/en-US/docs/Web/API/Response/type)
+		 */
 		type: string,
+		/**
+		 * The status message corresponding to the status code. (e.g., OK for 200).
+		 */
 		statusText: string,
+		/**
+		 * Indicates whether or not the response is the result of a redirect (that is, its URL list has more than one entry).
+		 */
 		redirected: boolean,
+		/**
+		 * response status
+		 */
 		status: number,
+		/**
+		 * The headers object associated with the response.
+		 */
 		headers: Record<string, string>,
+		/**
+		 * response body
+		 *
+		 * if request type is `"json"` returns json object;
+		 *
+		 * if request type is `"text"` returns `string`;
+		 *
+		 * if request type is `"arrayBuffer"` returns {@link ArrayBuffer};
+		 *
+		 * if request type is `"formData"` returns `Array`<[name: `string`, value: `string`|{@link FileJson}]>;
+		 */
 		body: BodyType[T],
 	}
 	

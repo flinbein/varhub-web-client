@@ -51,7 +51,7 @@ After the event is processed, the connection will be automatically opened (if [C
 </td>
 <td>
 
-[src/modules.d.ts:203](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L203)
+[src/modules.d.ts:203](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L203)
 
 </td>
 </tr>
@@ -81,7 +81,7 @@ room.on("connectionClose", (con, reason, wasOpen) => {
 </td>
 <td>
 
-[src/modules.d.ts:223](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L223)
+[src/modules.d.ts:223](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L223)
 
 </td>
 </tr>
@@ -111,7 +111,7 @@ room.on("connectionMessage", (con, ...data) => {
 </td>
 <td>
 
-[src/modules.d.ts:233](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L233)
+[src/modules.d.ts:233](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L233)
 
 </td>
 </tr>
@@ -141,7 +141,7 @@ room.on("connectionOpen", (con) => {
 </td>
 <td>
 
-[src/modules.d.ts:213](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L213)
+[src/modules.d.ts:213](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L213)
 
 </td>
 </tr>
@@ -150,4 +150,4 @@ room.on("connectionOpen", (con) => {
 
 ## Defined in
 
-[src/modules.d.ts:190](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L190)
+[src/modules.d.ts:190](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L190)

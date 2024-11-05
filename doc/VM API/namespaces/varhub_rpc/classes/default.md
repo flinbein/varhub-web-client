@@ -158,7 +158,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/modules.d.ts:694](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L694)
+[src/modules.d.ts:699](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L699)
 
 ## Accessors
 
@@ -172,7 +172,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/modules.d.ts:710](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L710)
+[src/modules.d.ts:715](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L715)
 
 ***
 
@@ -188,7 +188,7 @@ get current state
 
 #### Defined in
 
-[src/modules.d.ts:652](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L652)
+[src/modules.d.ts:657](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L657)
 
 ***
 
@@ -205,7 +205,7 @@ value is undefined while main module is executing
 
 #### Defined in
 
-[src/modules.d.ts:753](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L753)
+[src/modules.d.ts:758](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L758)
 
 ## Methods
 
@@ -225,7 +225,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/modules.d.ts:726](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L726)
+[src/modules.d.ts:731](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L731)
 
 ***
 
@@ -270,7 +270,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/modules.d.ts:722](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L722)
+[src/modules.d.ts:727](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L727)
 
 ***
 
@@ -354,7 +354,7 @@ event values
 
 #### Defined in
 
-[src/modules.d.ts:717](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L717)
+[src/modules.d.ts:722](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L722)
 
 ***
 
@@ -402,7 +402,7 @@ new state value, if state is not a function.
 
 #### Defined in
 
-[src/modules.d.ts:705](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L705)
+[src/modules.d.ts:710](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L710)
 
 ***
 
@@ -443,7 +443,7 @@ apply generic types for events
 
 #### Defined in
 
-[src/modules.d.ts:696](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L696)
+[src/modules.d.ts:701](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L701)
 
 ***
 
@@ -480,7 +480,7 @@ apply generic types for state.
 
 ##### Defined in
 
-[src/modules.d.ts:707](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L707)
+[src/modules.d.ts:712](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L712)
 
 #### withState(state)
 
@@ -538,7 +538,7 @@ apply generic types for state and set new state.
 
 ##### Defined in
 
-[src/modules.d.ts:709](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L709)
+[src/modules.d.ts:714](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L714)
 
 ***
 
@@ -602,7 +602,7 @@ object with methods.
 
 #### Defined in
 
-[src/modules.d.ts:747](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L747)
+[src/modules.d.ts:752](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L752)
 
 ***
 
@@ -719,4 +719,4 @@ set a limit on the number of opened channels
 
 #### Defined in
 
-[src/modules.d.ts:736](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L736)
+[src/modules.d.ts:741](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L741)
