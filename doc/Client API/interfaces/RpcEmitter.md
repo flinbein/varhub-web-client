@@ -95,7 +95,7 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Defined in
 
-[src/RPCChannel.ts:101](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/RPCChannel.ts#L101)
+[src/RPCChannel.ts:101](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCChannel.ts#L101)
 
 ***
 
@@ -165,7 +165,7 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Defined in
 
-[src/RPCChannel.ts:99](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/RPCChannel.ts#L99)
+[src/RPCChannel.ts:99](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCChannel.ts#L99)
 
 ***
 
@@ -235,4 +235,4 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 #### Defined in
 
-[src/RPCChannel.ts:100](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/RPCChannel.ts#L100)
+[src/RPCChannel.ts:100](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCChannel.ts#L100)

@@ -1,10 +1,10 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../../../README.md) • **Docs**
 
 ***
 
-[@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / RPCSource
+[@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:rpc"](../README.md) / default
 
-# Class: RPCSource\<METHODS, STATE, EVENTS\>
+# Class: default\<METHODS, STATE, EVENTS\>
 
 Remote procedure call handler
 
@@ -63,9 +63,9 @@ Remote procedure call handler
 
 ## Constructors
 
-### new RPCSource()
+### new default()
 
-> **new RPCSource**\<`METHODS`, `STATE`, `EVENTS`\>(`handler`?, `initialState`?): [`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `EVENTS`\>
+> **new default**\<`METHODS`, `STATE`, `EVENTS`\>(`handler`?, `initialState`?): [`default`](default.md)\<`METHODS`, `STATE`, `EVENTS`\>
 
 Create new instance of RPC
 
@@ -88,7 +88,7 @@ Create new instance of RPC
 </td>
 <td>
 
-`METHODS` \| [`RPCHandler`](../type-aliases/RPCHandler.md)
+[`RPCHandler`](../type-aliases/RPCHandler.md) \| `METHODS`
 
 </td>
 <td>
@@ -119,7 +119,7 @@ handler can be:
 
 #### Returns
 
-[`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `EVENTS`\>
+[`default`](default.md)\<`METHODS`, `STATE`, `EVENTS`\>
 
 #### Examples
 
@@ -158,7 +158,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/RPCSource.ts:176](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L176)
+[src/modules.d.ts:694](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L694)
 
 ## Accessors
 
@@ -172,7 +172,7 @@ console.assert(result === 8);
 
 #### Defined in
 
-[src/RPCSource.ts:244](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L244)
+[src/modules.d.ts:710](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L710)
 
 ***
 
@@ -188,7 +188,24 @@ get current state
 
 #### Defined in
 
-[src/RPCSource.ts:133](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L133)
+[src/modules.d.ts:652](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L652)
+
+***
+
+### default
+
+> `get` `static` **default**(): [`default`](default.md)\<`any`, `any`, `any`\>
+
+get the current rpc source, based on exports of main module.
+value is undefined while main module is executing
+
+#### Returns
+
+[`default`](default.md)\<`any`, `any`, `any`\>
+
+#### Defined in
+
+[src/modules.d.ts:753](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L753)
 
 ## Methods
 
@@ -208,7 +225,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/RPCSource.ts:306](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L306)
+[src/modules.d.ts:726](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L726)
 
 ***
 
@@ -237,7 +254,7 @@ dispose this source and disconnect all channels
 </td>
 <td>
 
-`XJData`
+`any`
 
 </td>
 <td>
@@ -253,7 +270,7 @@ dispose this source and disconnect all channels
 
 #### Defined in
 
-[src/RPCSource.ts:297](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L297)
+[src/modules.d.ts:722](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L722)
 
 ***
 
@@ -319,7 +336,7 @@ path for event. String or array of strings.
 </td>
 <td>
 
-`EventPathArgs`\<`P`, `EVENTS`\>
+[`EventPathArgs`](../type-aliases/EventPathArgs.md)\<`P`, `EVENTS`\>
 
 </td>
 <td>
@@ -337,108 +354,7 @@ event values
 
 #### Defined in
 
-[src/RPCSource.ts:254](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L254)
-
-***
-
-### emitFor()
-
-> **emitFor**\<`P`\>(`predicate`, `event`, ...`args`): `this`
-
-Emit event for all connected clients.
-Reserved event names: `close`, `init`, `error`, `state`
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`P` *extends* `string` \| [`string`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`predicate`
-
-</td>
-<td>
-
-`undefined` \| `null` \| `DeepIterable`\<[`Connection`](Connection.md)\> \| (`con`) => `any`
-
-</td>
-<td>
-
-event will be sent only to the listed connections.
-
-</td>
-</tr>
-<tr>
-<td>
-
-`event`
-
-</td>
-<td>
-
-`P`
-
-</td>
-<td>
-
-path for event. String or array of strings.
-
-</td>
-</tr>
-<tr>
-<td>
-
-...`args`
-
-</td>
-<td>
-
-`EventPathArgs`\<`P`, `EVENTS`\>
-
-</td>
-<td>
-
-event values
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`this`
-
-#### Defined in
-
-[src/RPCSource.ts:265](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L265)
+[src/modules.d.ts:717](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L717)
 
 ***
 
@@ -486,13 +402,13 @@ new state value, if state is not a function.
 
 #### Defined in
 
-[src/RPCSource.ts:224](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L224)
+[src/modules.d.ts:705](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L705)
 
 ***
 
 ### withEventTypes()
 
-> **withEventTypes**\<`E`\>(): [`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `E`\>
+> **withEventTypes**\<`E`\>(): [`default`](default.md)\<`METHODS`, `STATE`, `E`\>
 
 apply generic types for events
 
@@ -523,11 +439,11 @@ apply generic types for events
 
 #### Returns
 
-[`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `E`\>
+[`default`](default.md)\<`METHODS`, `STATE`, `E`\>
 
 #### Defined in
 
-[src/RPCSource.ts:212](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L212)
+[src/modules.d.ts:696](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L696)
 
 ***
 
@@ -535,7 +451,7 @@ apply generic types for events
 
 #### withState()
 
-> **withState**\<`S`\>(): [`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
+> **withState**\<`S`\>(): [`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
 
 apply generic types for state.
 
@@ -560,15 +476,15 @@ apply generic types for state.
 
 ##### Returns
 
-[`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
+[`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
 
 ##### Defined in
 
-[src/RPCSource.ts:235](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L235)
+[src/modules.d.ts:707](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L707)
 
 #### withState(state)
 
-> **withState**\<`S`\>(`state`): [`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
+> **withState**\<`S`\>(`state`): [`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
 
 apply generic types for state and set new state.
 
@@ -618,17 +534,17 @@ apply generic types for state and set new state.
 
 ##### Returns
 
-[`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
+[`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
 
 ##### Defined in
 
-[src/RPCSource.ts:237](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L237)
+[src/modules.d.ts:709](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L709)
 
 ***
 
 ### createDefaultHandler()
 
-> `static` **createDefaultHandler**(`parameters`): [`RPCHandler`](../type-aliases/RPCHandler.md)
+> `readonly` `static` **createDefaultHandler**(`parameters`): [`RPCHandler`](../type-aliases/RPCHandler.md)
 
 create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 
@@ -686,13 +602,13 @@ object with methods.
 
 #### Defined in
 
-[src/RPCSource.ts:188](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L188)
+[src/modules.d.ts:747](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L747)
 
 ***
 
 ### start()
 
-> `static` **start**(`rpcSource`, `room`, `__namedParameters`): () => `void`
+> `static` **start**(`rpcSource`, `room`, `options`?): () => `void`
 
 start listening for messages and processing procedure calls
 
@@ -715,7 +631,7 @@ start listening for messages and processing procedure calls
 </td>
 <td>
 
-[`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\>
+[`default`](default.md)\<`any`, `undefined`, `any`\>
 
 </td>
 <td>
@@ -732,7 +648,7 @@ message handler
 </td>
 <td>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`Room`](../../varhub:room/interfaces/Room.md)
 
 </td>
 <td>
@@ -744,7 +660,7 @@ room
 <tr>
 <td>
 
-`__namedParameters`
+`options`?
 
 </td>
 <td>
@@ -754,41 +670,39 @@ room
 </td>
 <td>
 
-&hyphen;
+</td>
+</tr>
+<tr>
+<td>
+
+`options.key`?
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+Special key for listening events. Default value: `"$rpc"`
 
 </td>
 </tr>
 <tr>
 <td>
 
-`__namedParameters.key`
+`options.maxChannelsPerClient`?
 
 </td>
 <td>
 
-`undefined` \| `string`
+`number`
 
 </td>
 <td>
 
-&hyphen;
-
-</td>
-</tr>
-<tr>
-<td>
-
-`__namedParameters.maxChannelsPerClient`
-
-</td>
-<td>
-
-`undefined` \| `number`
-
-</td>
-<td>
-
-&hyphen;
+set a limit on the number of opened channels
 
 </td>
 </tr>
@@ -805,4 +719,4 @@ room
 
 #### Defined in
 
-[src/RPCSource.ts:317](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RPCSource.ts#L317)
+[src/modules.d.ts:736](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L736)

@@ -20,8 +20,6 @@
  * @module VM API
  */
 
-import type { XJData } from "xjmapper";
-
 /**
  * This module allows you to get a controller of current {@link Room}.
  * @example
@@ -411,7 +409,7 @@ declare module "varhub:players" {
 		 * });
 		 * ```
 		 */
-		connectionMessage: [connecton: Connection, ...message: XJData[]]
+		connectionMessage: [connecton: Connection, ...message: any[]]
 	}
 	
 	/**

@@ -1,14 +1,12 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../../../README.md) • **Docs**
 
 ***
 
-[@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / PlayerEvents
+[@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:players"](../README.md) / PlayerEvents
 
 # Type Alias: PlayerEvents
 
 > **PlayerEvents**: `object`
-
-Events of [Player](../classes/Player.md)
 
 ## Type declaration
 
@@ -30,7 +28,7 @@ Events of [Player](../classes/Player.md)
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md), `XJData`[]]
+[[`Connection`](../../varhub:room/interfaces/Connection.md), `any`[]]
 
 </td>
 <td>
@@ -46,7 +44,7 @@ player.on("connectionMessage", (connection, ...msg) => {
 </td>
 <td>
 
-[src/Players.ts:327](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L327)
+[src/modules.d.ts:412](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L412)
 
 </td>
 </tr>
@@ -87,7 +85,7 @@ players.on("offline", player => player.kick("disconnected"));
 </td>
 <td>
 
-[src/Players.ts:294](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L294)
+[src/modules.d.ts:380](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L380)
 
 </td>
 </tr>
@@ -118,7 +116,7 @@ player.on("offline", () => {
 </td>
 <td>
 
-[src/Players.ts:316](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L316)
+[src/modules.d.ts:402](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L402)
 
 </td>
 </tr>
@@ -149,7 +147,7 @@ player.on("online", () => {
 </td>
 <td>
 
-[src/Players.ts:305](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L305)
+[src/modules.d.ts:391](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L391)
 
 </td>
 </tr>
@@ -158,4 +156,4 @@ player.on("online", () => {
 
 ## Defined in
 
-[src/Players.ts:273](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L273)
+[src/modules.d.ts:359](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L359)

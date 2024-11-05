@@ -1,18 +1,16 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../../../README.md) • **Docs**
 
 ***
 
-[@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / Players
+[@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:players"](../README.md) / default
 
-# Class: Players
-
-List of players based on named connections.
+# Class: default
 
 ## Constructors
 
-### new Players()
+### new default()
 
-> **new Players**(`room`, `registerPlayerHandler`): [`Players`](Players.md)
+> **new default**(`room`, `registerPlayerHandler`): [`default`](default.md)
 
 Create a player list based on connections.
 
@@ -35,7 +33,7 @@ Create a player list based on connections.
 </td>
 <td>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`Room`](../../varhub:room/interfaces/Room.md)
 
 </td>
 <td>
@@ -70,7 +68,7 @@ handler to get the player's name.
 
 #### Returns
 
-[`Players`](Players.md)
+[`default`](default.md)
 
 #### Examples
 
@@ -88,7 +86,7 @@ const players = new Players(room, async (connection, name, password) => {
 
 #### Defined in
 
-[src/Players.ts:124](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L124)
+[src/modules.d.ts:565](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L565)
 
 ## Accessors
 
@@ -104,59 +102,45 @@ get number of players
 
 #### Defined in
 
-[src/Players.ts:208](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L208)
-
-***
-
-### room
-
-> `get` **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)
-
-#### Returns
-
-[`RoomSocketHandler`](RoomSocketHandler.md)
-
-#### Defined in
-
-[src/Players.ts:133](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L133)
+[src/modules.d.ts:575](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L575)
 
 ## Methods
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `MapIterator`\<[`Player`](Player.md)\>
+> **\[iterator\]**(): `MapIterator`\<[`Player`](../interfaces/Player.md)\>
 
 iterate on all players
 
 #### Returns
 
-`MapIterator`\<[`Player`](Player.md)\>
+`MapIterator`\<[`Player`](../interfaces/Player.md)\>
 
 #### Defined in
 
-[src/Players.ts:264](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L264)
+[src/modules.d.ts:612](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L612)
 
 ***
 
 ### all()
 
-> **all**(): `Set`\<[`Player`](Player.md)\>
+> **all**(): `Set`\<[`Player`](../interfaces/Player.md)\>
 
 get all players
 
 #### Returns
 
-`Set`\<[`Player`](Player.md)\>
+`Set`\<[`Player`](../interfaces/Player.md)\>
 
 #### Defined in
 
-[src/Players.ts:223](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L223)
+[src/modules.d.ts:584](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L584)
 
 ***
 
 ### get()
 
-> **get**(`nameOrConnection`): `undefined` \| [`Player`](Player.md)
+> **get**(`nameOrConnection`): `undefined` \| [`Player`](../interfaces/Player.md)
 
 get player by name or connection
 
@@ -179,7 +163,7 @@ get player by name or connection
 </td>
 <td>
 
-`string` \| [`Connection`](Connection.md)
+`string` \| [`Connection`](../../varhub:room/interfaces/Connection.md)
 
 </td>
 <td>
@@ -193,17 +177,17 @@ name or connection
 
 #### Returns
 
-`undefined` \| [`Player`](Player.md)
+`undefined` \| [`Player`](../interfaces/Player.md)
 
 #### Defined in
 
-[src/Players.ts:199](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L199)
+[src/modules.d.ts:570](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L570)
 
 ***
 
 ### getGroup()
 
-> **getGroup**(`group`): `Set`\<[`Player`](Player.md)\>
+> **getGroup**(`group`): `Set`\<[`Player`](../interfaces/Player.md)\>
 
 get all players with specified group. If group is undefined - get all players without group.
 
@@ -238,11 +222,11 @@ get all players with specified group. If group is undefined - get all players wi
 
 #### Returns
 
-`Set`\<[`Player`](Player.md)\>
+`Set`\<[`Player`](../interfaces/Player.md)\>
 
 #### Defined in
 
-[src/Players.ts:216](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L216)
+[src/modules.d.ts:580](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L580)
 
 ## Events
 
@@ -329,7 +313,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:256](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L256)
+[src/modules.d.ts:608](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L608)
 
 ***
 
@@ -416,7 +400,7 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:234](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L234)
+[src/modules.d.ts:592](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L592)
 
 ***
 
@@ -503,4 +487,4 @@ event handler
 
 #### Defined in
 
-[src/Players.ts:245](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/Players.ts#L245)
+[src/modules.d.ts:600](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L600)

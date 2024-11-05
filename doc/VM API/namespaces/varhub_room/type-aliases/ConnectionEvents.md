@@ -1,14 +1,12 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../../../README.md) • **Docs**
 
 ***
 
-[@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / ConnectionEvents
+[@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:room"](../README.md) / ConnectionEvents
 
 # Type Alias: ConnectionEvents
 
 > **ConnectionEvents**: `object`
-
-Events of [Connection](../classes/Connection.md)
 
 ## Type declaration
 
@@ -49,7 +47,7 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:437](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RoomSocketHandler.ts#L437)
+[src/modules.d.ts:58](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L58)
 
 </td>
 </tr>
@@ -61,7 +59,7 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 </td>
 <td>
 
-`XJData`[]
+`any`[]
 
 </td>
 <td>
@@ -80,7 +78,7 @@ connection.on("message", (...data) => {
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:448](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RoomSocketHandler.ts#L448)
+[src/modules.d.ts:69](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L69)
 
 </td>
 </tr>
@@ -112,7 +110,7 @@ connection.open();
 </td>
 <td>
 
-[src/RoomSocketHandler.ts:426](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RoomSocketHandler.ts#L426)
+[src/modules.d.ts:47](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L47)
 
 </td>
 </tr>
@@ -121,4 +119,4 @@ connection.open();
 
 ## Defined in
 
-[src/RoomSocketHandler.ts:414](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/RoomSocketHandler.ts#L414)
+[src/modules.d.ts:35](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/modules.d.ts#L35)

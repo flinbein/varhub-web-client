@@ -33,7 +33,7 @@ client's connection is closed
 
 #### Defined in
 
-[src/VarhubClient.ts:157](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L157)
+[src/VarhubClient.ts:157](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L157)
 
 ***
 
@@ -49,7 +49,7 @@ client is successfully joined to the room.
 
 #### Defined in
 
-[src/VarhubClient.ts:152](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L152)
+[src/VarhubClient.ts:152](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L152)
 
 ## Methods
 
@@ -63,7 +63,7 @@ client is successfully joined to the room.
 
 #### Defined in
 
-[src/VarhubClient.ts:219](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L219)
+[src/VarhubClient.ts:219](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L219)
 
 ***
 
@@ -77,7 +77,7 @@ client is successfully joined to the room.
 
 #### Defined in
 
-[src/VarhubClient.ts:215](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L215)
+[src/VarhubClient.ts:215](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L215)
 
 ***
 
@@ -122,7 +122,7 @@ close client's connection
 
 #### Defined in
 
-[src/VarhubClient.ts:210](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L210)
+[src/VarhubClient.ts:210](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L210)
 
 ***
 
@@ -169,7 +169,7 @@ any serializable arguments
 
 #### Defined in
 
-[src/VarhubClient.ts:163](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L163)
+[src/VarhubClient.ts:163](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L163)
 
 ***
 
@@ -291,7 +291,7 @@ varhub.join(roomId).then(([client]) => {
 
 #### Defined in
 
-[src/VarhubClient.ts:142](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L142)
+[src/VarhubClient.ts:142](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L142)
 
 ## Events
 
@@ -376,7 +376,7 @@ Unsubscribe from client event
 
 #### Defined in
 
-[src/VarhubClient.ts:201](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L201)
+[src/VarhubClient.ts:201](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L201)
 
 ***
 
@@ -463,7 +463,7 @@ event handler
 
 #### Defined in
 
-[src/VarhubClient.ts:176](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L176)
+[src/VarhubClient.ts:176](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L176)
 
 ***
 
@@ -548,4 +548,4 @@ Subscribe on client event once
 
 #### Defined in
 
-[src/VarhubClient.ts:188](https://github.com/flinbein/varhub-web-client/blob/694f2cdb0a389c28f5ae3a428d2236721edc65d9/src/VarhubClient.ts#L188)
+[src/VarhubClient.ts:188](https://github.com/flinbein/varhub-web-client/blob/4b277cc940da1f35f3cf26aba33bb11aae1725b5/src/VarhubClient.ts#L188)
