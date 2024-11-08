@@ -20,7 +20,7 @@ connection closed
 
 #### Defined in
 
-[src/modules.d.ts:106](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L106)
+[src/modules.d.ts:106](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L106)
 
 ***
 
@@ -36,7 +36,7 @@ connection is deferred
 
 #### Defined in
 
-[src/modules.d.ts:170](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L170)
+[src/modules.d.ts:170](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L170)
 
 ***
 
@@ -52,7 +52,7 @@ get the parameters with which the connection was initialized
 
 #### Defined in
 
-[src/modules.d.ts:180](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L180)
+[src/modules.d.ts:180](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L180)
 
 ***
 
@@ -68,7 +68,7 @@ connection open
 
 #### Defined in
 
-[src/modules.d.ts:102](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L102)
+[src/modules.d.ts:102](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L102)
 
 ## Methods
 
@@ -113,7 +113,7 @@ close client's connection
 
 #### Defined in
 
-[src/modules.d.ts:140](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L140)
+[src/modules.d.ts:140](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L140)
 
 ***
 
@@ -224,7 +224,7 @@ async function checkConnection(connection, ...args) {
 
 #### Defined in
 
-[src/modules.d.ts:166](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L166)
+[src/modules.d.ts:166](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L166)
 
 ***
 
@@ -242,7 +242,7 @@ The connection is connected automatically if it has not been deferred.
 
 #### Defined in
 
-[src/modules.d.ts:176](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L176)
+[src/modules.d.ts:176](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L176)
 
 ***
 
@@ -289,7 +289,7 @@ any serializable arguments
 
 #### Defined in
 
-[src/modules.d.ts:111](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L111)
+[src/modules.d.ts:111](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L111)
 
 ***
 
@@ -405,7 +405,7 @@ connection.then(([connection]) => {
 
 #### Defined in
 
-[src/modules.d.ts:95](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L95)
+[src/modules.d.ts:95](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L95)
 
 ***
 
@@ -419,7 +419,7 @@ connection.then(([connection]) => {
 
 #### Defined in
 
-[src/modules.d.ts:181](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L181)
+[src/modules.d.ts:181](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L181)
 
 ***
 
@@ -433,7 +433,7 @@ connection.then(([connection]) => {
 
 #### Defined in
 
-[src/modules.d.ts:182](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L182)
+[src/modules.d.ts:182](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L182)
 
 ## Events
 
@@ -520,7 +520,7 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:135](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L135)
+[src/modules.d.ts:135](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L135)
 
 ***
 
@@ -607,7 +607,7 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:119](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L119)
+[src/modules.d.ts:119](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L119)
 
 ***
 
@@ -694,4 +694,4 @@ event handler
 
 #### Defined in
 
-[src/modules.d.ts:127](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L127)
+[src/modules.d.ts:127](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L127)

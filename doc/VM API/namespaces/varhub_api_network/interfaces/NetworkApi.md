@@ -95,4 +95,4 @@ url to fetch as string
 
 #### Defined in
 
-[src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/7d6a2e3812e654c01a487ef0fcd6a83839993854/src/modules.d.ts#L828)
+[src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/abccc7889bafc435c87bb6b71784735c5faeff42/src/modules.d.ts#L828)

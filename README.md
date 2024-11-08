@@ -1,5 +1,6 @@
 | [API Documentation](doc/README.md) 
 | [Codepen examples](https://codepen.io/collection/PoqYRg)
+| [Rollup plugin](https://github.com/flinbein/rollup-plugin-varhub-bundle#readme)
 |
 
 ---
