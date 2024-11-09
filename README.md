@@ -560,6 +560,8 @@ RPC allows clients to:
 The RPC protocol is built on top of the messaging between the client and the room.
 You can see the [detailed description](src/rpc.md) of the messages
 
+[More examples of using RPCSource](man/RPCSource.md)
+
 ## default RPC in VM
 
 You can export methods or structures with methods from entrypoint:
