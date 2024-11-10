@@ -6,7 +6,7 @@ import type { XJData } from "@flinbein/xjmapper";
  * events of {@link Players} object
  * @event
  * */
-export type PlayersEvents = {
+export type PlayersEvents<DESC extends {team?: string}> = {
 	/**
 	 * new player joined
 	 * @example
@@ -17,7 +17,7 @@ export type PlayersEvents = {
 	 * })
 	 * ```
 	 */
-	join: [Player]
+	join: [Player<DESC>]
 	/**
 	 * player leaves the game
 	 * @example
@@ -39,7 +39,7 @@ export type PlayersEvents = {
 	 * players.on("offline", player => player.kick("disconnected"))
 	 * ```
 	 */
-	leave: [Player]
+	leave: [Player<DESC>]
 	/**
 	 * player goes online
 	 * @example
@@ -51,7 +51,7 @@ export type PlayersEvents = {
 	 * })
 	 * ```
 	 */
-	online: [Player]
+	online: [Player<DESC>]
 	/**
 	 * player goes offline, last player's connection is closed.
 	 * @example
@@ -63,20 +63,20 @@ export type PlayersEvents = {
 	 * })
 	 * ```
 	 */
-	offline: [Player]
+	offline: [Player<DESC>]
 }
 
 /**
  * List of players based on named connections.
  */
-export default class Players {
-	readonly #playerMap = new Map<string, Player>();
-	readonly #playerConnections = new WeakMap<Player, Set<Connection>>();
+export default class Players<DESC extends {team?: string} = {}> {
+	readonly #playerMap = new Map<string, Player<DESC>>();
+	readonly #playerConnections = new WeakMap<Player<DESC>, Set<Connection>>();
 	readonly #playerGroups = new WeakMap<Player, string>();
-	readonly #playerEvents = new WeakMap<Player, EventEmitter<PlayerEvents>>();
+	readonly #playerEvents = new WeakMap<Player<DESC>, EventEmitter<PlayerEvents>>();
 	readonly #connectionPlayerNameMap = new WeakMap<Connection, string>();
 	readonly #registerPlayer
-	readonly #events = new EventEmitter<PlayersEvents>();
+	readonly #events = new EventEmitter<PlayersEvents<DESC>>();
 	readonly #room;
 	readonly #controller = {
 		isRegistered: (player: Player) => this.#playerMap.get(player.name) === player,
@@ -85,17 +85,17 @@ export default class Players {
 			if (group === undefined) return this.#playerGroups.delete(player);
 			this.#playerGroups.set(player, group);
 		},
-		getConnectionsOf: (player: Player) => this.#playerConnections.get(player),
-		registerEvents: (player: Player, events: EventEmitter<PlayerEvents>) => this.#playerEvents.set(player, events),
+		getConnectionsOf: (player: Player) => this.#playerConnections.get(player as any),
+		registerEvents: (player: Player, events: EventEmitter<PlayerEvents>) => this.#playerEvents.set(player as any, events),
 		kick: (player: Player, reason: string|null) => {
 			const existsPlayer =  this.#playerMap.get(player.name);
 			if (existsPlayer !== player) return;
 			this.#playerMap.delete(player.name);
-			const connections = this.#playerConnections.get(player)!
+			const connections = this.#playerConnections.get(player as any)!
 			for (let connection of connections) connection.close(reason);
 			connections.clear();
-			this.#playerEvents.get(player)?.emitWithTry("leave");
-			this.#events.emitWithTry("leave", player);
+			this.#playerEvents.get(player as any)?.emitWithTry("leave");
+			this.#events.emitWithTry("leave", player as any);
 		}
 	}
 	
@@ -167,14 +167,14 @@ export default class Players {
 			return;
 		}
 		const player = new Player(playerName, this.#controller);
-		this.#playerConnections.set(player, new Set([connection]));
-		this.#playerMap.set(playerName, player);
-		this.#events.emitWithTry("join", player);
+		this.#playerConnections.set(player as any, new Set([connection]));
+		this.#playerMap.set(playerName, player as any);
+		this.#events.emitWithTry("join", player as any);
 	}
 	
 	#onConnectionMessage = (connection: Connection, ...args: any[]) => {
 		const player = this.get(connection);
-		if (player) this.#playerEvents.get(player)?.emitWithTry("connectionMessage", connection, ...args);
+		if (player) this.#playerEvents.get(player as any)?.emitWithTry("connectionMessage", connection, ...args);
 	}
 	
 	#onConnectionClose = (connection: Connection) => {
@@ -196,7 +196,7 @@ export default class Players {
 	 * get player by name or connection
 	 * @param nameOrConnection name or connection
 	 */
-	get(nameOrConnection: Connection|string): Player|undefined {
+	get(nameOrConnection: Connection|string): Player<DESC>|undefined {
 		if (typeof nameOrConnection === "string") return this.#playerMap.get(nameOrConnection);
 		const playerName = this.#connectionPlayerNameMap.get(nameOrConnection);
 		if (playerName != null) return this.#playerMap.get(playerName);
@@ -211,16 +211,16 @@ export default class Players {
 	
 	/**
 	 * get all players with specified group. If group is undefined - get all players without group.
-	 * @param group
+	 * @param team
 	 */
-	getGroup(group: string|undefined): Set<Player> {
-		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === group));
+	getTeam(team: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): Set<Player<DESC>> {
+		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === team));
 	}
 	
 	/**
 	 * get all players
 	 */
-	all(): Set<Player> {
+	all(): Set<Player<DESC>> {
 		return new Set(this.#playerMap.values());
 	}
 	
@@ -231,7 +231,7 @@ export default class Players {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this{
+	on<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this{
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
@@ -242,7 +242,7 @@ export default class Players {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	once<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this{
+	once<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this{
 		this.#events.once.call(this, eventName, handler as any);
 		return this;
 	}
@@ -253,7 +253,7 @@ export default class Players {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	off<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this {
+	off<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this {
 		this.#events.off.call(this, eventName, handler as any);
 		return this;
 	}
@@ -261,7 +261,7 @@ export default class Players {
 	/**
 	 * iterate on all players
 	 */
-	[Symbol.iterator](): MapIterator<Player> {
+	[Symbol.iterator](): MapIterator<Player<DESC>> {
 		return this.#playerMap.values();
 	}
 }
@@ -330,7 +330,7 @@ export type PlayerEvents = {
 /**
  * Player represents a list of {@link Connection}s with same name.
  */
-class Player {
+class Player<DESC extends {team?: string} = {}> {
 	readonly #name: string
 	readonly #controller: any
 	readonly #eventBox = new EventEmitter<PlayerEvents>();
@@ -358,13 +358,13 @@ class Player {
 	 */
 	get registered(): boolean {return this.#controller.isRegistered(this)}
 	/**
-	 * get player's group
+	 * get player's team
 	 */
-	get group(): string|undefined {return this.#controller.getGroupOf(this)}
+	get team(): (DESC["team"] extends undefined ? string : DESC["team"])|undefined {return this.#controller.getGroupOf(this)}
 	/**
-	 * set player's group
+	 * set player's team
 	 */
-	setGroup(value: string|undefined): this {this.#controller.setGroupOf(this, value); return this}
+	setTeam(value: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
 	 * send message for all connections

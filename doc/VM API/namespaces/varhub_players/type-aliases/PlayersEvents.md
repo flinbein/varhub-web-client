@@ -4,9 +4,28 @@
 
 [@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:players"](../README.md) / PlayersEvents
 
-# Type Alias: PlayersEvents
+# Type Alias: PlayersEvents\<DESC\>
 
-> **PlayersEvents**: `object`
+> **PlayersEvents**\<`DESC`\>: `object`
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -27,7 +46,7 @@
 </td>
 <td>
 
-[[`Player`](../interfaces/Player.md)]
+[[`Player`](../interfaces/Player.md)\<`DESC`\>]
 
 </td>
 <td>
@@ -53,7 +72,7 @@ players.on("join", (player) => {
 </td>
 <td>
 
-[[`Player`](../interfaces/Player.md)]
+[[`Player`](../interfaces/Player.md)\<`DESC`\>]
 
 </td>
 <td>
@@ -90,7 +109,7 @@ players.on("offline", player => player.kick("disconnected"))
 </td>
 <td>
 
-[[`Player`](../interfaces/Player.md)]
+[[`Player`](../interfaces/Player.md)\<`DESC`\>]
 
 </td>
 <td>
@@ -117,7 +136,7 @@ players.on("offline", (player) => {
 </td>
 <td>
 
-[[`Player`](../interfaces/Player.md)]
+[[`Player`](../interfaces/Player.md)\<`DESC`\>]
 
 </td>
 <td>

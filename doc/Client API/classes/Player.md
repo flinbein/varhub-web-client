@@ -4,9 +4,34 @@
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / Player
 
-# Class: Player
+# Class: Player\<DESC\>
 
 Player represents a list of [Connection](Connection.md)s with same name.
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `object`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Accessors
 
@@ -19,18 +44,6 @@ get all player's connections
 #### Returns
 
 `Set`\<[`Connection`](Connection.md)\>
-
-***
-
-### group
-
-> `get` **group**(): `undefined` \| `string`
-
-get player's group
-
-#### Returns
-
-`undefined` \| `string`
 
 ***
 
@@ -67,6 +80,18 @@ player is registered in list of players
 #### Returns
 
 `boolean`
+
+***
+
+### team
+
+> `get` **team**(): `undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
+
+get player's team
+
+#### Returns
+
+`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
 
 ## Methods
 
@@ -170,11 +195,11 @@ send message for all connections
 
 ***
 
-### setGroup()
+### setTeam()
 
-> **setGroup**(`value`): `this`
+> **setTeam**(`value`): `this`
 
-set player's group
+set player's team
 
 #### Parameters
 
@@ -194,7 +219,7 @@ set player's group
 </td>
 <td>
 
-`undefined` \| `string`
+`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
 
 </td>
 </tr>

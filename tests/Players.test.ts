@@ -154,7 +154,7 @@ test.describe("Players", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		
-		const players = new Players(room, (_con, name) => String(name));
+		const players = new Players<{team: "redTeam"|"blueTeam"|"greenTeam"}>(room, (_con, name) => String(name));
 		
 		const aliceWs = roomWs.createClientMock("Alice");
 		const bobWs = roomWs.createClientMock("Bob");
@@ -168,18 +168,18 @@ test.describe("Players", () => {
 		);
 		const [alice, bob, charlie, eve] = ["Alice", "Bob", "Charlie", "Eve"].map(name => players.get(name)!);
 		
-		alice.setGroup("redTeam");
-		bob.setGroup("redTeam");
-		charlie.setGroup("blueTeam");
+		alice.setTeam("redTeam");
+		bob.setTeam("redTeam");
+		charlie.setTeam("blueTeam");
 		
-		assert.deepEqual(players.getGroup("redTeam"), new Set([alice, bob]));
-		assert.deepEqual(players.getGroup("blueTeam"), new Set([charlie]));
-		assert.deepEqual(players.getGroup("greenTeam"), new Set());
-		assert.deepEqual(players.getGroup(undefined), new Set(eve));
+		assert.deepEqual(players.getTeam("redTeam"), new Set([alice, bob]));
+		assert.deepEqual(players.getTeam("blueTeam"), new Set([charlie]));
+		assert.deepEqual(players.getTeam("greenTeam"), new Set());
+		assert.deepEqual(players.getTeam(undefined), new Set(eve));
 		
-		alice.setGroup("blueTeam");
-		assert.deepEqual(players.getGroup("redTeam"), new Set([bob]));
-		assert.deepEqual(players.getGroup("blueTeam"), new Set([alice, charlie]));
+		alice.setTeam("blueTeam");
+		assert.deepEqual(players.getTeam("redTeam"), new Set([bob]));
+		assert.deepEqual(players.getTeam("blueTeam"), new Set([alice, charlie]));
 		
 	})
 	

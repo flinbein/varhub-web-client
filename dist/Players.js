@@ -113,8 +113,8 @@ export default class Players {
     get count() {
         return this.#playerMap.size;
     }
-    getGroup(group) {
-        return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === group));
+    getTeam(team) {
+        return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === team));
     }
     all() {
         return new Set(this.#playerMap.values());
@@ -148,8 +148,8 @@ class Player {
     get connections() { return new Set(this.#controller.getConnectionsOf(this)); }
     get online() { return this.#controller.getConnectionsOf(this).size > 0; }
     get registered() { return this.#controller.isRegistered(this); }
-    get group() { return this.#controller.getGroupOf(this); }
-    setGroup(value) { this.#controller.setGroupOf(this, value); return this; }
+    get team() { return this.#controller.getGroupOf(this); }
+    setTeam(value) { this.#controller.setGroupOf(this, value); return this; }
     send(...args) {
         for (let connection of this.connections) {
             connection.send(...args);

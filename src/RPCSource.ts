@@ -122,9 +122,11 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	#state?: STATE;
 	/** @hidden */
 	declare public [Symbol.unscopables]: {
-		__rpc_methods: METHODS,
-		__rpc_events: EVENTS,
-		__rpc_state: STATE,
+		[Symbol.unscopables]: {
+			__rpc_methods: METHODS,
+			__rpc_events: EVENTS,
+			__rpc_state: STATE,
+		}
 	};
 	
 	/**

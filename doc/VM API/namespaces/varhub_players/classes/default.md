@@ -4,13 +4,38 @@
 
 [@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:players"](../README.md) / default
 
-# Class: default
+# Class: default\<DESC\>
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `object`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Constructors
 
 ### new default()
 
-> **new default**(`room`, `registerPlayerHandler`): [`default`](default.md)
+> **new default**\<`DESC`\>(`room`, `registerPlayerHandler`): [`default`](default.md)\<`DESC`\>
 
 Create a player list based on connections.
 
@@ -68,7 +93,7 @@ handler to get the player's name.
 
 #### Returns
 
-[`default`](default.md)
+[`default`](default.md)\<`DESC`\>
 
 #### Examples
 
@@ -100,31 +125,31 @@ get number of players
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `MapIterator`\<[`Player`](../interfaces/Player.md)\>
+> **\[iterator\]**(): `MapIterator`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 iterate on all players
 
 #### Returns
 
-`MapIterator`\<[`Player`](../interfaces/Player.md)\>
+`MapIterator`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 ***
 
 ### all()
 
-> **all**(): `Set`\<[`Player`](../interfaces/Player.md)\>
+> **all**(): `Set`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 get all players
 
 #### Returns
 
-`Set`\<[`Player`](../interfaces/Player.md)\>
+`Set`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 ***
 
 ### get()
 
-> **get**(`nameOrConnection`): `undefined` \| [`Player`](../interfaces/Player.md)
+> **get**(`nameOrConnection`): `undefined` \| [`Player`](../interfaces/Player.md)\<`DESC`\>
 
 get player by name or connection
 
@@ -161,13 +186,13 @@ name or connection
 
 #### Returns
 
-`undefined` \| [`Player`](../interfaces/Player.md)
+`undefined` \| [`Player`](../interfaces/Player.md)\<`DESC`\>
 
 ***
 
-### getGroup()
+### getTeam()
 
-> **getGroup**(`group`): `Set`\<[`Player`](../interfaces/Player.md)\>
+> **getTeam**(`group`): `Set`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 get all players with specified group. If group is undefined - get all players without group.
 
@@ -190,7 +215,7 @@ get all players with specified group. If group is undefined - get all players wi
 </td>
 <td>
 
-`undefined` \| `string`
+`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
 
 </td>
 <td>
@@ -202,7 +227,7 @@ get all players with specified group. If group is undefined - get all players wi
 
 #### Returns
 
-`Set`\<[`Player`](../interfaces/Player.md)\>
+`Set`\<[`Player`](../interfaces/Player.md)\<`DESC`\>\>
 
 ## Events
 
@@ -223,7 +248,7 @@ get all players with specified group. If group is undefined - get all players wi
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -306,7 +331,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -389,7 +414,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
 
 </td>
 <td>

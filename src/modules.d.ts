@@ -415,7 +415,7 @@ declare module "varhub:players" {
 	/**
 	 * Player represents a list of {@link Connection}s with same name.
 	 */
-	export interface Player {
+	export interface Player<DESC extends {team?: string} = {}> {
 		/**
 		 * player's name
 		 */
@@ -436,11 +436,11 @@ declare module "varhub:players" {
 		/**
 		 * get player's group
 		 */
-		get group(): string|undefined;
+		get team(): (DESC["team"] extends undefined ? string : DESC["team"])|undefined;
 		/**
 		 * set player's group
 		 */
-		setGroup(value: string|undefined);
+		setTeam(value: (DESC["team"] extends undefined ? string : DESC["team"])|undefined);
 		/**
 		 * send message for all connections
 		 * @param args
@@ -485,7 +485,7 @@ declare module "varhub:players" {
 	}
 	
 	/** @group Events */
-	export type PlayersEvents = {
+	export type PlayersEvents<DESC extends {team?: string}> = {
 		/**
 		 * new player joined
 		 * @example
@@ -496,7 +496,7 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		join: [Player]
+		join: [Player<DESC>]
 		/**
 		 * player leaves the game
 		 * @example
@@ -518,7 +518,7 @@ declare module "varhub:players" {
 		 * players.on("offline", player => player.kick("disconnected"))
 		 * ```
 		 */
-		leave: [Player]
+		leave: [Player<DESC>]
 		/**
 		 * player goes online
 		 * @example
@@ -530,7 +530,7 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		online: [Player]
+		online: [Player<DESC>]
 		/**
 		 * player goes offline, last player's connection is closed.
 		 * @example
@@ -542,9 +542,9 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		offline: [Player]
+		offline: [Player<DESC>]
 	}
-	export default class Players {
+	export default class Players<DESC extends {team?: string} = {}> {
 		/**
 		 * Create a player list based on connections.
 		 * @example
@@ -572,7 +572,7 @@ declare module "varhub:players" {
 		 * get player by name or connection
 		 * @param nameOrConnection name or connection
 		 */
-		get(nameOrConnection: Connection|string): Player|undefined;
+		get(nameOrConnection: Connection|string): Player<DESC>|undefined;
 		
 		/**
 		 * get number of players
@@ -582,11 +582,11 @@ declare module "varhub:players" {
 		 * get all players with specified group. If group is undefined - get all players without group.
 		 * @param group
 		 */
-		getGroup(group: string|undefined): Set<Player>;
+		getTeam(group: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): Set<Player<DESC>>;
 		/**
 		 * get all players
 		 */
-		all(): Set<Player>;
+		all(): Set<Player<DESC>>;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -594,7 +594,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		on<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -602,7 +602,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		once<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -610,11 +610,11 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof PlayersEvents>(eventName: T, handler: (...args: PlayersEvents[T]) => void): this;
+		off<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
 		/**
 		 * iterate on all players
 		 */
-		[Symbol.iterator](): MapIterator<Player>;
+		[Symbol.iterator](): MapIterator<Player<DESC>>;
 	}
 }
 
@@ -646,9 +646,11 @@ declare module "varhub:rpc" {
 		#private;
 		/** @hidden */
 		[Symbol.unscopables]: {
-			__rpc_methods: METHODS;
-			__rpc_events: EVENTS;
-			__rpc_state: STATE;
+			[Symbol.unscopables]: {
+				__rpc_methods: METHODS;
+				__rpc_events: EVENTS;
+				__rpc_state: STATE;
+			}
 		};
 		
 		/**

@@ -6,7 +6,7 @@
 
 # Variable: RPCChannel()
 
-> `const` **RPCChannel**: \<`M`\>(`client`, `options`?) => `M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `unknown`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `undefined`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `any`, `undefined`\>
+> `const` **RPCChannel**: \<`M`\>(`client`, `options`?) => `M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `STATE`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `STATE`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `any`, `undefined`\>
 
 Constructor for new RPC channel based on [VarhubClient](../classes/VarhubClient.md)
 
@@ -77,7 +77,7 @@ default:`"$rpc"`
 
 ## Returns
 
-`M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `unknown`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `undefined`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `any`, `undefined`\>
+`M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `STATE`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `STATE`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `any`, `undefined`\>
 
 - stateless channel.
 - result extends [RPCInstance](../interfaces/RPCInstance.md).

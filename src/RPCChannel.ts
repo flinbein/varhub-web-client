@@ -139,13 +139,13 @@ export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): 
 		 * - result has constructors for all constructable methods of {@link RPCSource} in room.
 		 * - all constructors are synchronous and return a new {@link RPCChannel}
 		 */
-		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, unknown> ? RPCChannel<METHODS, EVENTS, undefined> : RPCChannel<M>,
+		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? RPCChannel<METHODS, EVENTS, STATE> : RPCChannel<M>,
 		/** @hidden */
-		new<M, E>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, undefined>>
+		new<M, E, S>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, S>>
 	}
 ));
 
-type MetaScope<M, E, S> = { [Symbol.unscopables]: {__rpc_methods: M, __rpc_events: E, __rpc_state: S}}
+type MetaScope<M, E, S> = { [Symbol.unscopables]: {[Symbol.unscopables]:{__rpc_methods: M, __rpc_events: E, __rpc_state: S}}}
 
 /** @hidden */
 export type RPCChannel<M = any, E = any, S = undefined> = (
