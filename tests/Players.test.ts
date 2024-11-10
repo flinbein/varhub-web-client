@@ -149,13 +149,11 @@ test.describe("Players", () => {
 		assert.equal(players.get("Bob")!.online, false, "bob offline now");
 	})
 	
-	it("groups", {timeout: 3000}, async () => {
+	it("teams", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		
 		const players = new Players<{team: "redTeam"|"blueTeam"|"greenTeam"}>(room, (_con, name) => String(name));
-		
 		const aliceWs = roomWs.createClientMock("Alice");
 		const bobWs = roomWs.createClientMock("Bob");
 		const charlieWs = roomWs.createClientMock("Charlie");
@@ -167,7 +165,6 @@ test.describe("Players", () => {
 			)
 		);
 		const [alice, bob, charlie, eve] = ["Alice", "Bob", "Charlie", "Eve"].map(name => players.get(name)!);
-		
 		alice.setTeam("redTeam");
 		bob.setTeam("redTeam");
 		charlie.setTeam("blueTeam");

@@ -215,7 +215,7 @@ get all players with specified group. If group is undefined - get all players wi
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
+`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
 
 </td>
 <td>

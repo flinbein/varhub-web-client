@@ -213,7 +213,7 @@ export default class Players<DESC extends {team?: string} = {}> {
 	 * get all players with specified group. If group is undefined - get all players without group.
 	 * @param team
 	 */
-	getTeam(team: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): Set<Player<DESC>> {
+	getTeam(team: (DESC["team"] extends string ? DESC["team"] : string)|undefined): Set<Player<DESC>> {
 		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === team));
 	}
 	
@@ -360,11 +360,11 @@ class Player<DESC extends {team?: string} = {}> {
 	/**
 	 * get player's team
 	 */
-	get team(): (DESC["team"] extends undefined ? string : DESC["team"])|undefined {return this.#controller.getGroupOf(this)}
+	get team(): (DESC["team"] extends string ? DESC["team"] : string)|undefined {return this.#controller.getGroupOf(this)}
 	/**
 	 * set player's team
 	 */
-	setTeam(value: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): this {this.#controller.setGroupOf(this, value); return this}
+	setTeam(value: (DESC["team"] extends string ? DESC["team"] : string)|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
 	 * send message for all connections

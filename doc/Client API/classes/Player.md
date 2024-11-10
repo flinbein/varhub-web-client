@@ -85,13 +85,13 @@ player is registered in list of players
 
 ### team
 
-> `get` **team**(): `undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
+> `get` **team**(): `undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
 
 get player's team
 
 #### Returns
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
+`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
 
 ## Methods
 
@@ -219,7 +219,7 @@ set player's team
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `undefined` ? `string` : `DESC`\[`"team"`\]
+`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
 
 </td>
 </tr>

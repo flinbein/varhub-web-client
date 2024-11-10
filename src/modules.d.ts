@@ -436,11 +436,11 @@ declare module "varhub:players" {
 		/**
 		 * get player's group
 		 */
-		get team(): (DESC["team"] extends undefined ? string : DESC["team"])|undefined;
+		get team(): (DESC["team"] extends string ? DESC["team"] : string)|undefined;
 		/**
 		 * set player's group
 		 */
-		setTeam(value: (DESC["team"] extends undefined ? string : DESC["team"])|undefined);
+		setTeam(value: (DESC["team"] extends string ? DESC["team"] : string)|undefined);
 		/**
 		 * send message for all connections
 		 * @param args
@@ -582,7 +582,7 @@ declare module "varhub:players" {
 		 * get all players with specified group. If group is undefined - get all players without group.
 		 * @param group
 		 */
-		getTeam(group: (DESC["team"] extends undefined ? string : DESC["team"])|undefined): Set<Player<DESC>>;
+		getTeam(group: (DESC["team"] extends string ? DESC["team"] : string)|undefined): Set<Player<DESC>>;
 		/**
 		 * get all players
 		 */
