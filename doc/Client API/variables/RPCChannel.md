@@ -86,7 +86,3 @@ default:`"$rpc"`
 - all methods are asynchronous and return a Promise<XJData>
 - result has constructors for all constructable methods of [RPCSource](../classes/RPCSource.md) in room.
 - all constructors are synchronous and return a new [RPCChannel](RPCChannel.md)
-
-## Defined in
-
-[src/RPCChannel.ts:121](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L121)

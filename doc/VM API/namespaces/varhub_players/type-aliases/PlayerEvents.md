@@ -16,7 +16,6 @@
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -40,11 +39,6 @@ player.on("connectionMessage", (connection, ...msg) => {
   connection.send("thanks for a message");
 });
 ```
-
-</td>
-<td>
-
-[src/modules.d.ts:412](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L412)
 
 </td>
 </tr>
@@ -83,11 +77,6 @@ players.on("offline", player => player.kick("disconnected"));
 ```
 
 </td>
-<td>
-
-[src/modules.d.ts:380](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L380)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -112,11 +101,6 @@ player.on("offline", () => {
   console.assert(!player.online);
 })
 ```
-
-</td>
-<td>
-
-[src/modules.d.ts:402](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L402)
 
 </td>
 </tr>
@@ -145,15 +129,6 @@ player.on("online", () => {
 ```
 
 </td>
-<td>
-
-[src/modules.d.ts:391](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L391)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/modules.d.ts:359](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L359)

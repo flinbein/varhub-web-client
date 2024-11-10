@@ -20,10 +20,6 @@ connection closed
 
 `boolean`
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:574](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L574)
-
 ***
 
 ### deferred
@@ -35,10 +31,6 @@ connection is deferred
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:513](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L513)
 
 ***
 
@@ -52,10 +44,6 @@ get the parameters with which the connection was initialized
 
 `XJData`[]
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:506](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L506)
-
 ***
 
 ### ready
@@ -67,10 +55,6 @@ connection open
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:567](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L567)
 
 ## Methods
 
@@ -112,10 +96,6 @@ close client's connection
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:637](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L637)
 
 ***
 
@@ -224,10 +204,6 @@ async function checkConnection(connection, ...args) {
 }
 ```
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:541](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L541)
-
 ***
 
 ### open()
@@ -241,10 +217,6 @@ The connection is connected automatically if it has not been deferred.
 #### Returns
 
 [`Connection`](Connection.md)
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:583](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L583)
 
 ***
 
@@ -288,10 +260,6 @@ any serializable arguments
 #### Returns
 
 [`Connection`](Connection.md)
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:592](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L592)
 
 ***
 
@@ -405,10 +373,6 @@ connection.then(([connection]) => {
 });
 ```
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:496](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L496)
-
 ***
 
 ### toString()
@@ -419,10 +383,6 @@ connection.then(([connection]) => {
 
 `string`
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:641](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L641)
-
 ***
 
 ### valueOf()
@@ -432,10 +392,6 @@ connection.then(([connection]) => {
 #### Returns
 
 `number`
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:645](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L645)
 
 ## Events
 
@@ -520,10 +476,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:628](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L628)
-
 ***
 
 ### on()
@@ -607,10 +559,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/RoomSocketHandler.ts:604](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L604)
-
 ***
 
 ### once()
@@ -693,7 +641,3 @@ event handler
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/RoomSocketHandler.ts:616](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L616)

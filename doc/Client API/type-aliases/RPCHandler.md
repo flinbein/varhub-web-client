@@ -98,7 +98,3 @@ In this case the handler must return a [RPCSource](../classes/RPCSource.md) or P
 ## Returns
 
 `XJData` \| `Promise`\<`XJData`\> \| [`RPCSource`](../classes/RPCSource.md)
-
-## Defined in
-
-[src/RPCSource.ts:15](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCSource.ts#L15)

@@ -18,7 +18,6 @@
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -36,11 +35,6 @@
 <td>
 
 &hyphen;
-
-</td>
-<td>
-
-[src/RoomSocketHandler.ts:81](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L81)
 
 </td>
 </tr>
@@ -71,11 +65,6 @@ room.on("connection", (connection, ...params) => {
 After the event is processed, the connection will be automatically opened (if [Connection#close](../classes/Connection.md#close) or [Connection#defer](../classes/Connection.md#defer) was not called).
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:38](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L38)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -99,11 +88,6 @@ room.on("connectionClose", (con, reason, wasOpen) => {
   console.log("connection closed by reason:", reason);
 })
 ```
-
-</td>
-<td>
-
-[src/RoomSocketHandler.ts:58](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L58)
 
 </td>
 </tr>
@@ -131,11 +115,6 @@ room.on("connectionMessage", (con, ...data) => {
 ```
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:68](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L68)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -159,11 +138,6 @@ room.on("connectionOpen", (con) => {
   con.send("Welcome!");
 })
 ```
-
-</td>
-<td>
-
-[src/RoomSocketHandler.ts:48](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L48)
 
 </td>
 </tr>
@@ -192,11 +166,6 @@ client.on("error", (asyncError) => {
 ```
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:79](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L79)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -214,15 +183,6 @@ client.on("error", (asyncError) => {
 &hyphen;
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:80](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L80)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/RoomSocketHandler.ts:25](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L25)

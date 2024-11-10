@@ -33,14 +33,14 @@ Methods and properties of [RPCChannel](../variables/RPCChannel.md)
 
 ## Properties
 
-| Property | Type | Defined in |
-| ------ | ------ | ------ |
-| `call` | (`path`: `string`[], ...`args`: `any`[]) => `Promise`\<`any`\> | [src/RPCChannel.ts:89](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L89) |
-| `close` | (`reason`?: `string`) => `void` | [src/RPCChannel.ts:91](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L91) |
-| `closed` | `boolean` | [src/RPCChannel.ts:88](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L88) |
-| `create` | (`path`: `string`[], ...`args`: `any`[]) => [`RPCInstance`](RPCInstance.md)\<`any`\> & [`RpcEmitter`](RpcEmitter.md)\<`never`\> | [src/RPCChannel.ts:90](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L90) |
-| `ready` | `boolean` | [src/RPCChannel.ts:87](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L87) |
-| `state` | `S` | [src/RPCChannel.ts:92](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L92) |
+| Property | Type |
+| ------ | ------ |
+| `call` | (`path`: `string`[], ...`args`: `any`[]) => `Promise`\<`any`\> |
+| `close` | (`reason`?: `string`) => `void` |
+| `closed` | `boolean` |
+| `create` | (`path`: `string`[], ...`args`: `any`[]) => [`RPCInstance`](RPCInstance.md)\<`any`\> & [`RpcEmitter`](RpcEmitter.md)\<`never`\> |
+| `ready` | `boolean` |
+| `state` | `S` |
 
 ## Methods
 
@@ -58,10 +58,6 @@ Methods and properties of [RPCChannel](../variables/RPCChannel.md)
 
 `Disposable.[dispose]`
 
-##### Defined in
-
-node\_modules/typescript/lib/lib.esnext.disposable.d.ts:36
-
 #### \[dispose\]()
 
 > **\[dispose\]**(): `void`
@@ -73,10 +69,6 @@ node\_modules/typescript/lib/lib.esnext.disposable.d.ts:36
 ##### Inherited from
 
 `Disposable.[dispose]`
-
-##### Defined in
-
-node\_modules/@types/node/globals.d.ts:282
 
 ***
 
@@ -161,7 +153,3 @@ node\_modules/@types/node/globals.d.ts:282
 #### Returns
 
 `Promise`\<`R1` \| `R2`\>
-
-#### Defined in
-
-[src/RPCChannel.ts:83](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L83)

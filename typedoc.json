@@ -10,6 +10,7 @@
   "enumMembersFormat": "htmlTable",
   "typeDeclarationFormat": "htmlTable",
   "propertyMembersFormat": "htmlTable",
+  "disableSources": true,
   "externalSymbolLinkMappings": {
     "global": {
       "XJData": "https://github.com/flinbein/xjmapper/blob/main/src/index.ts#L15"

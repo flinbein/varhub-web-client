@@ -18,7 +18,6 @@ Events of [VarhubClient](../classes/VarhubClient.md)
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -47,11 +46,6 @@ client.on("close", (reason: string|null, wasOnline: boolean) => {
 ```
 
 </td>
-<td>
-
-[src/VarhubClient.ts:30](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L30)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -76,11 +70,6 @@ client.on("error", (asyncError) => {
   console.assert(client.closed);
 })
 ```
-
-</td>
-<td>
-
-[src/VarhubClient.ts:52](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L52)
 
 </td>
 </tr>
@@ -109,11 +98,6 @@ client.on("message", (...data: XJData[]) => {
 ```
 
 </td>
-<td>
-
-[src/VarhubClient.ts:19](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L19)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -140,15 +124,6 @@ client.on("open", () => {
 ```
 
 </td>
-<td>
-
-[src/VarhubClient.ts:41](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L41)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/VarhubClient.ts:8](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L8)

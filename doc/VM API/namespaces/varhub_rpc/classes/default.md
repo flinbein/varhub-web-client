@@ -156,10 +156,6 @@ const result = await rpc.test(5, 3);
 console.assert(result === 8);
 ```
 
-#### Defined in
-
-[src/modules.d.ts:699](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L699)
-
 ## Accessors
 
 ### disposed
@@ -169,10 +165,6 @@ console.assert(result === 8);
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[src/modules.d.ts:715](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L715)
 
 ***
 
@@ -186,10 +178,6 @@ get current state
 
 `STATE`
 
-#### Defined in
-
-[src/modules.d.ts:657](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L657)
-
 ***
 
 ### default
@@ -202,10 +190,6 @@ value is undefined while main module is executing
 #### Returns
 
 [`default`](default.md)\<`any`, `any`, `any`\>
-
-#### Defined in
-
-[src/modules.d.ts:758](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L758)
 
 ## Methods
 
@@ -222,10 +206,6 @@ dispose this source and disconnect all channels
 #### Implementation of
 
 `Disposable.[dispose]`
-
-#### Defined in
-
-[src/modules.d.ts:731](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L731)
 
 ***
 
@@ -267,10 +247,6 @@ dispose this source and disconnect all channels
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/modules.d.ts:727](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L727)
 
 ***
 
@@ -352,10 +328,6 @@ event values
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:722](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L722)
-
 ***
 
 ### setState()
@@ -400,10 +372,6 @@ new state value, if state is not a function.
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:710](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L710)
-
 ***
 
 ### withEventTypes()
@@ -441,10 +409,6 @@ apply generic types for events
 
 [`default`](default.md)\<`METHODS`, `STATE`, `E`\>
 
-#### Defined in
-
-[src/modules.d.ts:701](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L701)
-
 ***
 
 ### withState()
@@ -477,10 +441,6 @@ apply generic types for state.
 ##### Returns
 
 [`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
-
-##### Defined in
-
-[src/modules.d.ts:712](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L712)
 
 #### withState(state)
 
@@ -535,10 +495,6 @@ apply generic types for state and set new state.
 ##### Returns
 
 [`default`](default.md)\<`METHODS`, `S`, `EVENTS`\>
-
-##### Defined in
-
-[src/modules.d.ts:714](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L714)
 
 ***
 
@@ -600,10 +556,6 @@ object with methods.
 
 - [RPCHandler](../type-aliases/RPCHandler.md)
 
-#### Defined in
-
-[src/modules.d.ts:752](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L752)
-
 ***
 
 ### start()
@@ -631,7 +583,7 @@ start listening for messages and processing procedure calls
 </td>
 <td>
 
-[`default`](default.md)\<`any`, `undefined`, `any`\>
+[`default`](default.md)\<`any`, `any`, `any`\>
 
 </td>
 <td>
@@ -716,7 +668,3 @@ set a limit on the number of opened channels
 ##### Returns
 
 `void`
-
-#### Defined in
-
-[src/modules.d.ts:741](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L741)

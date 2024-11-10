@@ -18,10 +18,6 @@ connection closed
 
 `boolean`
 
-#### Defined in
-
-[src/modules.d.ts:106](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L106)
-
 ***
 
 ### deferred
@@ -33,10 +29,6 @@ connection is deferred
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[src/modules.d.ts:170](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L170)
 
 ***
 
@@ -50,10 +42,6 @@ get the parameters with which the connection was initialized
 
 `any`[]
 
-#### Defined in
-
-[src/modules.d.ts:180](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L180)
-
 ***
 
 ### ready
@@ -65,10 +53,6 @@ connection open
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[src/modules.d.ts:102](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L102)
 
 ## Methods
 
@@ -110,10 +94,6 @@ close client's connection
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/modules.d.ts:140](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L140)
 
 ***
 
@@ -222,10 +202,6 @@ async function checkConnection(connection, ...args) {
 }
 ```
 
-#### Defined in
-
-[src/modules.d.ts:166](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L166)
-
 ***
 
 ### open()
@@ -239,10 +215,6 @@ The connection is connected automatically if it has not been deferred.
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/modules.d.ts:176](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L176)
 
 ***
 
@@ -286,10 +258,6 @@ any serializable arguments
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/modules.d.ts:111](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L111)
 
 ***
 
@@ -403,10 +371,6 @@ connection.then(([connection]) => {
 });
 ```
 
-#### Defined in
-
-[src/modules.d.ts:95](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L95)
-
 ***
 
 ### toString()
@@ -417,10 +381,6 @@ connection.then(([connection]) => {
 
 `string`
 
-#### Defined in
-
-[src/modules.d.ts:181](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L181)
-
 ***
 
 ### valueOf()
@@ -430,10 +390,6 @@ connection.then(([connection]) => {
 #### Returns
 
 `number`
-
-#### Defined in
-
-[src/modules.d.ts:182](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L182)
 
 ## Events
 
@@ -518,10 +474,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:135](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L135)
-
 ***
 
 ### on()
@@ -605,10 +557,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:119](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L119)
-
 ***
 
 ### once()
@@ -691,7 +639,3 @@ event handler
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/modules.d.ts:127](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L127)

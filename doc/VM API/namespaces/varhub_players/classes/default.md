@@ -84,10 +84,6 @@ const players = new Players(room, async (connection, name, password) => {
 });
 ```
 
-#### Defined in
-
-[src/modules.d.ts:570](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L570)
-
 ## Accessors
 
 ### count
@@ -99,10 +95,6 @@ get number of players
 #### Returns
 
 `number`
-
-#### Defined in
-
-[src/modules.d.ts:580](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L580)
 
 ## Methods
 
@@ -116,10 +108,6 @@ iterate on all players
 
 `MapIterator`\<[`Player`](../interfaces/Player.md)\>
 
-#### Defined in
-
-[src/modules.d.ts:617](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L617)
-
 ***
 
 ### all()
@@ -131,10 +119,6 @@ get all players
 #### Returns
 
 `Set`\<[`Player`](../interfaces/Player.md)\>
-
-#### Defined in
-
-[src/modules.d.ts:589](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L589)
 
 ***
 
@@ -179,10 +163,6 @@ name or connection
 
 `undefined` \| [`Player`](../interfaces/Player.md)
 
-#### Defined in
-
-[src/modules.d.ts:575](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L575)
-
 ***
 
 ### getGroup()
@@ -223,10 +203,6 @@ get all players with specified group. If group is undefined - get all players wi
 #### Returns
 
 `Set`\<[`Player`](../interfaces/Player.md)\>
-
-#### Defined in
-
-[src/modules.d.ts:585](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L585)
 
 ## Events
 
@@ -311,10 +287,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:613](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L613)
-
 ***
 
 ### on()
@@ -398,10 +370,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:597](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L597)
-
 ***
 
 ### once()
@@ -484,7 +452,3 @@ event handler
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/modules.d.ts:605](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L605)

@@ -92,7 +92,3 @@ url to fetch as string
  - [RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
  - [RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
  - [RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
-
-#### Defined in
-
-[src/modules.d.ts:828](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L828)

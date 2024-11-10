@@ -37,7 +37,6 @@ Basic events of [RPCChannel](../variables/RPCChannel.md)
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -67,11 +66,6 @@ rpc.on("close", (reason) => {
 ```
 
 </td>
-<td>
-
-[src/RPCChannel.ts:32](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L32)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -97,11 +91,6 @@ rpc.on("error", (reason) => {
   console.assert(rpc.closed);
 });
 ```
-
-</td>
-<td>
-
-[src/RPCChannel.ts:56](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L56)
 
 </td>
 </tr>
@@ -131,11 +120,6 @@ rpc.on("init", (reason) => {
 ```
 
 </td>
-<td>
-
-[src/RPCChannel.ts:44](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L44)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -162,15 +146,6 @@ rpc.on("state", (newState, oldState) => {
 ```
 
 </td>
-<td>
-
-[src/RPCChannel.ts:20](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L20)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/RPCChannel.ts:9](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L9)

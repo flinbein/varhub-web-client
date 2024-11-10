@@ -18,7 +18,6 @@ Define all events dispatched by room controller
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -49,11 +48,6 @@ room.on("connection", (con, ...params) => {
 After the event is processed, the connection will be automatically opened (if [Connection#close](../interfaces/Connection.md#close) or [Connection#defer](../interfaces/Connection.md#defer) was not called).
 
 </td>
-<td>
-
-[src/modules.d.ts:203](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L203)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -77,11 +71,6 @@ room.on("connectionClose", (con, reason, wasOpen) => {
   console.log("connection closed by reason:", reason);
 })
 ```
-
-</td>
-<td>
-
-[src/modules.d.ts:223](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L223)
 
 </td>
 </tr>
@@ -109,11 +98,6 @@ room.on("connectionMessage", (con, ...data) => {
 ```
 
 </td>
-<td>
-
-[src/modules.d.ts:233](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L233)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -139,15 +123,6 @@ room.on("connectionOpen", (con) => {
 ```
 
 </td>
-<td>
-
-[src/modules.d.ts:213](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L213)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/modules.d.ts:190](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L190)

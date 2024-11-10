@@ -43,7 +43,6 @@ keyof `BodyType`
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -61,11 +60,6 @@ keyof `BodyType`
 <td>
 
 request body. Empty by default.
-
-</td>
-<td>
-
-[src/modules.d.ts:868](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L868)
 
 </td>
 </tr>
@@ -87,11 +81,6 @@ request body. Empty by default.
 [RequestInit.credentials](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials)
 
 </td>
-<td>
-
-[src/modules.d.ts:876](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L876)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -109,11 +98,6 @@ request body. Empty by default.
 add custom headers to the request
 
 </td>
-<td>
-
-[src/modules.d.ts:864](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L864)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -129,11 +113,6 @@ add custom headers to the request
 <td>
 
 http method. `GET` by default
-
-</td>
-<td>
-
-[src/modules.d.ts:860](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L860)
 
 </td>
 </tr>
@@ -155,11 +134,6 @@ http method. `GET` by default
 [RequestInit.mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode)
 
 </td>
-<td>
-
-[src/modules.d.ts:880](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L880)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -177,11 +151,6 @@ http method. `GET` by default
 **See**
 
 [RequestInit.redirect](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#redirect)
-
-</td>
-<td>
-
-[src/modules.d.ts:872](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L872)
 
 </td>
 </tr>
@@ -203,11 +172,6 @@ http method. `GET` by default
 [RequestInit.referrer](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrer)
 
 </td>
-<td>
-
-[src/modules.d.ts:884](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L884)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -227,11 +191,6 @@ http method. `GET` by default
 [RequestInit.referrerPolicy](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#referrerpolicy)
 
 </td>
-<td>
-
-[src/modules.d.ts:888](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L888)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -249,15 +208,6 @@ http method. `GET` by default
 `"json"|"text"|"arrayBuffer"|"formData"`. By default, it will define using header content-type
 
 </td>
-<td>
-
-[src/modules.d.ts:856](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L856)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/modules.d.ts:852](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L852)

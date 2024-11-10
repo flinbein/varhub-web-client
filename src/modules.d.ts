@@ -738,7 +738,7 @@ declare module "varhub:rpc" {
 		 * @param options.maxChannelsPerClient set a limit on the number of opened channels
 		 * @param options.key Special key for listening events. Default value: `"$rpc"`
 		 */
-		static start(rpcSource: RPCSource<any, undefined, any>, room: Room, options?: {
+		static start(rpcSource: RPCSource<any, any, any>, room: Room, options?: {
 			maxChannelsPerClient?: number;
 			key?: string
 		}): () => void;

@@ -43,10 +43,6 @@ Varhub instance to manage rooms, create clients
 
 [`Varhub`](Varhub.md)
 
-#### Defined in
-
-[src/Varhub.ts:78](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L78)
-
 ## Accessors
 
 ### url
@@ -60,10 +56,6 @@ get current url as string
 `string`
 
 string
-
-#### Defined in
-
-[src/Varhub.ts:86](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L86)
 
 ## Methods
 
@@ -113,10 +105,6 @@ example to generate random id
 ```js
 Array.from({length:10}).map(() => Math.random().toString(36).substring(2)).join("")
 ```
-
-#### Defined in
-
-[src/Varhub.ts:167](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L167)
 
 ***
 
@@ -197,10 +185,6 @@ options
 
 `Promise`\<`RoomCreateResult`\<`T`\>\>
 
-#### Defined in
-
-[src/Varhub.ts:95](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L95)
-
 ***
 
 ### createRoomSocket()
@@ -278,10 +262,6 @@ set public message of this room
 
 [`RoomSocketHandler`](RoomSocketHandler.md)
 
-#### Defined in
-
-[src/Varhub.ts:105](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L105)
-
 ***
 
 ### findRooms()
@@ -328,10 +308,6 @@ If room has no message, it will not be included in result.
 `Promise`\<`Record`\<`string`, `string`\>\>
 
 record of <roomId, message>.
-
-#### Defined in
-
-[src/Varhub.ts:117](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L117)
 
 ***
 
@@ -399,10 +375,6 @@ string
 
 Error if room not found or room not public or integrity mismatch
 
-#### Defined in
-
-[src/Varhub.ts:128](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L128)
-
 ***
 
 ### join()
@@ -464,7 +436,3 @@ options
 [`VarhubClient`](VarhubClient.md)
 
 client
-
-#### Defined in
-
-[src/Varhub.ts:151](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/Varhub.ts#L151)

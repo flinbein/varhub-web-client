@@ -31,10 +31,6 @@ client's connection is closed
 
 `boolean`
 
-#### Defined in
-
-[src/VarhubClient.ts:157](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L157)
-
 ***
 
 ### ready
@@ -47,10 +43,6 @@ client is successfully joined to the room.
 
 `boolean`
 
-#### Defined in
-
-[src/VarhubClient.ts:152](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L152)
-
 ## Methods
 
 ### \[asyncDispose\]()
@@ -61,10 +53,6 @@ client is successfully joined to the room.
 
 `Promise`\<`void`\>
 
-#### Defined in
-
-[src/VarhubClient.ts:219](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L219)
-
 ***
 
 ### \[dispose\]()
@@ -74,10 +62,6 @@ client is successfully joined to the room.
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/VarhubClient.ts:215](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L215)
 
 ***
 
@@ -119,10 +103,6 @@ close client's connection
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/VarhubClient.ts:210](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L210)
 
 ***
 
@@ -166,10 +146,6 @@ any serializable arguments
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/VarhubClient.ts:163](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L163)
 
 ***
 
@@ -289,10 +265,6 @@ varhub.join(roomId).then(([client]) => {
 });
 ```
 
-#### Defined in
-
-[src/VarhubClient.ts:142](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L142)
-
 ## Events
 
 ### off()
@@ -373,10 +345,6 @@ Unsubscribe from client event
 `this`
 
 #### See
-
-#### Defined in
-
-[src/VarhubClient.ts:201](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L201)
 
 ***
 
@@ -461,10 +429,6 @@ event handler
 
 `this`
 
-#### Defined in
-
-[src/VarhubClient.ts:176](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L176)
-
 ***
 
 ### once()
@@ -545,7 +509,3 @@ Subscribe on client event once
 `this`
 
 #### See
-
-#### Defined in
-
-[src/VarhubClient.ts:188](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/VarhubClient.ts#L188)

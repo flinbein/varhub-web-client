@@ -51,10 +51,6 @@ change public message of the room. Set null to make room private.
 
 `null` \| `string`
 
-#### Defined in
-
-[src/modules.d.ts:256](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L256)
-
 ## Methods
 
 ### \[asyncDispose\]()
@@ -65,10 +61,6 @@ change public message of the room. Set null to make room private.
 
 `Promise`\<`void`\>
 
-#### Defined in
-
-[src/modules.d.ts:312](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L312)
-
 ***
 
 ### \[dispose\]()
@@ -78,10 +70,6 @@ change public message of the room. Set null to make room private.
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/modules.d.ts:311](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L311)
 
 ***
 
@@ -120,10 +108,6 @@ send message to all ready connections.
 
 `this`
 
-#### Defined in
-
-[src/modules.d.ts:271](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L271)
-
 ***
 
 ### destroy()
@@ -135,10 +119,6 @@ destroy this room.
 #### Returns
 
 `void`
-
-#### Defined in
-
-[src/modules.d.ts:266](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L266)
 
 ***
 
@@ -236,10 +216,6 @@ get only ready (or not ready) connections.
 
 connections found
 
-#### Defined in
-
-[src/modules.d.ts:281](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L281)
-
 ## Events
 
 ### off()
@@ -326,10 +302,6 @@ event handler
 #### See
 
 RoomEvents
-
-#### Defined in
-
-[src/modules.d.ts:309](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L309)
 
 ***
 
@@ -418,10 +390,6 @@ event handler
 
 RoomEvents
 
-#### Defined in
-
-[src/modules.d.ts:291](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L291)
-
 ***
 
 ### once()
@@ -508,7 +476,3 @@ event handler
 #### See
 
 RoomEvents
-
-#### Defined in
-
-[src/modules.d.ts:300](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/modules.d.ts#L300)

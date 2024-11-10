@@ -18,7 +18,6 @@ Events of [Connection](../classes/Connection.md)
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
-<th>Defined in</th>
 </tr>
 </thead>
 <tbody>
@@ -47,11 +46,6 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 ```
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:437](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L437)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -76,11 +70,6 @@ connection.on("message", (...data) => {
   console.assert(connection.ready);
 })
 ```
-
-</td>
-<td>
-
-[src/RoomSocketHandler.ts:448](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L448)
 
 </td>
 </tr>
@@ -110,15 +99,6 @@ connection.open();
 ```
 
 </td>
-<td>
-
-[src/RoomSocketHandler.ts:426](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L426)
-
-</td>
 </tr>
 </tbody>
 </table>
-
-## Defined in
-
-[src/RoomSocketHandler.ts:414](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RoomSocketHandler.ts#L414)

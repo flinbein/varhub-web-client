@@ -93,10 +93,6 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 `this`
 
-#### Defined in
-
-[src/RPCChannel.ts:101](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L101)
-
 ***
 
 ### on()
@@ -163,10 +159,6 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 
 `this`
 
-#### Defined in
-
-[src/RPCChannel.ts:99](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L99)
-
 ***
 
 ### once()
@@ -232,7 +224,3 @@ Methods to handle events of [RPCChannel](../variables/RPCChannel.md)
 #### Returns
 
 `this`
-
-#### Defined in
-
-[src/RPCChannel.ts:100](https://github.com/flinbein/varhub-web-client/blob/03abd2bf517b76514fc1e5aae61e36810a87369c/src/RPCChannel.ts#L100)
