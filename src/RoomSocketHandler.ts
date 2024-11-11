@@ -18,11 +18,12 @@ const enum ROOM_ACTION {
 	BROADCAST = 5,
 }
 
+type RoomDesc = {data?: any}
 /**
  * {@link RoomSocketHandler} events
  * @group Events
  * */
-export type RoomSocketHandlerEvents = {
+export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
 	/**
 	 * new connection initialized
 	 * @example
@@ -35,7 +36,7 @@ export type RoomSocketHandlerEvents = {
 	 * ```
 	 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
 	 * */
-	connection: [connection: Connection, ...args: XJData[]];
+	connection: [connection: Connection<DESC>, ...args: XJData[]];
 	/**
 	 * connection successfully opened
 	 * @example
@@ -45,7 +46,7 @@ export type RoomSocketHandlerEvents = {
 	 * })
 	 * ```
 	 * */
-	connectionOpen: [connection: Connection];
+	connectionOpen: [connection: Connection<DESC>];
 	/**
 	 * connection closed
 	 * @example
@@ -55,7 +56,7 @@ export type RoomSocketHandlerEvents = {
 	 * })
 	 * ```
 	 * */
-	connectionClose: [connection: Connection, reason: string | null, wasOnline: boolean];
+	connectionClose: [connection: Connection<DESC>, reason: string | null, wasOnline: boolean];
 	/**
 	 * received a message from connection
 	 * @example
@@ -65,7 +66,7 @@ export type RoomSocketHandlerEvents = {
 	 * })
 	 * ```
 	 * */
-	connectionMessage: [connection: Connection, ...args: XJData[]];
+	connectionMessage: [connection: Connection<DESC>, ...args: XJData[]];
 	/**
 	 * error creating room
 	 * @example
@@ -94,7 +95,7 @@ export type RoomSocketHandlerEvents = {
  * console.log(room.id);
  * ```
  */
-export class RoomSocketHandler {
+export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	#ws: WebSocket;
 	#id: string|null = null;
 	#integrity: string|null = null;
@@ -193,7 +194,7 @@ export class RoomSocketHandler {
 	 * @param {boolean} [filter.closed] get only closed (or not closed) connections.
 	 * @return connections found
 	 */
-	getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection>{
+	getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection<DESC>>{
 		return this.#connectionsLayer.getConnections(filter);
 	}
 	
@@ -269,7 +270,7 @@ export class RoomSocketHandler {
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	on<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
+	on<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.on.call(this, event, handler as any);
 		return this;
 	}
@@ -282,7 +283,7 @@ export class RoomSocketHandler {
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	once<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
+	once<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.once.call(this, event, handler as any);
 		return this;
 	}
@@ -295,7 +296,7 @@ export class RoomSocketHandler {
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	off<T extends keyof RoomSocketHandlerEvents>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents[T]) => void): this{
+	off<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.off.call(this, event, handler as any);
 		return this;
 	}
@@ -452,13 +453,17 @@ export type ConnectionEvents = {
  * Handler of room connection
  * @group Classes
  */
-class Connection {
+class Connection<DESC extends {data?: any} = {}> {
 	#id: number;
 	#parameters: XJData[];
 	#handle: ConnectionsLayer
 	#subscriber
 	#initResolver = Promise.withResolvers<void>();
 	#deferred = false;
+	/**
+	 * custom data for this connection
+	 */
+	declare data?: DESC extends {data: infer T} ? T : any;
 
 	/** @hidden */
 	constructor(id: number, parameters: XJData[], handle: ConnectionsLayer){

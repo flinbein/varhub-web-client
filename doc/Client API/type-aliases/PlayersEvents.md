@@ -16,13 +16,19 @@ events of [Players](../classes/Players.md) object
 <thead>
 <tr>
 <th>Type Parameter</th>
+<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* `PlayerDesc`
+
+</td>
+<td>
+
+`object`
 
 </td>
 </tr>

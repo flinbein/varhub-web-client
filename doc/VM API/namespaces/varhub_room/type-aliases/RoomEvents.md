@@ -4,11 +4,36 @@
 
 [@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:room"](../README.md) / RoomEvents
 
-# Type Alias: RoomEvents
+# Type Alias: RoomEvents\<DESC\>
 
-> **RoomEvents**: `object`
+> **RoomEvents**\<`DESC`\>: `object`
 
 Define all events dispatched by room controller
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -29,7 +54,7 @@ Define all events dispatched by room controller
 </td>
 <td>
 
-[[`Connection`](../interfaces/Connection.md), `any`[]]
+[[`Connection`](../interfaces/Connection.md)\<`DESC`\>, `any`[]]
 
 </td>
 <td>
@@ -57,7 +82,7 @@ After the event is processed, the connection will be automatically opened (if [C
 </td>
 <td>
 
-[[`Connection`](../interfaces/Connection.md), `string` \| `null`, `boolean`]
+[[`Connection`](../interfaces/Connection.md)\<`DESC`\>, `string` \| `null`, `boolean`]
 
 </td>
 <td>
@@ -82,7 +107,7 @@ room.on("connectionClose", (con, reason, wasOpen) => {
 </td>
 <td>
 
-[[`Connection`](../interfaces/Connection.md), `any`[]]
+[[`Connection`](../interfaces/Connection.md)\<`DESC`\>, `any`[]]
 
 </td>
 <td>
@@ -107,7 +132,7 @@ room.on("connectionMessage", (con, ...data) => {
 </td>
 <td>
 
-[[`Connection`](../interfaces/Connection.md)]
+[[`Connection`](../interfaces/Connection.md)\<`DESC`\>]
 
 </td>
 <td>

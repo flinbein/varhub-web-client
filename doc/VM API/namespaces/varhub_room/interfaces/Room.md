@@ -4,7 +4,32 @@
 
 [@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:room"](../README.md) / Room
 
-# Interface: Room
+# Interface: Room\<DESC\>
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Accessors
 
@@ -124,7 +149,7 @@ destroy this room.
 
 ### getConnections()
 
-> **getConnections**(`filter`?): `Set`\<[`Connection`](Connection.md)\>
+> **getConnections**(`filter`?): `Set`\<[`Connection`](Connection.md)\<`DESC`\>\>
 
 get all connections
 
@@ -212,7 +237,7 @@ get only ready (or not ready) connections.
 
 #### Returns
 
-`Set`\<[`Connection`](Connection.md)\>
+`Set`\<[`Connection`](Connection.md)\<`DESC`\>\>
 
 connections found
 
@@ -235,7 +260,7 @@ connections found
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)
+`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -322,7 +347,7 @@ RoomEvents
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)
+`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -409,7 +434,7 @@ RoomEvents
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)
+`T` *extends* keyof [`RoomEvents`](../type-aliases/RoomEvents.md)\<`DESC`\>
 
 </td>
 <td>

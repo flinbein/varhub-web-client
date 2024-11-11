@@ -21,7 +21,7 @@ Player represents a list of [Connection](Connection.md)s with same name.
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* `PlayerDesc`
 
 </td>
 <td>
@@ -33,17 +33,23 @@ Player represents a list of [Connection](Connection.md)s with same name.
 </tbody>
 </table>
 
+## Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| `data?` | `DESC` *extends* `object` ? `T` : `any` | custom data for this player |
+
 ## Accessors
 
 ### connections
 
-> `get` **connections**(): `Set`\<[`Connection`](Connection.md)\>
+> `get` **connections**(): `Set`\<[`Connection`](Connection.md)\<`object`\>\>
 
 get all player's connections
 
 #### Returns
 
-`Set`\<[`Connection`](Connection.md)\>
+`Set`\<[`Connection`](Connection.md)\<`object`\>\>
 
 ***
 
@@ -85,25 +91,25 @@ player is registered in list of players
 
 ### team
 
-> `get` **team**(): `undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+> `get` **team**(): `undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 get player's team
 
 #### Returns
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 ## Methods
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `SetIterator`\<[`Connection`](Connection.md)\>
+> **\[iterator\]**(): `SetIterator`\<[`Connection`](Connection.md)\<`object`\>\>
 
 iterate on all player's connections
 
 #### Returns
 
-`SetIterator`\<[`Connection`](Connection.md)\>
+`SetIterator`\<[`Connection`](Connection.md)\<`object`\>\>
 
 ***
 
@@ -219,7 +225,7 @@ set player's team
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 </td>
 </tr>

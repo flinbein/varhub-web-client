@@ -1,6 +1,7 @@
 import * as assert from "node:assert";
 import { describe, it, mock } from "node:test";
-import { RPCSource, RPCChannel, VarhubClient, Connection, RoomSocketHandler, Players } from "../src/index.js";
+import { RPCSource, RPCChannel, VarhubClient, Connection, Players } from "../src/index.js";
+import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 
 describe("RPCSource", () => {
@@ -349,16 +350,16 @@ describe("RPCSource", () => {
 		
 		
 		await Promise.all([nonameChannel, aliceChannel, bobChannel1, bobChannel2, charlieChannel]);
-		players.get("Alice")?.setGroup("redTeam");
-		players.get("Bob")?.setGroup("redTeam");
+		players.get("Alice")?.setTeam("redTeam");
+		players.get("Bob")?.setTeam("redTeam");
 		
 		rpcRoom.emit("notify", "forAll"); // n a 1 2 c
 		rpcRoom.emitFor(room.getConnections({ready: true}), "notify", "forAllConnections"); // n a 1 2 c
 		rpcRoom.emitFor(players, "notify", "forPlayers"); // - a 1 2 c
 		rpcRoom.emitFor([...players], "notify", "forPlayersArray"); // - a 1 2 c
 		rpcRoom.emitFor(players.get("Alice"), "notify", "forAlice"); // - a - - -
-		rpcRoom.emitFor(players.getGroup("redTeam"), "notify", "forRedTeam"); // - a 1 2 -
-		rpcRoom.emitFor(players.getGroup(undefined), "notify", "forNoTeam"); // - - - - c
+		rpcRoom.emitFor(players.getTeam("redTeam"), "notify", "forRedTeam"); // - a 1 2 -
+		rpcRoom.emitFor(players.getTeam(undefined), "notify", "forNoTeam"); // - - - - c
 		
 		for (let connection of room.getConnections({ready: true})) {
 			if (connection.parameters[1] === 1) {

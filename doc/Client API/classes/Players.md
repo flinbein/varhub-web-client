@@ -21,7 +21,7 @@ List of players based on named connections.
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* `PlayerDesc`
 
 </td>
 <td>
@@ -60,7 +60,7 @@ Create a player list based on connections.
 </td>
 <td>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 </td>
 <td>
@@ -127,11 +127,11 @@ get number of players
 
 ### room
 
-> `get` **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)
+> `get` **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 #### Returns
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 ## Methods
 
@@ -184,7 +184,7 @@ get player by name or connection
 </td>
 <td>
 
-`string` \| [`Connection`](Connection.md)
+`string` \| [`Connection`](Connection.md)\<`object`\>
 
 </td>
 <td>
@@ -227,7 +227,7 @@ get all players with specified group. If group is undefined - get all players wi
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 </td>
 <td>

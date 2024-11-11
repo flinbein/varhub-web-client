@@ -4,7 +4,38 @@
 
 [@flinbein/varhub-web-clent](../../../../README.md) / [VM API](../../../README.md) / ["varhub:room"](../README.md) / Connection
 
-# Interface: Connection
+# Interface: Connection\<DESC\>
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+## Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| `data?` | `DESC` *extends* `object` ? `T` : `any` | custom data for this connection |
 
 ## Accessors
 
@@ -286,7 +317,7 @@ Promise like for events "open", "error"
 </td>
 <td>
 
-[[`Connection`](Connection.md)]
+[[`Connection`](Connection.md)\<`DESC`\>]
 
 </td>
 </tr>

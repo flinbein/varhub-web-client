@@ -141,14 +141,14 @@ export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): 
 		 */
 		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? RPCChannel<METHODS, EVENTS, STATE> : RPCChannel<M>,
 		/** @hidden */
-		new<M, E, S>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, S>>
+		new<M, E, S = any>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, S>>
 	}
 ));
 
 type MetaScope<M, E, S> = { [Symbol.unscopables]: {[Symbol.unscopables]:{__rpc_methods: M, __rpc_events: E, __rpc_state: S}}}
 
 /** @hidden */
-export type RPCChannel<M = any, E = any, S = undefined> = (
+export type RPCChannel<M = unknown, E = unknown, S = undefined> = (
 	M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? (
 		RPCInstance<STATE> & RpcMapper<METHODS, EVENTS & RPCChannelEvents<STATE>>
 	) : (

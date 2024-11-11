@@ -189,7 +189,7 @@ options
 
 ### createRoomSocket()
 
-> **createRoomSocket**(`options`?): [`RoomSocketHandler`](RoomSocketHandler.md)
+> **createRoomSocket**(`options`?): [`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 create websocket connection to handle new room
 
@@ -260,7 +260,7 @@ set public message of this room
 
 #### Returns
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 ***
 

@@ -31,6 +31,8 @@
  */
 declare module "varhub:room" {
 	
+	type RoomDesc = {data?: any}
+	
 	/** @event */
 	export type ConnectionEvents = {
 		/**
@@ -69,7 +71,11 @@ declare module "varhub:room" {
 		message: any[];
 	}
 	
-	interface Connection {
+	interface Connection<DESC extends RoomDesc = {}> {
+		/**
+		 * custom data for this connection
+		 */
+		data?: DESC extends {data: infer T} ? T : any;
 		/**
 		 * Promise like for events "open", "error"
 		 * ### Using in async context
@@ -187,7 +193,7 @@ declare module "varhub:room" {
 	 * @event
 	 * Define all events dispatched by room controller
 	 */
-	export type RoomEvents = {
+	export type RoomEvents<DESC extends RoomDesc = {}> = {
 		/**
 		 * new connection initialized
 		 * @example
@@ -200,7 +206,7 @@ declare module "varhub:room" {
 		 * ```
 		 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
 		 * */
-		connection: [connection: Connection, ...params: any[]];
+		connection: [connection: Connection<DESC>, ...params: any[]];
 		/**
 		 * connection successfully opened
 		 * @example
@@ -210,7 +216,7 @@ declare module "varhub:room" {
 		 * })
 		 * ```
 		 * */
-		connectionOpen: [connection: Connection];
+		connectionOpen: [connection: Connection<DESC>];
 		/**
 		 * connection closed
 		 * @example
@@ -220,7 +226,7 @@ declare module "varhub:room" {
 		 * })
 		 * ```
 		 * */
-		connectionClose: [connection: Connection, reason: string | null, wasOpen: boolean];
+		connectionClose: [connection: Connection<DESC>, reason: string | null, wasOpen: boolean];
 		/**
 		 * received a message from connection
 		 * @example
@@ -230,11 +236,10 @@ declare module "varhub:room" {
 		 * })
 		 * ```
 		 * */
-		connectionMessage: [connection: Connection, ...data: any[]];
+		connectionMessage: [connection: Connection<DESC>, ...data: any[]];
 	}
 	
-	
-	interface Room {
+	interface Room <DESC extends RoomDesc = {}> {
 		#private
 		/** @hidden */
 		then<R1 = [this]>(
@@ -278,7 +283,7 @@ declare module "varhub:room" {
 		 * @param {boolean} [filter.closed] get only closed (or not closed) connections.
 		 * @return connections found
 		 */
-		getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection>;
+		getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection<DESC>>;
 		
 		/**
 		 * @event
@@ -288,7 +293,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		on<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		on<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof RoomEvents} T
@@ -297,7 +302,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		once<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		once<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof RoomEvents} T
@@ -306,7 +311,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		off<T extends keyof RoomEvents>(event: T, handler: (...args: RoomEvents[T]) => void): this;
+		off<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
 		
 		[Symbol.dispose](): void;
 		[Symbol.asyncDispose](): Promise<void>;
@@ -353,6 +358,11 @@ declare module "varhub:events" {
  */
 declare module "varhub:players" {
 	import type { Connection, Room } from "varhub:room"
+	type PlayerDesc = {
+		team?: string,
+		data?: any
+	};
+	
 	/**
 	 * @event
 	 */
@@ -415,7 +425,11 @@ declare module "varhub:players" {
 	/**
 	 * Player represents a list of {@link Connection}s with same name.
 	 */
-	export interface Player<DESC extends {team?: string} = {}> {
+	export interface Player<DESC extends PlayerDesc = {}> {
+		/**
+		 * custom data for this player
+		 */
+		data?: DESC extends {data: infer T} ? T : any;
 		/**
 		 * player's name
 		 */
@@ -436,11 +450,11 @@ declare module "varhub:players" {
 		/**
 		 * get player's group
 		 */
-		get team(): (DESC["team"] extends string ? DESC["team"] : string)|undefined;
+		get team(): (DESC extends {team: infer T} ? T : string)|undefined;
 		/**
 		 * set player's group
 		 */
-		setTeam(value: (DESC["team"] extends string ? DESC["team"] : string)|undefined);
+		setTeam(value: (DESC extends {team: infer T} ? T : string)|undefined): this;
 		/**
 		 * send message for all connections
 		 * @param args
@@ -485,7 +499,7 @@ declare module "varhub:players" {
 	}
 	
 	/** @group Events */
-	export type PlayersEvents<DESC extends {team?: string}> = {
+	export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 		/**
 		 * new player joined
 		 * @example
@@ -544,7 +558,7 @@ declare module "varhub:players" {
 		 */
 		offline: [Player<DESC>]
 	}
-	export default class Players<DESC extends {team?: string} = {}> {
+	export default class Players<DESC extends PlayerDesc = {}> {
 		/**
 		 * Create a player list based on connections.
 		 * @example
@@ -582,7 +596,7 @@ declare module "varhub:players" {
 		 * get all players with specified group. If group is undefined - get all players without group.
 		 * @param group
 		 */
-		getTeam(group: (DESC["team"] extends string ? DESC["team"] : string)|undefined): Set<Player<DESC>>;
+		getTeam(group: (DESC extends {team: infer T} ? T : string)|undefined): Set<Player<DESC>>;
 		/**
 		 * get all players
 		 */

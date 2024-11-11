@@ -60,6 +60,31 @@ Player represents a list of [Connection](../varhub:room/interfaces/Connection.md
 </tbody>
 </table>
 
+### Type Aliases
+
+<table>
+<thead>
+<tr>
+<th>Type alias</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+[PlayerDesc](type-aliases/PlayerDesc.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+</tbody>
+</table>
+
 ### Events
 
 <table>

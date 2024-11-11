@@ -600,7 +600,7 @@ message handler
 </td>
 <td>
 
-[`Room`](../../varhub:room/interfaces/Room.md)
+[`Room`](../../varhub:room/interfaces/Room.md)\<`object`\>
 
 </td>
 <td>

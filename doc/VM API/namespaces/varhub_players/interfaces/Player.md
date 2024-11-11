@@ -21,7 +21,7 @@ Player represents a list of [Connection](../../varhub:room/interfaces/Connection
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* [`PlayerDesc`](../type-aliases/PlayerDesc.md)
 
 </td>
 <td>
@@ -33,17 +33,23 @@ Player represents a list of [Connection](../../varhub:room/interfaces/Connection
 </tbody>
 </table>
 
+## Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| `data?` | `DESC` *extends* `object` ? `T` : `any` | custom data for this player |
+
 ## Accessors
 
 ### connections
 
-> `get` **connections**(): `Set`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\>
+> `get` **connections**(): `Set`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\<`object`\>\>
 
 get all player's connections
 
 #### Returns
 
-`Set`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\>
+`Set`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\<`object`\>\>
 
 ***
 
@@ -85,25 +91,25 @@ player is registered in list of players
 
 ### team
 
-> `get` **team**(): `undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+> `get` **team**(): `undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 get player's group
 
 #### Returns
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 ## Methods
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `SetIterator`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\>
+> **\[iterator\]**(): `SetIterator`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\<`object`\>\>
 
 iterate on all player's connections
 
 #### Returns
 
-`SetIterator`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\>
+`SetIterator`\<[`Connection`](../../varhub:room/interfaces/Connection.md)\<`object`\>\>
 
 ***
 
@@ -191,7 +197,7 @@ send message for all connections
 
 ### setTeam()
 
-> **setTeam**(`value`): `any`
+> **setTeam**(`value`): `this`
 
 set player's group
 
@@ -213,7 +219,7 @@ set player's group
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 </td>
 </tr>
@@ -222,7 +228,7 @@ set player's group
 
 #### Returns
 
-`any`
+`this`
 
 ***
 

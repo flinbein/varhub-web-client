@@ -4,9 +4,40 @@
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / Connection
 
-# Class: Connection
+# Class: Connection\<DESC\>
 
 Handler of room connection
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `object`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+## Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| `data?` | `DESC` *extends* `object` ? `T` : `any` | custom data for this connection |
 
 ## Accessors
 
@@ -208,7 +239,7 @@ async function checkConnection(connection, ...args) {
 
 ### open()
 
-> **open**(): [`Connection`](Connection.md)
+> **open**(): [`Connection`](Connection.md)\<`DESC`\>
 
 Allow the connection to connect
 
@@ -216,13 +247,13 @@ The connection is connected automatically if it has not been deferred.
 
 #### Returns
 
-[`Connection`](Connection.md)
+[`Connection`](Connection.md)\<`DESC`\>
 
 ***
 
 ### send()
 
-> **send**(...`data`): [`Connection`](Connection.md)
+> **send**(...`data`): [`Connection`](Connection.md)\<`DESC`\>
 
 send data to connection
 
@@ -259,7 +290,7 @@ any serializable arguments
 
 #### Returns
 
-[`Connection`](Connection.md)
+[`Connection`](Connection.md)\<`DESC`\>
 
 ***
 
@@ -288,7 +319,7 @@ Promise like for events "open", "error"
 </td>
 <td>
 
-[[`Connection`](Connection.md)]
+[[`Connection`](Connection.md)\<`DESC`\>]
 
 </td>
 </tr>

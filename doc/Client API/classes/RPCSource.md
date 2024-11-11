@@ -362,7 +362,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 </td>
 <td>
 
-`undefined` \| `null` \| `DeepIterable`\<[`Connection`](Connection.md)\> \| (`con`) => `any`
+`undefined` \| `null` \| `DeepIterable`\<[`Connection`](Connection.md)\<`object`\>\> \| (`con`) => `any`
 
 </td>
 <td>
@@ -684,7 +684,7 @@ message handler
 </td>
 <td>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
 
 </td>
 <td>

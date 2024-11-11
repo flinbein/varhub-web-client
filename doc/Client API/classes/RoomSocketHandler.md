@@ -4,7 +4,7 @@
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / RoomSocketHandler
 
-# Class: RoomSocketHandler
+# Class: RoomSocketHandler\<DESC\>
 
 Client-side room handler.
 It allows you to handle room events and send messages to connected clients.
@@ -19,6 +19,31 @@ const room: RoomSocketHandler = hub.createRoomSocket();
 await room;
 console.log(room.id);
 ```
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `object`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Accessors
 
@@ -137,7 +162,7 @@ destroy this room
 
 ### broadcast()
 
-> **broadcast**(...`msg`): [`RoomSocketHandler`](RoomSocketHandler.md)
+> **broadcast**(...`msg`): [`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>
 
 send message to all ready connections.
 
@@ -168,7 +193,7 @@ send message to all ready connections.
 
 #### Returns
 
-[`RoomSocketHandler`](RoomSocketHandler.md)
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>
 
 ***
 
@@ -186,7 +211,7 @@ destroy this room.
 
 ### getConnections()
 
-> **getConnections**(`filter`?): `Set`\<[`Connection`](Connection.md)\>
+> **getConnections**(`filter`?): `Set`\<[`Connection`](Connection.md)\<`DESC`\>\>
 
 get all connections
 
@@ -274,7 +299,7 @@ get only ready (or not ready) connections.
 
 #### Returns
 
-`Set`\<[`Connection`](Connection.md)\>
+`Set`\<[`Connection`](Connection.md)\<`DESC`\>\>
 
 connections found
 
@@ -305,7 +330,7 @@ Promise like for events "init", "error"
 </td>
 <td>
 
-[[`RoomSocketHandler`](RoomSocketHandler.md)]
+[[`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>]
 
 </td>
 </tr>
@@ -414,7 +439,7 @@ varhub.createRoomSocket().then(([room]) => {
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)
+`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -501,7 +526,7 @@ RoomSocketHandlerEvents
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)
+`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -588,7 +613,7 @@ RoomSocketHandlerEvents
 <tr>
 <td>
 
-`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)
+`T` *extends* keyof [`RoomSocketHandlerEvents`](../type-aliases/RoomSocketHandlerEvents.md)\<`DESC`\>
 
 </td>
 <td>

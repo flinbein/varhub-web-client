@@ -4,11 +4,36 @@
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / RoomSocketHandlerEvents
 
-# Type Alias: RoomSocketHandlerEvents
+# Type Alias: RoomSocketHandlerEvents\<DESC\>
 
-> **RoomSocketHandlerEvents**: `object`
+> **RoomSocketHandlerEvents**\<`DESC`\>: `object`
 
 [RoomSocketHandler](../classes/RoomSocketHandler.md) events
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -46,7 +71,7 @@
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md), `XJData`[]]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>, `XJData`[]]
 
 </td>
 <td>
@@ -74,7 +99,7 @@ After the event is processed, the connection will be automatically opened (if [C
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md), `string` \| `null`, `boolean`]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>, `string` \| `null`, `boolean`]
 
 </td>
 <td>
@@ -99,7 +124,7 @@ room.on("connectionClose", (con, reason, wasOpen) => {
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md), `XJData`[]]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>, `XJData`[]]
 
 </td>
 <td>
@@ -124,7 +149,7 @@ room.on("connectionMessage", (con, ...data) => {
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md)]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>]
 
 </td>
 <td>

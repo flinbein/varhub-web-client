@@ -14,13 +14,19 @@
 <thead>
 <tr>
 <th>Type Parameter</th>
+<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* [`PlayerDesc`](PlayerDesc.md)
+
+</td>
+<td>
+
+`object`
 
 </td>
 </tr>

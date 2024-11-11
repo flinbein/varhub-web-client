@@ -19,7 +19,7 @@
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* [`PlayerDesc`](../type-aliases/PlayerDesc.md)
 
 </td>
 <td>
@@ -58,7 +58,7 @@ Create a player list based on connections.
 </td>
 <td>
 
-[`Room`](../../varhub:room/interfaces/Room.md)
+[`Room`](../../varhub:room/interfaces/Room.md)\<`object`\>
 
 </td>
 <td>
@@ -172,7 +172,7 @@ get player by name or connection
 </td>
 <td>
 
-`string` \| [`Connection`](../../varhub:room/interfaces/Connection.md)
+`string` \| [`Connection`](../../varhub:room/interfaces/Connection.md)\<`object`\>
 
 </td>
 <td>
@@ -215,7 +215,7 @@ get all players with specified group. If group is undefined - get all players wi
 </td>
 <td>
 
-`undefined` \| `DESC`\[`"team"`\] *extends* `string` ? `any`\[`any`\] : `string`
+`undefined` \| `DESC` *extends* `object` ? `T` : `string`
 
 </td>
 <td>

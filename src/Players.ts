@@ -2,11 +2,16 @@ import EventEmitter from "./EventEmitter.js";
 import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
 import type { XJData } from "@flinbein/xjmapper";
 
+
+type PlayerDesc = {
+	team?: string,
+	data?: any
+};
 /**
  * events of {@link Players} object
  * @event
  * */
-export type PlayersEvents<DESC extends {team?: string}> = {
+export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 	/**
 	 * new player joined
 	 * @example
@@ -69,7 +74,7 @@ export type PlayersEvents<DESC extends {team?: string}> = {
 /**
  * List of players based on named connections.
  */
-export default class Players<DESC extends {team?: string} = {}> {
+export default class Players<DESC extends PlayerDesc = {}> {
 	readonly #playerMap = new Map<string, Player<DESC>>();
 	readonly #playerConnections = new WeakMap<Player<DESC>, Set<Connection>>();
 	readonly #playerGroups = new WeakMap<Player, string>();
@@ -213,7 +218,7 @@ export default class Players<DESC extends {team?: string} = {}> {
 	 * get all players with specified group. If group is undefined - get all players without group.
 	 * @param team
 	 */
-	getTeam(team: (DESC["team"] extends string ? DESC["team"] : string)|undefined): Set<Player<DESC>> {
+	getTeam(team: (DESC extends {team: infer T} ? T : string)|undefined): Set<Player<DESC>> {
 		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === team));
 	}
 	
@@ -330,9 +335,13 @@ export type PlayerEvents = {
 /**
  * Player represents a list of {@link Connection}s with same name.
  */
-class Player<DESC extends {team?: string} = {}> {
+class Player<DESC extends PlayerDesc = {}> {
 	readonly #name: string
 	readonly #controller: any
+	/**
+	 * custom data for this player
+	 */
+	declare data?: DESC extends {data: infer T} ? T : any;
 	readonly #eventBox = new EventEmitter<PlayerEvents>();
 	/** @hidden */
 	constructor(name: string, controller: any) {
@@ -360,11 +369,11 @@ class Player<DESC extends {team?: string} = {}> {
 	/**
 	 * get player's team
 	 */
-	get team(): (DESC["team"] extends string ? DESC["team"] : string)|undefined {return this.#controller.getGroupOf(this)}
+	get team(): (DESC extends {team: infer T} ? T : string)|undefined {return this.#controller.getGroupOf(this)}
 	/**
 	 * set player's team
 	 */
-	setTeam(value: (DESC["team"] extends string ? DESC["team"] : string)|undefined): this {this.#controller.setGroupOf(this, value); return this}
+	setTeam(value: (DESC extends {team: infer T} ? T : string)|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
 	 * send message for all connections
