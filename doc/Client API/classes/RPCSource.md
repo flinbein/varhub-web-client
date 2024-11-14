@@ -21,7 +21,7 @@ Remote procedure call handler
 <tr>
 <td>
 
-`METHODS` *extends* `Record`\<`string`, `any`\>
+`METHODS` *extends* `Record`\<`string`, `any`\> \| `string`
 
 </td>
 <td>
@@ -94,8 +94,9 @@ Create new instance of RPC
 <td>
 
 handler can be:
-- function of type [RPCHandler](../type-aliases/RPCHandler.md);
-- object with methods for remote call.
+- `function` of type [RPCHandler](../type-aliases/RPCHandler.md);
+- `object` with methods for remote call.
+- `string` prefix: use self methods starting with prefix for remote call.
 
 </td>
 </tr>
@@ -193,6 +194,124 @@ dispose this source and disconnect all channels
 #### Implementation of
 
 `Disposable.[dispose]`
+
+***
+
+### bindConnection()
+
+> **bindConnection**\<`A`\>(`handler`): (`this`, ...`args`) => `ReturnType`\<`A`\>
+
+Create function to handle RPC of connection with [Connection](Connection.md) as 1st argument
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`A` *extends* (`this`, `c`, ...`args`) => `any`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`handler`
+
+</td>
+<td>
+
+`A`
+
+</td>
+<td>
+
+method handler with prepended [Connection](Connection.md)
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`Function`
+
+##### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`this`
+
+</td>
+<td>
+
+`ThisParameterType`\<`A`\>
+
+</td>
+</tr>
+<tr>
+<td>
+
+...`args`
+
+</td>
+<td>
+
+`RestParams`\<`Parameters`\<`A`\>\>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`ReturnType`\<`A`\>
+
+#### Example
+
+```typescript
+class Deck extends RPCSource<{}, boolean> {
+  constructor(){
+    super({}, false);
+  }
+
+  doSomething = this.bindConnection((connection, ...args) => {
+    console.log(connection, "call doSomething with args:", args);
+    this.setState(true)
+  });
+}
+```
 
 ***
 
@@ -584,7 +703,7 @@ apply generic types for state and set new state.
 
 ### createDefaultHandler()
 
-> `static` **createDefaultHandler**(`parameters`): [`RPCHandler`](../type-aliases/RPCHandler.md)
+> `static` **createDefaultHandler**(`parameters`, `prefix`): [`RPCHandler`](../type-aliases/RPCHandler.md)
 
 create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 
@@ -595,6 +714,7 @@ create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 <tr>
 <th>Parameter</th>
 <th>Type</th>
+<th>Default value</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -608,6 +728,11 @@ create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 <td>
 
 `object`
+
+</td>
+<td>
+
+`undefined`
 
 </td>
 <td>
@@ -627,7 +752,34 @@ create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 </td>
 <td>
 
+`undefined`
+
+</td>
+<td>
+
 object with methods.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`prefix`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+`""`
+
+</td>
+<td>
+
+prefix of used methods, empty by default
 
 </td>
 </tr>
@@ -754,3 +906,372 @@ room
 ##### Returns
 
 `void`
+
+***
+
+### with()
+
+#### with()
+
+> `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(): \<`METHODS`, `STATE`, `EVENTS`\>(`methods`, `state`?) => [`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `EVENTS`\>
+
+##### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`BIND_METHODS` *extends* `string` \| `Record`\<`string`, `any`\>
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_STATE`
+
+</td>
+<td>
+
+`undefined`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_EVENTS`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`Function`
+
+###### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`methods`
+
+</td>
+<td>
+
+`METHODS`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`state`?
+
+</td>
+<td>
+
+`STATE`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+###### Returns
+
+[`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `EVENTS`\>
+
+| Name | Type |
+| ------ | ------ |
+| `prototype` | [`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\> |
+
+#### with(methods)
+
+> `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(`methods`): \<`STATE`, `EVENTS`\>(`state`?) => [`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `STATE`, `EVENTS`\>
+
+Create a new constructor of [RPCSource](RPCSource.md) with bound methods.
+
+##### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`BIND_METHODS` *extends* `string` \| `Record`\<`string`, `any`\>
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_STATE`
+
+</td>
+<td>
+
+`undefined`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_EVENTS`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`methods`
+
+</td>
+<td>
+
+[`RPCHandler`](../type-aliases/RPCHandler.md) \| `BIND_METHODS`
+
+</td>
+<td>
+
+bound methods for remote call
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`Function`
+
+###### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`state`?
+
+</td>
+<td>
+
+`STATE`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+###### Returns
+
+[`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `STATE`, `EVENTS`\>
+
+| Name | Type |
+| ------ | ------ |
+| `prototype` | [`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\> |
+
+##### Example
+
+```typescript
+export class Counter extends RPCSource.with("$_")<number> {
+  $_increment(){
+    this.setState(this.state + 1);
+  }
+}
+// client code
+const rpc = new RPCChannel(client);
+const rpcCounter = new rpc.Counter(100);
+await rpcCounter.increment();
+console.log(rpcCounter.state) // 101
+```
+
+#### with(methods, state)
+
+> `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(`methods`, `state`): \<`EVENTS`\>() => [`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `BIND_STATE`, `EVENTS`\>
+
+Create a new constructor of [RPCSource](RPCSource.md) with bound methods and initial state.
+
+##### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`BIND_METHODS` *extends* `string` \| `Record`\<`string`, `any`\>
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_STATE`
+
+</td>
+<td>
+
+`undefined`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`BIND_EVENTS`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`methods`
+
+</td>
+<td>
+
+[`RPCHandler`](../type-aliases/RPCHandler.md) \| `BIND_METHODS`
+
+</td>
+<td>
+
+bound methods for remote call
+
+</td>
+</tr>
+<tr>
+<td>
+
+`state`
+
+</td>
+<td>
+
+`BIND_STATE`
+
+</td>
+<td>
+
+initial state
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`Function`
+
+###### Returns
+
+[`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `BIND_STATE`, `EVENTS`\>
+
+| Name | Type |
+| ------ | ------ |
+| `prototype` | [`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\> |
+
+##### Example
+
+```typescript
+const Counter = RPCSource.with({}, 0);
+export const counter = new Counter();
+setInterval(() => {
+  counter.setState(state => state+1)
+}, 1000);
+```

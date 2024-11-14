@@ -223,7 +223,7 @@ describe("Room props", async () => {
 		const bobWs = wsMock.createClientMock("Bob");
 		const charlieWs = wsMock.createClientMock("Charlie");
 		const eveWs = wsMock.createClientMock("Eve");
-		await new Promise(resolve => setTimeout(resolve, 32));
+		await new Promise(resolve => setTimeout(resolve, 52));
 		
 		const connectionsMap = new Map([...room.getConnections()].map((con) => [con.parameters[0] as string, con]))
 		const alice = connectionsMap.get("Alice")!;

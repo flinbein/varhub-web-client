@@ -652,20 +652,68 @@ declare module "varhub:rpc" {
 	export type RPCHandler = ((connection: Connection, path: string[], args: any[], openChannel: boolean) => any);
 	type EventPath<T, K extends keyof T = keyof T> = (K extends string ? (T[K] extends any[] ? (K | [K]) : [K, ...(EventPath<T[K]> extends infer NEXT extends (string | string[]) ? (NEXT extends any[] ? NEXT : [NEXT]) : never)]) : never);
 	type EventPathArgs<PATH, FORM> = (PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) : PATH extends [] ? (FORM extends any[] ? FORM : never) : PATH extends [infer STEP extends string, ...infer TAIL extends string[]] ? (STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never) : never);
-	
+	type DeepIterable<T> = T | Iterable<DeepIterable<T>>;
+	type BoxMethods<T, PREFIX extends string> = {
+		[KEY in keyof T as KEY extends `${PREFIX}${infer NAME}` ? NAME : never]: T[KEY];
+	};
+	type MetaScopeValue<METHODS, EVENTS, STATE> = {
+		[Symbol.unscopables]: {
+			__rpc_methods: METHODS;
+			__rpc_events: EVENTS;
+			__rpc_state: STATE;
+		};
+	};
+	type RestParams<T extends any[]> = T extends [any, ...infer R] ? R : never;
 	/**
 	 * Remote procedure call handler
 	 */
 	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
 		#private;
-		/** @hidden */
-		[Symbol.unscopables]: {
-			[Symbol.unscopables]: {
-				__rpc_methods: METHODS;
-				__rpc_events: EVENTS;
-				__rpc_state: STATE;
-			}
+		static with<const BIND_METHODS extends string | Record<string, any> = {}, BIND_STATE = undefined, const BIND_EVENTS = {}>(): {
+			new <METHODS extends Record<string, any> | string = BIND_METHODS, STATE = BIND_STATE, EVENTS = BIND_EVENTS>(methods: METHODS, state?: STATE): RPCSource<METHODS, STATE, EVENTS>;
+			prototype: RPCSource<any, any, any>;
 		};
+		/**
+		 * Create a new constructor of {@link RPCSource} with bound methods.
+		 * @example
+		 * ```typescript
+		 * export class Counter extends RPCSource.with("$_")<number> {
+		 *   $_increment(){
+		 *     this.setState(this.state + 1);
+		 *   }
+		 * }
+		 * // client code
+		 * const rpc = new RPCChannel(client);
+		 * const rpcCounter = new rpc.Counter(100);
+		 * await rpcCounter.increment();
+		 * console.log(rpcCounter.state) // 101
+		 * ```
+		 * @param methods bound methods for remote call
+		 */
+		static with<const BIND_METHODS extends Record<string, any> | string = {}, BIND_STATE = undefined, const BIND_EVENTS = {}>(methods: BIND_METHODS | RPCHandler): {
+			new <STATE = BIND_STATE, EVENTS = BIND_EVENTS>(state?: STATE): RPCSource<BIND_METHODS, STATE, EVENTS>;
+			prototype: RPCSource<any, any, any>;
+		};
+		/**
+		 * Create a new constructor of {@link RPCSource} with bound methods and initial state.
+		 * @example
+		 * ```typescript
+		 * const Counter = RPCSource.with({}, 0);
+		 * export const counter = new Counter();
+		 * setInterval(() => {
+		 *   counter.setState(state => state+1)
+		 * }, 1000);
+		 * ```
+		 * @param methods bound methods for remote call
+		 * @param state initial state
+		 */
+		static with<const BIND_METHODS extends Record<string, any> | string = {}, BIND_STATE = undefined, const BIND_EVENTS = {}>(methods: BIND_METHODS | RPCHandler, state: BIND_STATE): {
+			new <EVENTS = BIND_EVENTS>(): RPCSource<BIND_METHODS, BIND_STATE, EVENTS>;
+			prototype: RPCSource<any, any, any>;
+		};
+		
+		/** @hidden */
+		[Symbol.unscopables]: MetaScopeValue<METHODS extends string ? BoxMethods<this, METHODS> : METHODS, EVENTS, STATE>;
 		
 		/**
 		 * get current state
@@ -708,11 +756,40 @@ declare module "varhub:rpc" {
 		 * ```
 		 * @param {RPCHandler|METHODS} handler
 		 * handler can be:
-		 * - function of type {@link RPCHandler};
-		 * - object with methods for remote call.
+		 * - `function` of type {@link RPCHandler};
+		 * - `object` with methods for remote call.
+		 * - `string` prefix: use self methods starting with prefix for remote call.
 		 * @param initialState
 		 */
 		constructor(handler?: RPCHandler | METHODS, initialState?: STATE);
+		/**
+		 * create {@link RPCHandler} based on object with methods
+		 * @param parameters
+		 * @param parameters.form object with methods.
+		 * @param prefix prefix of used methods, empty by default
+		 * @returns - {@link RPCHandler}
+		 */
+		static createDefaultHandler(parameters: {
+			form: any;
+		}, prefix?: string): RPCHandler;
+		/**
+		 * Create function to handle RPC of connection with {@link Connection} as 1st argument
+		 * @example
+		 * ```typescript
+		 * class Deck extends RPCSource<{}, boolean> {
+		 *   constructor(){
+		 *     super({}, false);
+		 *   }
+		 *
+		 *   doSomething = this.bindConnection((connection, ...args) => {
+		 *     console.log(connection, "call doSomething with args:", args);
+		 *     this.setState(true)
+		 *   });
+		 * }
+		 * ```
+		 * @param handler method handler with prepended {@link Connection}
+		 */
+		bindConnection<A extends (this: this, c: Connection, ...args: any) => any>(handler: A): (this: ThisParameterType<A>, ...args: RestParams<Parameters<A>>) => ReturnType<A>;
 		/** apply generic types for events */
 		withEventTypes<E = EVENTS>(): RPCSource<METHODS, STATE, E>;
 		/** @hidden */
@@ -736,6 +813,14 @@ declare module "varhub:rpc" {
 		 * @param args event values
 		 */
 		emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this;
+		/**
+		 * Emit event for all connected clients.
+		 * Reserved event names: `close`, `init`, `error`, `state`
+		 * @param predicate event will be sent only to the listed connections.
+		 * @param event path for event. String or array of strings.
+		 * @param args event values
+		 */
+		emitFor<P extends EventPath<EVENTS>>(predicate: DeepIterable<Connection> | ((con: Connection) => any) | null | undefined, event: P, ...args: EventPathArgs<P, EVENTS>): this;
 		/**
 		 * dispose this source and disconnect all channels
 		 * @param reason

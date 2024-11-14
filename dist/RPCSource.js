@@ -1,7 +1,7 @@
 import EventEmitter from "./EventEmitter.js";
 const isConstructable = (fn) => {
     try {
-        return Boolean(class E extends fn {
+        return Boolean(class extends fn {
         });
     }
     catch {
@@ -30,7 +30,21 @@ class RPCSourceChannel {
         this.#closeHook(reason);
     }
 }
+const dangerPropNames = [
+    "__proto__",
+    "__defineGetter__",
+    "__defineSetter__",
+    "__lookupGetter__",
+    "__lookupSetter__",
+];
 export default class RPCSource {
+    static with(...prependArgs) {
+        return class extends this {
+            constructor(...args) {
+                super(...prependArgs, ...args);
+            }
+        };
+    }
     #handler;
     #autoDispose = false;
     #innerEvents = new EventEmitter();
@@ -40,18 +54,34 @@ export default class RPCSource {
         this.#state = initialState;
         if (typeof handler === "object")
             handler = RPCSource.createDefaultHandler({ form: handler });
+        else if (typeof handler === "string")
+            handler = RPCSource.createDefaultHandler({ form: this }, handler);
         this.#handler = handler;
     }
-    static createDefaultHandler(parameters) {
+    static createDefaultHandler(parameters, prefix = "") {
+        if (prefix) {
+            for (let prop of dangerPropNames) {
+                if (prop.startsWith(prefix))
+                    throw new Error("prefix " + prefix + " is danger");
+            }
+        }
         return function (con, path, args, openChannel) {
             let target = parameters?.form;
-            for (let step of path) {
+            for (let i = 0; i < path.length; i++) {
+                const step = i === 0 ? prefix + path[i] : path[i];
+                if (dangerPropNames.includes(step))
+                    throw new Error("wrong path: " + step + " in (" + prefix + ")" + path.join(".") + ": forbidden step");
                 if (typeof target !== "object")
-                    throw new Error("wrong path");
-                if (!Object.keys(target).includes(step))
-                    throw new Error("wrong path");
+                    throw new Error("wrong path: " + step + " in (" + prefix + ")" + path.join(".") + ": not object");
+                if (i > 0 || !prefix) {
+                    if (!Object.keys(target).includes(step)) {
+                        throw new Error("wrong path: " + step + " in (" + prefix + ")" + path.join(".") + ": forbidden prop");
+                    }
+                }
                 target = target[step];
             }
+            if (openChannel && target instanceof RPCSource && args.length === 0)
+                return target;
             if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
                 const MetaConstructor = function (...args) {
                     return Reflect.construct(target, args, MetaConstructor);
@@ -64,6 +94,12 @@ export default class RPCSource {
                 return result;
             }
             return target.apply(con, args);
+        };
+    }
+    bindConnection(handler) {
+        const that = this;
+        return function (...args) {
+            return handler.call(that, this, ...args);
         };
     }
     withEventTypes() {

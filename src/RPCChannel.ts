@@ -101,6 +101,9 @@ export interface RpcEmitter<E> {
 	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
 }
 type RpcMapper<M, E = never> = (
+	[M] extends [MetaScope<infer METHODS, infer EVENTS, infer STATE>] ? (
+		{new(): RPCChannel<METHODS, EVENTS, STATE>}
+	) :
 	[M] extends [{new(...args: infer PARAM): MetaScope<infer METHODS, infer EVENTS, infer STATE>}] ? (
 		{new(...args: PARAM): RPCChannel<METHODS, EVENTS, STATE>}
 	) :

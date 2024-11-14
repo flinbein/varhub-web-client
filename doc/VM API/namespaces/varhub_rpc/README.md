@@ -61,6 +61,30 @@ Remote procedure call handler
 <tr>
 <td>
 
+[BoxMethods](type-aliases/BoxMethods.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+[DeepIterable](type-aliases/DeepIterable.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
 [EventPath](type-aliases/EventPath.md)
 
 </td>
@@ -74,6 +98,30 @@ Remote procedure call handler
 <td>
 
 [EventPathArgs](type-aliases/EventPathArgs.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+[MetaScopeValue](type-aliases/MetaScopeValue.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+[RestParams](type-aliases/RestParams.md)
 
 </td>
 <td>

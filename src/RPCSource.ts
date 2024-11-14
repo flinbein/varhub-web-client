@@ -1,6 +1,7 @@
 import EventEmitter from "./EventEmitter.js";
 import type { XJData } from "@flinbein/xjmapper";
 import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
+import { RPCChannel } from "./RPCChannel.js";
 
 /**
  * remote call handler for {@link RPCSource}
@@ -55,7 +56,7 @@ const enum REMOTE_ACTION {
 
 const isConstructable = (fn: any) => {
 	try {
-		return Boolean(class E extends fn {})
+		return Boolean(class extends fn {})
 	} catch {
 		return false
 	}
@@ -107,10 +108,96 @@ export type { RPCSourceChannel };
 
 export type DeepIterable<T> = T | Iterable<DeepIterable<T>>;
 
+type BoxMethods<T, PREFIX extends string> = {
+	[KEY in keyof T as KEY extends `${PREFIX}${infer NAME}` ? NAME : never]: T[KEY]
+}
+
+type MetaScopeValue<METHODS, EVENTS, STATE> = {
+	[Symbol.unscopables]: {
+		__rpc_methods: METHODS,
+		__rpc_events: EVENTS,
+		__rpc_state: STATE,
+	}
+}
+
+type RestParams<T extends any[]> = T extends [any, ...infer R] ? R : never;
+
+const dangerPropNames = [
+	"__proto__",
+	"__defineGetter__",
+	"__defineSetter__",
+	"__lookupGetter__",
+	"__lookupSetter__",
+]
+
 /**
  * Remote procedure call handler
  */
-export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
+export default class RPCSource<METHODS extends Record<string, any> | string = {}, STATE = undefined, EVENTS = {}> implements Disposable {
+	
+	static with <
+		const BIND_METHODS extends string | Record<string, any> = {},
+		BIND_STATE = undefined,
+		const BIND_EVENTS = {}
+	>(): {
+		new<METHODS extends Record<string, any> | string = BIND_METHODS, STATE = BIND_STATE, EVENTS = BIND_EVENTS>(methods: METHODS, state?: STATE): RPCSource<METHODS, STATE, EVENTS>,
+		prototype: RPCSource<any, any, any>
+	};
+	/**
+	 * Create a new constructor of {@link RPCSource} with bound methods.
+	 * @example
+	 * ```typescript
+	 * export class Counter extends RPCSource.with("$_")<number> {
+	 *   $_increment(){
+	 *     this.setState(this.state + 1);
+	 *   }
+	 * }
+	 * // client code
+	 * const rpc = new RPCChannel(client);
+	 * const rpcCounter = new rpc.Counter(100);
+	 * await rpcCounter.increment();
+	 * console.log(rpcCounter.state) // 101
+	 * ```
+	 * @param methods bound methods for remote call
+	 */
+	static with<
+		const BIND_METHODS extends Record<string, any> | string = {},
+		BIND_STATE = undefined,
+		const BIND_EVENTS = {}
+	>(methods: BIND_METHODS | RPCHandler): {
+		new<STATE = BIND_STATE, EVENTS = BIND_EVENTS>(state?: STATE): RPCSource<BIND_METHODS, STATE, EVENTS>,
+		prototype: RPCSource<any, any, any>
+	};
+	/**
+	 * Create a new constructor of {@link RPCSource} with bound methods and initial state.
+	 * @example
+	 * ```typescript
+	 * const Counter = RPCSource.with({}, 0);
+	 * export const counter = new Counter();
+	 * setInterval(() => {
+	 *   counter.setState(state => state+1)
+	 * }, 1000);
+	 * ```
+	 * @param methods bound methods for remote call
+	 * @param state initial state
+	 */
+	static with<
+		const BIND_METHODS extends Record<string, any> | string = {},
+		BIND_STATE = undefined,
+		const BIND_EVENTS = {}
+	>(methods: BIND_METHODS | RPCHandler, state: BIND_STATE): {
+		new<EVENTS = BIND_EVENTS>(): RPCSource<BIND_METHODS, BIND_STATE, EVENTS>,
+		prototype: RPCSource<any, any, any>
+	};
+	static with (this: FunctionConstructor, ...prependArgs: any): any {
+		return class extends this {
+			constructor(...args: any) {
+				super(...prependArgs, ...args);
+			}
+		};
+	}
+	
+	
 	#handler: RPCHandler
 	#autoDispose = false
 	#innerEvents = new EventEmitter<{
@@ -121,13 +208,7 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	}>();
 	#state?: STATE;
 	/** @hidden */
-	declare public [Symbol.unscopables]: {
-		[Symbol.unscopables]: {
-			__rpc_methods: METHODS,
-			__rpc_events: EVENTS,
-			__rpc_state: STATE,
-		}
-	};
+	declare public [Symbol.unscopables]: MetaScopeValue<METHODS extends string ? BoxMethods<this, METHODS> : METHODS, EVENTS, STATE>
 	
 	/**
 	 * get current state
@@ -171,13 +252,15 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 * ```
 	 * @param {RPCHandler|METHODS} handler
 	 * handler can be:
-	 * - function of type {@link RPCHandler};
-	 * - object with methods for remote call.
+	 * - `function` of type {@link RPCHandler};
+	 * - `object` with methods for remote call.
+	 * - `string` prefix: use self methods starting with prefix for remote call.
 	 * @param initialState
 	 */
 	constructor(handler?: RPCHandler|METHODS, initialState?: STATE) {
 		this.#state = initialState;
 		if (typeof handler === "object") handler = RPCSource.createDefaultHandler({form: handler});
+		else if (typeof handler === "string") handler = RPCSource.createDefaultHandler({form: this}, handler);
 		this.#handler = handler as any;
 	}
 	
@@ -185,16 +268,29 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 	 * create {@link RPCHandler} based on object with methods
 	 * @param parameters
 	 * @param parameters.form object with methods.
+	 * @param prefix prefix of used methods, empty by default
 	 * @returns - {@link RPCHandler}
 	 */
-	static createDefaultHandler(parameters: {form: any}): RPCHandler {
+	static createDefaultHandler(parameters: {form: any}, prefix: string = ""): RPCHandler {
+		if (prefix) {
+			for (let prop of dangerPropNames) {
+				if (prop.startsWith(prefix)) throw new Error("prefix "+prefix+" is danger");
+			}
+		}
 		return function(con: Connection, path: string[], args: XJData[], openChannel: boolean) {
 			let target: any = parameters?.form;
-			for (let step of path) {
-				if (typeof target !== "object") throw new Error("wrong path");
-				if (!Object.keys(target).includes(step)) throw new Error("wrong path");
+			for (let i=0; i<path.length; i++) {
+				const step = i === 0 ? prefix + path[i] : path[i];
+				if (dangerPropNames.includes(step)) throw new Error("wrong path: "+step+" in ("+prefix+")"+path.join(".")+": forbidden step");
+				if (typeof target !== "object") throw new Error("wrong path: "+step+" in ("+prefix+")"+path.join(".")+": not object");
+				if (i > 0 || !prefix){
+					if (!Object.keys(target).includes(step)) {
+						throw new Error("wrong path: "+step+" in ("+prefix+")"+path.join(".")+": forbidden prop");
+					}
+				}
 				target = target[step];
 			}
+			if (openChannel && target instanceof RPCSource && args.length === 0) return target;
 			if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
 				const MetaConstructor = function (...args: any){
 					return Reflect.construct(target, args, MetaConstructor);
@@ -208,6 +304,32 @@ export default class RPCSource<METHODS extends Record<string, any> = {}, STATE =
 			}
 			return target.apply(con, args);
 		}
+	}
+	
+	/**
+	 * Create function to handle RPC of connection with {@link Connection} as 1st argument
+	 * @example
+	 * ```typescript
+	 * class Deck extends RPCSource<{}, boolean> {
+	 *   constructor(){
+	 *     super({}, false);
+	 *   }
+	 *
+	 *   doSomething = this.bindConnection((connection, ...args) => {
+	 *     console.log(connection, "call doSomething with args:", args);
+	 *     this.setState(true)
+	 *   });
+	 * }
+	 * ```
+	 * @param handler method handler with prepended {@link Connection}
+	 */
+	bindConnection<A extends (this: this, c: Connection, ...args: any) => any>(
+		handler: A
+	): (this: ThisParameterType<A>, ...args: RestParams<Parameters<A>>) => ReturnType<A> {
+		const that = this;
+		return function (this: Connection, ...args: any){
+			return handler.call(that, this, ...args);
+		} as any;
 	}
 	
 	/** apply generic types for events */

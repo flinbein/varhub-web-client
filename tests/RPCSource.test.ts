@@ -403,7 +403,7 @@ describe("RPCSource", () => {
 	
 	it("RPCSource state event", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		await room;
 		
@@ -446,5 +446,54 @@ describe("RPCSource", () => {
 		assert.equal(clientDeck.state, 300);
 		
 		assert.deepEqual(onDeckState.mock.calls.map(c => c.arguments), [[100], [200, 100], [300, 200]], "wrong");
+	})
+	
+	it("RPCSource with prefix", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		class MainRPC extends RPCSource.with("$")<number> {
+			
+			$userSetState = this.bindConnection((connection, value: number) => {
+				this.setState(connection.parameters[1] as number + value);
+			});
+			
+			$Deck = class Deck extends RPCSource<{}, string> {
+				constructor(props: string) {
+					super({}, "base_"+props);
+				}
+			}
+		}
+		const rpcRoom = new MainRPC(100);
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		await clientRpc;
+		assert.equal(clientRpc.state, 100, "main state");
+		await clientRpc.userSetState(50);
+		assert.equal(clientRpc.state, 2050, "main next state");
+		const deck = new clientRpc.Deck("test1");
+		await deck;
+		assert.equal(deck.state, "base_test1", "deck state");
+	})
+	
+	it("RPCSource self param", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		class Deck extends RPCSource.with({}, 100) {}
+		const roomDeck = new Deck();
+		const rpcRoom = new RPCSource({MyDeck: roomDeck});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		await clientRpc;
+		const deck = new clientRpc.MyDeck();
+		await deck;
+		assert.equal(deck.state, 100, "deck state");
 	})
 });
