@@ -290,7 +290,10 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 				}
 				target = target[step];
 			}
-			if (openChannel && target instanceof RPCSource && args.length === 0) return target;
+			if (openChannel && args.length === 0) {
+				if (target instanceof RPCSource) return target;
+				if (typeof target?.then === "function") return target;
+			}
 			if (openChannel && (target?.prototype instanceof RPCSource) && isESClass(target)) {
 				const MetaConstructor = function (...args: any){
 					return Reflect.construct(target, args, MetaConstructor);

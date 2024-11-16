@@ -102,7 +102,10 @@ export interface RpcEmitter<E> {
 }
 type RpcMapper<M, E = never> = (
 	[M] extends [MetaScope<infer METHODS, infer EVENTS, infer STATE>] ? (
-		{new(): RPCChannel<METHODS, EVENTS, STATE>}
+			{new(): RPCChannel<METHODS, EVENTS, STATE>}
+	) :
+	[M] extends [PromiseLike<MetaScope<infer METHODS, infer EVENTS, infer STATE>>] ? (
+			{new(): RPCChannel<METHODS, EVENTS, STATE>}
 	) :
 	[M] extends [{new(...args: infer PARAM): MetaScope<infer METHODS, infer EVENTS, infer STATE>}] ? (
 		{new(...args: PARAM): RPCChannel<METHODS, EVENTS, STATE>}

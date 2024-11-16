@@ -496,4 +496,22 @@ describe("RPCSource", () => {
 		await deck;
 		assert.equal(deck.state, 100, "deck state");
 	})
+	
+	it("RPCSource self promise param", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		class Deck extends RPCSource.with({}, 100) {}
+		const deckSourcePromise = Promise.resolve(new Deck);
+		const rpcRoom = new RPCSource({MyDeck: deckSourcePromise});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		await clientRpc;
+		const deck = new clientRpc.MyDeck();
+		await deck;
+		assert.equal(deck.state, 100, "deck (as promise) state");
+	})
 });
