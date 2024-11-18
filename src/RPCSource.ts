@@ -22,9 +22,9 @@ export type RPCHandler = (
 
 /** @hidden */
 type EventPath<T, K extends keyof T = keyof T> = (
-	K extends string ? (
+	K extends (string|number) ? (
 		T[K] extends any[] ? (K | [K]) : [K, ...(
-			EventPath<T[K]> extends infer NEXT extends (string|string[]) ? (
+			EventPath<T[K]> extends infer NEXT extends ((string|number)|(string|number)[]) ? (
 				NEXT extends any[] ? NEXT : [NEXT]
 			) : never
 		)]
@@ -35,7 +35,7 @@ type EventPath<T, K extends keyof T = keyof T> = (
 type EventPathArgs<PATH, FORM> = (
 	PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) :
 	PATH extends [] ? (FORM extends any[] ? FORM : never) :
-	PATH extends [infer STEP extends string, ...infer TAIL extends string[]] ? (
+	PATH extends [infer STEP extends (string|number), ...infer TAIL extends (string|number)[]] ? (
 		STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never
 	) : never
 )
@@ -197,11 +197,10 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 		};
 	}
 	
-	
 	#handler: RPCHandler
 	#autoDispose = false
 	#innerEvents = new EventEmitter<{
-		message: [filter: undefined | ((connection: Connection) => boolean), eventPath: string[], eventData: XJData[]],
+		message: [filter: undefined | ((connection: Connection) => boolean), eventPath: (string|number)[], eventData: XJData[]],
 		state: [STATE],
 		dispose: [XJData],
 		channel: [RPCSourceChannel],
@@ -395,7 +394,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 		...args: EventPathArgs<P, EVENTS>
 	): this {
 		if (this.#disposed) throw new Error("disposed");
-		const path: string[] = (typeof event === "string") ? [event] : event;
+		const path: (string|number)[] = (typeof event === "string" || typeof event === "number") ? [event] : event;
 		this.#innerEvents.emitWithTry("message", this.#getPredicateFilter(predicate), path, args);
 		return this;
 	}
@@ -499,7 +498,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.CLOSE, disposeReason);
 							channels.get(con)?.delete(newChannelId as any);
 						}
-						const onSourceMessage = (filter: undefined | ((con: Connection) => boolean), path: string[], args: XJData[]) => {
+						const onSourceMessage = (filter: undefined | ((con: Connection) => boolean), path: (string|number)[], args: XJData[]) => {
 							if (filter && !filter(con)) return;
 							con.send(incomingKey, newChannelId, REMOTE_ACTION.EVENT, path, args);
 						}
@@ -544,7 +543,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 				channel.close();
 			}
 		}
-		const onMainRpcSourceMessage = (filter: ((con: Connection) => boolean) | undefined, path: string[], args: any[]) => {
+		const onMainRpcSourceMessage = (filter: ((con: Connection) => boolean) | undefined, path: (string|number)[], args: any[]) => {
 			for (let connection of room.getConnections({ready: true})) {
 				if (filter && !filter(connection)) continue;
 				connection.send(key, undefined, REMOTE_ACTION.EVENT, path, args)

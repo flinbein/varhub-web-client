@@ -650,8 +650,8 @@ declare module "varhub:players" {
 declare module "varhub:rpc" {
 	import type { Connection, Room } from "varhub:room";
 	export type RPCHandler = ((connection: Connection, path: string[], args: any[], openChannel: boolean) => any);
-	type EventPath<T, K extends keyof T = keyof T> = (K extends string ? (T[K] extends any[] ? (K | [K]) : [K, ...(EventPath<T[K]> extends infer NEXT extends (string | string[]) ? (NEXT extends any[] ? NEXT : [NEXT]) : never)]) : never);
-	type EventPathArgs<PATH, FORM> = (PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) : PATH extends [] ? (FORM extends any[] ? FORM : never) : PATH extends [infer STEP extends string, ...infer TAIL extends string[]] ? (STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never) : never);
+	type EventPath<T, K extends keyof T = keyof T> = (K extends (string|number) ? (T[K] extends any[] ? (K | [K]) : [K, ...(EventPath<T[K]> extends infer NEXT extends ((string|number)|(string|number)[]) ? (NEXT extends any[] ? NEXT : [NEXT]) : never)]) : never)
+	type EventPathArgs<PATH, FORM> = (PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) : PATH extends [] ? (FORM extends any[] ? FORM : never) : PATH extends [infer STEP extends (string|number), ...infer TAIL extends (string|number)[]] ? (STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never) : never)
 	type DeepIterable<T> = T | Iterable<DeepIterable<T>>;
 	type BoxMethods<T, PREFIX extends string> = {
 		[KEY in keyof T as KEY extends `${PREFIX}${infer NAME}` ? NAME : never]: T[KEY];

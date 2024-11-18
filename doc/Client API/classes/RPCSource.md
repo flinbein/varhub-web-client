@@ -375,7 +375,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 <tr>
 <td>
 
-`P` *extends* `string` \| [`string`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
+`P` *extends* `string` \| `number` \| [`string`] \| [`number`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
 
 </td>
 </tr>
@@ -455,7 +455,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 <tr>
 <td>
 
-`P` *extends* `string` \| [`string`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
+`P` *extends* `string` \| `number` \| [`string`] \| [`number`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
 
 </td>
 </tr>

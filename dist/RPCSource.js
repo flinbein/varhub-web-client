@@ -134,7 +134,7 @@ export default class RPCSource {
     emitFor(predicate, event, ...args) {
         if (this.#disposed)
             throw new Error("disposed");
-        const path = (typeof event === "string") ? [event] : event;
+        const path = (typeof event === "string" || typeof event === "number") ? [event] : event;
         this.#innerEvents.emitWithTry("message", this.#getPredicateFilter(predicate), path, args);
         return this;
     }

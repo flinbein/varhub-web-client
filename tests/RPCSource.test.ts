@@ -514,4 +514,54 @@ describe("RPCSource", () => {
 		await deck;
 		assert.equal(deck.state, 100, "deck (as promise) state");
 	})
+	
+	it("numeric enum events", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const enum EVENT_KEYS {ONE = 1, TWO = 2}
+		const RPC = RPCSource.with({ping(){}})<undefined, {[EVENT_KEYS.ONE]: [string], [EVENT_KEYS.TWO]: [number]}>;
+		const rpcRoom = new (RPC)();
+		RPCSource.start(rpcRoom, room);
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		const oneEvents = mock.fn();
+		const twoEvents = mock.fn();
+		clientRpc.on(EVENT_KEYS.ONE, oneEvents);
+		clientRpc.on(EVENT_KEYS.TWO, twoEvents);
+		await clientRpc
+		rpcRoom.emit(EVENT_KEYS.ONE, "test");
+		rpcRoom.emit(EVENT_KEYS.TWO, 42);
+		await clientRpc.ping();
+		assert.equal(oneEvents.mock.callCount(), 1, "EVENT_KEYS.ONE called 1 time");
+		assert.equal(twoEvents.mock.callCount(), 1, "EVENT_KEYS.TWO called 1 time");
+		assert.deepEqual(oneEvents.mock.calls[0].arguments, ["test"], "EVENT_KEYS.ONE correct event");
+		assert.deepEqual(twoEvents.mock.calls[0].arguments, [42], "EVENT_KEYS.TWO correct event");
+	});
+	
+	it("numeric events", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room;
+		
+		const RPC = RPCSource.with({ping(){}})<undefined, Record<string|number, any[]>>;
+		const rpcRoom = new (RPC)();
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		const numEvents = mock.fn();
+		const strEvents = mock.fn();
+		clientRpc.on(1, numEvents);
+		clientRpc.on("1", strEvents);
+		await clientRpc
+		rpcRoom.emit(1, "test");
+		rpcRoom.emit("1", 42);
+		await clientRpc.ping();
+		assert.equal(numEvents.mock.callCount(), 1, "numEvent called 1 time");
+		assert.equal(strEvents.mock.callCount(), 1, "strEvent called 1 time");
+		assert.deepEqual(numEvents.mock.calls[0].arguments, ["test"], "numEvent correct event");
+		assert.deepEqual(strEvents.mock.calls[0].arguments, [42], "strEvent correct event");
+	});
 });
