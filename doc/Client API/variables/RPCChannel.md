@@ -6,7 +6,7 @@
 
 # Variable: RPCChannel()
 
-> `const` **RPCChannel**: \<`M`\>(`client`, `options`?) => `M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `STATE`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `STATE`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `unknown`, `undefined`\>
+> `const` **RPCChannel**: \<`M`\>(`client`, `options`?) => `RPCChannel`\<`M`\>
 
 Constructor for new RPC channel based on [VarhubClient](../classes/VarhubClient.md)
 
@@ -77,11 +77,10 @@ default:`"$rpc"`
 
 ## Returns
 
-`M` *extends* `MetaScope`\<`METHODS`, `EVENTS`, `STATE`\> ? [`RPCChannel`](RPCChannel.md)\<`METHODS`, `EVENTS`, `STATE`\> : [`RPCChannel`](RPCChannel.md)\<`M`, `unknown`, `undefined`\>
+`RPCChannel`\<`M`\>
 
 - stateless channel.
-- result extends [RPCInstance](../interfaces/RPCInstance.md).
-- result extends [RpcEmitter](../interfaces/RpcEmitter.md) and can subscribe on events of current [RPCSource](../classes/RPCSource.md) of room
+- result extends RPCChannelInstance.
 - result has all methods of current [RPCSource](../classes/RPCSource.md) in room.
 - all methods are asynchronous and return a Promise<XJData>
 - result has constructors for all constructable methods of [RPCSource](../classes/RPCSource.md) in room.

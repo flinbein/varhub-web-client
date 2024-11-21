@@ -17,7 +17,7 @@ describe("VarHubRpcClient", () => {
 		await using client = new VarhubClient(wsMock);
 		assert.equal(client.ready, false);
 		wsMock.backend.close();
-		await assert.rejects(Promise.resolve(client));
+		await assert.rejects(client.promise);
 		assert.equal(client.ready, false);
 		assert.equal(client.closed, true);
 	})
@@ -27,7 +27,7 @@ describe("VarHubRpcClient", () => {
 		await using client = new VarhubClient(wsMock);
 		assert.equal(client.ready, false);
 		wsMock.backend.open();
-		await client;
+		await client.promise;
 		wsMock.backend.close();
 		await new Promise(r => setTimeout(r, 52));
 		assert.equal(client.ready, false);
@@ -38,10 +38,10 @@ describe("VarHubRpcClient", () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
 		let ready = false;
-		client.then(() => ready = true);
+		client.promise.then(() => ready = true);
 		assert.equal(ready, false);
 		wsMock.backend.open();
-		await client;
+		await client.promise;
 		assert.equal(ready, true);
 	});
 
@@ -77,7 +77,7 @@ describe("VarHubRpcClient", () => {
 		let thisValue: any;
 		client.on("open", function (this: any) {thisValue = this});
 		wsMock.backend.open();
-		await client;
+		await client.promise;
 		assert.equal(thisValue, client, "client this value");
 	})
 });

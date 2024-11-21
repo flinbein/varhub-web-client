@@ -10,7 +10,7 @@ describe("RPCSource", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource({
 			test(value: number) {
@@ -31,11 +31,11 @@ describe("RPCSource", () => {
 		const client = new VarhubClient(clientWs);
 		const rpcClient = new RPCChannel<typeof rpcRoom>(client);
 		await rpcClient;
-		
 		assert.equal(await rpcClient.hello("Bobby"), "Hello, Bobby!", "hello message");
 		assert.equal(await rpcClient.math.sum(100, 200), 300, "math.sum");
 		
 		const clientDeck = new rpcClient.deck();
+		
 		const testedPromise = new Promise(r => clientDeck.deep.on("tested", r));
 		assert.equal(clientDeck.ready, false, "clientDeck not ready");
 		assert.equal(await clientDeck.test(99), true, "clientDeck call test");
@@ -48,16 +48,16 @@ describe("RPCSource", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource().withEventTypes<{"test": [number]}>();
 		
 		const rpcRoom = new RPCSource({
 			deck: () =>  deck,
-			emitDeck: (value: number) => {
+			emitDeck: (value: number): undefined => {
 				deck.emit("test", value)
 			},
-			disposeDeck: (reason: any) => {
+			disposeDeck: (reason: any): undefined => {
 				deck.dispose(reason);
 			}
 		});
@@ -68,11 +68,10 @@ describe("RPCSource", () => {
 		const client = new VarhubClient(clientWs);
 		const rpcClient = new RPCChannel<typeof rpcRoom>(client);
 		await rpcClient;
-		
 		const testMock1 = mock.fn();
 		const testMock2 = mock.fn();
-		const [clientDeck1] = await new rpcClient.deck();
-		const [clientDeck2] = await new rpcClient.deck();
+		const clientDeck1 = await new rpcClient.deck().promise;
+		const clientDeck2 = await new rpcClient.deck().promise;
 		clientDeck1.on("test", testMock1);
 		clientDeck2.on("test", testMock2);
 		
@@ -101,24 +100,24 @@ describe("RPCSource", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource().withEventTypes<{"test": [number]}>();
 		
-		const rpcRoom = new RPCSource({deck: () =>  deck, ping(){}});
+		const rpcRoom = new RPCSource({deck: () =>  deck, ping: () => undefined});
 		
 		RPCSource.start(rpcRoom, room);
 		
 		const clientWs = roomWs.createClientMock("Eve", "player");
 		const client = new VarhubClient(clientWs);
 		const rpcClient = new RPCChannel<typeof rpcRoom>(client);
-		await rpcClient;
+		await rpcClient.promise;
 		
 		const onError = mock.fn();
 		const onClose = mock.fn();
 		const onMessage = mock.fn();
 		client.on("message", onMessage);
-		const [clientDeck] = await new rpcClient.deck(); // wait for add client
+		const clientDeck = await new rpcClient.deck().promise; // wait for add client
 		clientDeck.on("error", onError);
 		clientDeck.on("close", onClose);
 		deck.emit("test", 1);
@@ -146,7 +145,7 @@ describe("RPCSource", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource().withEventTypes<{"test": [number]}>();
 		deck.dispose();
@@ -158,14 +157,14 @@ describe("RPCSource", () => {
 		const clientWs = roomWs.createClientMock("Eve", "player");
 		const client = new VarhubClient(clientWs);
 		const rpcClient = new RPCChannel<typeof rpcRoom>(client);
-		await rpcClient;
+		await rpcClient.promise;
 		
 		const onError = mock.fn();
 		const onClose = mock.fn();
 		const clientDeck = new rpcClient.deck();
 		clientDeck.on("error", onError);
 		clientDeck.on("close", onClose);
-		await assert.rejects(Promise.resolve(clientDeck), "client deck disposed");
+		await assert.rejects(clientDeck.promise, "client deck disposed");
 		assert.equal(onError.mock.callCount(), 1, "emit error 1 time");
 		assert.equal(onError.mock.calls[0].arguments.length, 1, "emit error");
 		assert.ok(onError.mock.calls[0].arguments[0] instanceof Error, "emit error type");
@@ -179,7 +178,7 @@ describe("RPCSource", () => {
 		await using room = new RoomSocketHandler(roomWs);
 		room.on("connection", con => con.open());
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource();
 		const rpcRoom = new RPCSource({deck: () =>  deck});
@@ -189,20 +188,20 @@ describe("RPCSource", () => {
 		const clientWs = roomWs.createClientMock("Eve", "player");
 		const client = new VarhubClient(clientWs);
 		const rpcClient = new RPCChannel<typeof rpcRoom>(client);
-		await rpcClient;
+		await rpcClient.promise;
 		
 		new rpcClient.deck();
 		new rpcClient.deck();
-		await assert.rejects(Promise.resolve(new rpcClient.deck()), "limit for 2 channels per client");
+		await assert.rejects(new rpcClient.deck().promise, "limit for 2 channels per client");
 	})
 	
 	it("constructor channel", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
-		class Deck extends RPCSource<{getMyName(): string, changeState(a: number): void}, number, unknown> {
+		class Deck extends RPCSource<{getMyName(): string, changeState(a: number): undefined}, number, unknown> {
 			constructor(baseState: number) {
 				super({
 					getMyName(this: Connection){
@@ -221,7 +220,7 @@ describe("RPCSource", () => {
 		
 		const clientWs = roomWs.createClientMock("Bob", "player");
 		const client = new VarhubClient(clientWs);
-		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
+		const rpcClient = await new RPCChannel<typeof rpcRoom>(client).promise;
 		const deck = new rpcClient.Deck(99);
 		const onState = mock.fn();
 		deck.on("state", onState);
@@ -235,7 +234,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		class Deck extends RPCSource<{getMyName(): string}> {
 			declare private static connection: Connection;
@@ -254,7 +253,7 @@ describe("RPCSource", () => {
 		
 		const clientWs = roomWs.createClientMock("Bob", "player");
 		const client = new VarhubClient(clientWs);
-		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
+		const rpcClient = await new RPCChannel<typeof rpcRoom>(client).promise;
 		const deck = new rpcClient.Deck();
 		assert.equal(await deck.getMyName(), "Bob", "deck returns name");
 	})
@@ -263,14 +262,14 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const rpcRoom = new RPCSource({}).withEventTypes<{test: [string]}>();
 		void RPCSource.start(rpcRoom, room);
 		
 		const clientWs = roomWs.createClientMock("Bob", "player");
 		const client = new VarhubClient(clientWs);
-		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
+		const rpcClient = await new RPCChannel<typeof rpcRoom>(client).promise;
 		const onTest = mock.fn()
 		rpcClient.on("test", onTest);
 		rpcRoom.emit("test", "msg");
@@ -283,7 +282,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const decks: Deck[] = [];
 		class Deck extends RPCSource<{}, number> {
@@ -297,7 +296,7 @@ describe("RPCSource", () => {
 		}
 		const rpcRoom = new RPCSource({
 			Deck,
-			nope: () => {},
+			nope: () => null,
 			getDisposed: (state: number) => {
 				return decks.find(deck => deck.state === state)?.disposed
 			},
@@ -307,7 +306,7 @@ describe("RPCSource", () => {
 		
 		const clientWs = roomWs.createClientMock("Bob", "player");
 		const client = new VarhubClient(clientWs);
-		const [rpcClient] = await new RPCChannel<typeof rpcRoom>(client);
+		const rpcClient = await new RPCChannel<typeof rpcRoom>(client).promise;
 		const deck1 = new rpcClient.Deck(1);
 		assert.equal(await rpcClient.getDisposed(1), false, "deck1 not disposed");
 		deck1.close();
@@ -331,7 +330,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		const players = new Players(room, (_connection, arg) => arg ? String(arg) : null)
 		
 		const rpcRoom = new RPCSource({ping: () => true}).withEventTypes<{notify: [any]}>();
@@ -349,7 +348,7 @@ describe("RPCSource", () => {
 		const charlieChannel = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Charlie"))).on("notify", onCharlieNotify);
 		
 		
-		await Promise.all([nonameChannel, aliceChannel, bobChannel1, bobChannel2, charlieChannel]);
+		await Promise.all([nonameChannel, aliceChannel, bobChannel1, bobChannel2, charlieChannel].map(c => c.promise));
 		players.get("Alice")?.setTeam("redTeam");
 		players.get("Bob")?.setTeam("redTeam");
 		
@@ -405,7 +404,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const rpcRoom = new RPCSource({ping: () => true}, 100);
 		RPCSource.start(rpcRoom, room);
@@ -413,7 +412,7 @@ describe("RPCSource", () => {
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 1)));
 		const onState = mock.fn();
 		clientRpc.on("state", onState);
-		await clientRpc;
+		await clientRpc.promise;
 		
 		rpcRoom.setState(200);
 		rpcRoom.setState(300);
@@ -426,7 +425,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const deck = new RPCSource({ping: () => true}, 100);
 		const rpcRoom = new RPCSource({Deck: () => deck});
@@ -452,11 +451,11 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		class MainRPC extends RPCSource.with("$")<number> {
 			
-			$userSetState = this.bindConnection((connection, value: number) => {
+			$userSetState = this.bindConnection((connection, value: number): undefined => {
 				this.setState(connection.parameters[1] as number + value);
 			});
 			
@@ -470,12 +469,12 @@ describe("RPCSource", () => {
 		RPCSource.start(rpcRoom, room);
 		
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
-		await clientRpc;
+		await clientRpc.promise;
 		assert.equal(clientRpc.state, 100, "main state");
 		await clientRpc.userSetState(50);
 		assert.equal(clientRpc.state, 2050, "main next state");
 		const deck = new clientRpc.Deck("test1");
-		await deck;
+		await deck.promise;
 		assert.equal(deck.state, "base_test1", "deck state");
 	})
 	
@@ -483,7 +482,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		class Deck extends RPCSource.with({}, 100) {}
 		const roomDeck = new Deck();
@@ -491,9 +490,9 @@ describe("RPCSource", () => {
 		RPCSource.start(rpcRoom, room);
 		
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
-		await clientRpc;
+		await clientRpc.promise;
 		const deck = new clientRpc.MyDeck();
-		await deck;
+		await deck.promise;
 		assert.equal(deck.state, 100, "deck state");
 	})
 	
@@ -501,7 +500,7 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		class Deck extends RPCSource.with({}, 100) {}
 		const deckSourcePromise = Promise.resolve(new Deck);
@@ -509,9 +508,9 @@ describe("RPCSource", () => {
 		RPCSource.start(rpcRoom, room);
 		
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
-		await clientRpc;
+		await clientRpc.promise;
 		const deck = new clientRpc.MyDeck();
-		await deck;
+		await deck.promise;
 		assert.equal(deck.state, 100, "deck (as promise) state");
 	})
 	
@@ -519,10 +518,10 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
 		const enum EVENT_KEYS {ONE = 1, TWO = 2}
-		const RPC = RPCSource.with({ping(){}})<undefined, {[EVENT_KEYS.ONE]: [string], [EVENT_KEYS.TWO]: [number]}>;
+		const RPC = RPCSource.with({ping: () => null})<undefined, {[EVENT_KEYS.ONE]: [string], [EVENT_KEYS.TWO]: [number]}>;
 		const rpcRoom = new (RPC)();
 		RPCSource.start(rpcRoom, room);
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
@@ -530,7 +529,7 @@ describe("RPCSource", () => {
 		const twoEvents = mock.fn();
 		clientRpc.on(EVENT_KEYS.ONE, oneEvents);
 		clientRpc.on(EVENT_KEYS.TWO, twoEvents);
-		await clientRpc
+		await clientRpc.promise;
 		rpcRoom.emit(EVENT_KEYS.ONE, "test");
 		rpcRoom.emit(EVENT_KEYS.TWO, 42);
 		await clientRpc.ping();
@@ -544,24 +543,76 @@ describe("RPCSource", () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
-		await room;
+		await room.promise;
 		
-		const RPC = RPCSource.with({ping(){}})<undefined, Record<string|number, any[]>>;
-		const rpcRoom = new (RPC)();
+		const rpcRoom = new (RPCSource.with({ping: () => null})<undefined, Record<string|number, any[]>>)();
 		RPCSource.start(rpcRoom, room);
 		
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
 		const numEvents = mock.fn();
 		const strEvents = mock.fn();
-		clientRpc.on(1, numEvents);
 		clientRpc.on("1", strEvents);
-		await clientRpc
-		rpcRoom.emit(1, "test");
+		clientRpc.on(1, numEvents);
+		await clientRpc.promise;
 		rpcRoom.emit("1", 42);
+		rpcRoom.emit(1, "test");
 		await clientRpc.ping();
-		assert.equal(numEvents.mock.callCount(), 1, "numEvent called 1 time");
 		assert.equal(strEvents.mock.callCount(), 1, "strEvent called 1 time");
-		assert.deepEqual(numEvents.mock.calls[0].arguments, ["test"], "numEvent correct event");
+		assert.equal(numEvents.mock.callCount(), 1, "numEvent called 1 time");
 		assert.deepEqual(strEvents.mock.calls[0].arguments, [42], "strEvent correct event");
+		assert.deepEqual(numEvents.mock.calls[0].arguments, ["test"], "numEvent correct event");
+	});
+	
+	it("notify as main method", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room.promise;
+		
+		const rpcRoom = new RPCSource({
+			notify: (x: number) => x + 1,
+		});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		assert.equal(clientRpc.notify.notify(100), undefined, "call notify.notify is void");
+		assert.equal(await clientRpc.notify(100), 101, "call notify as main method");
+	});
+	
+	it("notify of method", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room.promise;
+		
+		const rpcRoom = new RPCSource({
+			updateData: (x: number) => {rpcRoom.setState(x)},
+		}, 0);
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		await clientRpc.promise;
+		assert.equal(clientRpc.state, 0, "base state = 0");
+		clientRpc.updateData.notify(120);
+		await new Promise(r => clientRpc.on("state", r));
+		assert.equal(clientRpc.state, 120, "next state = 120");
+	});
+	
+	it("source with any events", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+			await using room = new RoomSocketHandler(roomWs);
+		roomWs.backend.open();
+		await room.promise;
+		
+		const rpcRoom = new RPCSource({});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock("Bob", 2000)));
+		await clientRpc.promise;
+		const eventData = await new Promise(r => {
+			clientRpc.on("custom-event", r);
+			rpcRoom.emit("custom-event", 100);
+		});
+		assert.equal(eventData, 100, "custom event data");
 	});
 });

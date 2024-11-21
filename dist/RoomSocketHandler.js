@@ -48,15 +48,14 @@ export class RoomSocketHandler {
             this.#id = roomId;
             this.#publicMessage = publicMessage ?? null;
             this.#integrity = integrity ?? null;
-            this.#initResolver.resolve([this]);
+            this.#initResolver.resolve(this);
             this.#ready = true;
-            this.#selfEvents.emitWithTry("init");
+            this.#selfEvents.emitWithTry("ready");
         });
     }
-    then(onfulfilled, onrejected) {
-        return this.#initResolver.promise.then(onfulfilled, onrejected);
+    get promise() {
+        return this.#initResolver.promise;
     }
-    ;
     getConnections(filter) {
         return this.#connectionsLayer.getConnections(filter);
     }
@@ -218,14 +217,13 @@ class Connection {
         this.#handle = handle;
         this.#parameters = parameters;
         const subscriber = this.#subscriber = this.#handle.getConnectionEmitter(this);
-        subscriber.on("open", () => this.#initResolver.resolve());
+        subscriber.on("open", () => this.#initResolver.resolve(this));
         subscriber.on("close", (reason) => this.#initResolver.reject(reason));
         this.#initResolver.promise.catch(() => { });
     }
-    then(onfulfilled, onrejected) {
-        return this.#initResolver.promise.then(() => [this]).then(onfulfilled, onrejected);
+    get promise() {
+        return this.#initResolver.promise;
     }
-    ;
     get parameters() {
         return this.#parameters;
     }

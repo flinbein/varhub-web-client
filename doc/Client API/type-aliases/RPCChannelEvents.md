@@ -97,7 +97,7 @@ rpc.on("error", (reason) => {
 <tr>
 <td>
 
-`init`
+`ready`
 
 </td>
 <td>
@@ -113,8 +113,8 @@ channel is closed
 
 ```typescript
 const rpc = new RPCChannel(client);
-rpc.on("init", (reason) => {
-  console.log("channel initialized");
+rpc.on("ready", () => {
+  console.log("channel ready");
   console.assert(rpc.ready);
 });
 ```

@@ -37,6 +37,6 @@
 export { Varhub } from "./Varhub.js"
 export { VarhubClient, type VarhubClientEvents } from "./VarhubClient.js"
 export type { RoomSocketHandler, RoomSocketHandlerEvents, Connection, ConnectionEvents } from "./RoomSocketHandler.js"
-export { RPCChannel, type RPCInstance, type RPCChannelEvents, type RpcEmitter } from "./RPCChannel.js"
+export { RPCChannel, type RPCChannelEvents } from "./RPCChannel.js"
 export {default as RPCSource, type RPCHandler} from "./RPCSource.js"
 export { default as Players, type PlayersEvents, type Player, type PlayerEvents } from "./Players.js"

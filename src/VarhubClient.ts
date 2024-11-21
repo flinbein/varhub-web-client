@@ -70,14 +70,14 @@ export class VarhubClient {
 	readonly #ws: WebSocket;
 	
 	readonly #selfEvents = new EventEmitter<VarhubClientEvents>();
-	#initResolver = Promise.withResolvers<[this]>();
+	#resolver = Promise.withResolvers<[this]>();
 	#ready = false;
 	#closed = false;
 	
 	/** @hidden */
 	constructor(ws: WebSocket, getErrorLog: () => Promise<any> = getNoError) {
 		this.#ws = ws;
-		this.#initResolver.promise.catch(() => {});
+		this.#resolver.promise.catch(() => {});
 		ws.binaryType = "arraybuffer";
 		if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
 			throw new Error("websocket is closed");
@@ -87,11 +87,11 @@ export class VarhubClient {
 				this.#ready = true;
 				this.#closed = false;
 				this.#selfEvents.emitWithTry("open");
-				this.#initResolver.resolve([this]);
+				this.#resolver.resolve([this]);
 			})
 		} else {
 			this.#ready = true;
-			this.#initResolver.resolve([this]);
+			this.#resolver.resolve([this]);
 		}
 		ws.addEventListener("message", (event) => {
 			this.#selfEvents.emitWithTry("message", ...parse(event.data));
@@ -107,44 +107,13 @@ export class VarhubClient {
 			this.#closed = true;
 			const errorPromise = getErrorLog ? getErrorLog() : Promise.resolve(undefined);
 			this.#selfEvents.emitWithTry("error", errorPromise);
-			this.#initResolver.reject(new Error("websocket closed", {cause: errorPromise}));
+			this.#resolver.reject(new Error("websocket closed", {cause: errorPromise}));
 		})
 	}
 	
-	/**
-	 * Promise like for events "open", "error"
-	 * @example
-	 * ```typescript
-	 * // Using in async context
-	 * const client = varhub.join(roomId);
-	 * try {
-	 *   await client;
-	 *   console.log("client connected");
-	 * } catch (error) {
-	 *   console.log("connection error");
-	 * }
-	 * ```
-	 * @example
-	 * ```typescript
-	 * // Using in async context
-	 * const [client] = await varhub.join(roomId);
-	 * ```
-	 * @example
-	 * ```typescript
-	 * // Using in sync context
-	 * varhub.join(roomId).then(([client]) => {
-	 *   console.log("client connected");
-	 * });
-	 * ```
-	 * @param onfulfilled
-	 * @param onrejected
-	 */
-	then<R1 = [this], R2 = never>(
-		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
-	): PromiseLike<R1 | R2> {
-		return this.#initResolver.promise.then(onfulfilled, onrejected);
-	};
+	get promise(){
+		return this.#resolver.promise;
+	}
 	
 	/**
 	 * client is successfully joined to the room.
@@ -173,7 +142,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event "message", "open", "close" or "error"
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof VarhubClientEvents>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents[T]) => void): this{
+	on<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
 		this.#selfEvents.on.call(this, event, handler as any);
 		return this;
 	}
@@ -185,7 +154,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler
 	 */
-	once<T extends keyof VarhubClientEvents>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents[T]) => void): this{
+	once<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
 		this.#selfEvents.once.call(this, event, handler as any);
 		return this;
 	}
@@ -198,7 +167,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler
 	 */
-	off<T extends keyof VarhubClientEvents>(event: T, handler: (this: typeof this, ...args: VarhubClientEvents[T]) => void): this{
+	off<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
 		this.#selfEvents.off.call(this, event, handler as any);
 		return this;
 	}

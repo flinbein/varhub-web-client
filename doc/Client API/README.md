@@ -105,7 +105,7 @@ import {Varhub} from "@flinbein/varhub-web-client";
 
 const hub = new Varhub("https://example.com/varhub/");
 const room: RoomSocketHandler = hub.createRoomSocket();
-await room;
+await room.promise;
 console.log(room.id);
 ```
 
@@ -167,43 +167,6 @@ client.send("some message");
 <td>
 
 Constructor for new RPC channel based on [VarhubClient](classes/VarhubClient.md)
-
-</td>
-</tr>
-</tbody>
-</table>
-
-### Interfaces
-
-<table>
-<thead>
-<tr>
-<th>Interface</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-[RpcEmitter](interfaces/RpcEmitter.md)
-
-</td>
-<td>
-
-Methods to handle events of [RPCChannel](variables/RPCChannel.md)
-
-</td>
-</tr>
-<tr>
-<td>
-
-[RPCInstance](interfaces/RPCInstance.md)
-
-</td>
-<td>
-
-Methods and properties of [RPCChannel](variables/RPCChannel.md)
 
 </td>
 </tr>

@@ -233,7 +233,7 @@ test.describe("Players", () => {
 		const aliceClient = new VarhubClient(roomWs.createClientMock("Alice"));
 		aliceClient.on("message", onMessageAlice);
 		
-		await Promise.all([bobClient1, bobClient2, aliceClient]);
+		await Promise.all([bobClient1, bobClient2, aliceClient].map(client => client.promise));
 		
 		await new Promise(r => {
 			aliceClient.on("message", r);
@@ -257,7 +257,7 @@ test.describe("Players", () => {
 		const bobClient1 = new VarhubClient(roomWs.createClientMock("Bob", 2));
 		const bobClient2 = new VarhubClient(roomWs.createClientMock("Bob", 3));
 		
-		await Promise.all([bobClient1, bobClient2, aliceClient]);
+		await Promise.all([bobClient1, bobClient2, aliceClient].map(client => client.promise));
 		
 		const onAliceConnectionMessage = mock.fn();
 		const alicePlayer = players.get("Alice")!;
@@ -266,8 +266,6 @@ test.describe("Players", () => {
 		const onBobConnectionMessage = mock.fn();
 		const bobPlayer = players.get("Bob")!;
 		bobPlayer.on("connectionMessage", onBobConnectionMessage);
-		
-		
 		
 		await new Promise((resolve) => {
 			alicePlayer.on("connectionMessage", resolve);
@@ -287,6 +285,5 @@ test.describe("Players", () => {
 		
 		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments.slice(1), [ 3, "from Bob"]);
 		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments[0].parameters, ["Bob", 3]);
-		
 	})
 });

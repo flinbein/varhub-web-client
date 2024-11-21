@@ -2,6 +2,149 @@ import type { XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
 import type { VarhubClient } from "./VarhubClient.js";
 
+interface MetaScopeValue<M  = any, E  = any, S = any> {[Symbol.unscopables]:{__rpc_methods: M, __rpc_events: E, __rpc_state: S}}
+interface MetaScope<M  = any, E  = any, S = any> { [Symbol.unscopables]: MetaScopeValue<M, E, S>}
+
+interface MetaDesc<M = any, E = any, S = any> {
+	methods?: M;
+	events?: E;
+	state?: S;
+}
+
+interface MetaType<M = any, E = any, S = any> {
+	methods: M;
+	events: E;
+	state: S;
+}
+
+type MetaScopeToDesc<T extends MetaScope> = T extends MetaScope<infer M , infer E, infer S> ? MetaType<M, E, S> : never;
+
+type ExtraKeys = "on" | "once" | "off" | "notify" | "then";
+
+type ExtractMetaType<T extends MetaDesc | MetaScope> = (
+	(T extends MetaScope ? MetaScopeToDesc<T> : T) extends infer D ? {
+		methods: D extends {methods: infer M} ? M : any,
+		events: D extends {events: infer E} ? E : any,
+		state: D extends {state: infer S} ? S : any,
+	} : never
+)
+
+type RPCMethodsAny = {
+	[key: string] : RPCMethodsAny & RPCMethod<any, any> & RPCConstructor<any, any>
+}
+
+type RPCMethodsPart<T, EXCLUDE = ExtraKeys> = 0 extends (1 & T) ? RPCMethodsAny : (
+	T extends ((...args: any) => any) | {new (...args: any): any} | MetaScope ? unknown : {
+		[K in Exclude<keyof T & string, EXCLUDE>]: RPCMethodsPart<T[K]>
+	}
+) & (
+	T extends (...args: infer A) => infer R ? (
+		[R] extends [never] ? RPCMethod<A, R> :
+		Exclude<R, MetaScope> extends infer RC ? ([RC] extends [never] ? unknown : RPCMethod<A, RC>) : unknown
+	) & (
+		[R] extends [never] ? unknown :
+		Extract<R, MetaScope> extends infer RC extends MetaScope ? RPCConstructor<A, RC>: unknown
+	) : unknown
+) & (
+	T extends (new (...args: infer A) => infer R extends MetaScope) ? RPCConstructor<A, R> : unknown
+) & (
+	T extends PromiseLike<infer R extends MetaScope> ? RPCConstructor<[], R> : unknown
+) & (
+	T extends MetaScope ? RPCConstructor<[], T> : unknown
+);
+
+type RPCMethod<A extends any[], R> = {
+	(...args: A & XJData[]): Promise<Awaited<R>>
+	notify(...args: A & XJData[]): void
+	call: never,
+	bind: never,
+	apply: never,
+	name: never,
+	length: never
+}
+
+type RPCConstructor<A extends any[], R extends MetaScope> = {
+	new (...args: A & XJData[]): RPCChannel<R>;
+	call: never,
+	bind: never,
+	apply: never,
+	name: never,
+	length: never
+}
+
+type EventPath<T, K extends keyof T = keyof T> = (
+	K extends (string|number) ? (
+		T[K] extends infer P ? (
+			0 extends (1 & P) ? (K | [K, ...(number|string)[]]) :
+			P extends unknown[] ? (K | [K]) : [K, ...(
+				EventPath<T[K]> extends infer NEXT extends ((string|number)|(string|number)[]) ? (
+					NEXT extends any[] ? NEXT : [NEXT]
+				) : never
+			)]
+		): never
+	) : never
+);
+
+type EventPathArgs<PATH extends number|string|(number|string)[], FORM> = (
+	0 extends (1 & FORM) ? any[] :
+	PATH extends (number|string) ? EventPathArgs<[PATH], FORM> :
+	PATH extends [] ? FORM extends any[] ? 0 extends (1 & FORM) ? any[] : FORM : never :
+	PATH extends [infer PROP, ...infer TAIL extends (number|string)[]] ? (
+		PROP extends keyof FORM ? EventPathArgs<TAIL, FORM[PROP]> : never
+	) : never
+);
+
+interface EventHandler<F, SPECIAL_EVENTS extends string> {
+	on<E extends Exclude<EventPath<F>, SPECIAL_EVENTS>>(this: this, eventName: E, handler: (...args: EventPathArgs<E, F>) => void): this,
+	once<E extends Exclude<EventPath<F>, SPECIAL_EVENTS>>(this: this, eventName: E, handler: (...args: EventPathArgs<E, F>) => void): this,
+	off<E extends Exclude<EventPath<F>, SPECIAL_EVENTS>>(this: this, eventName: E, handler: (...args: EventPathArgs<E, F>) => void): this,
+}
+interface BaseEventHandler<S> {
+	on<E extends keyof RPCChannelEvents<S>>(this: this, eventName: E, handler: (...args: RPCChannelEvents<S>[E]) => void): this,
+	once<E extends keyof RPCChannelEvents<S>>(this: this, eventName: E, handler: (...args: RPCChannelEvents<S>[E]) => void): this,
+	off<E extends keyof RPCChannelEvents<S>>(this: this, eventName: E, handler: (...args: RPCChannelEvents<S>[E]) => void): this,
+}
+type EventsOfAny<SPECIAL_EVENTS extends string = never> = EventHandlerAny<SPECIAL_EVENTS> & {[key: string]: EventsOfAny}
+interface EventHandlerAny<SPECIAL_EVENTS extends string = never> {
+	on<T extends string | number | (string|number)[]>(this: this, eventName: T extends SPECIAL_EVENTS ? never : T, handler: (...args: any) => void): this,
+	once<T extends string | number | (string|number)[]>(this: this, eventName: T extends SPECIAL_EVENTS ? never : T, handler: (...args: any) => void): this,
+	off<T extends string | number | (string|number)[]>(this: this, eventName: T extends SPECIAL_EVENTS ? never : T, handler: (...args: any) => void): this,
+}
+interface EventHandlerEmptyArray<E extends any[]> {
+	on(eventName: [], handler: (this: this, ...args: E) => void): this,
+	once(eventName: [], handler: (this: this, ...args: E) => void): this,
+	off(eventName: [], handler: (this: this, ...args: E) => void): this,
+}
+
+type HasAnyValue<T, Y, N> = T[keyof T] extends infer V ? ([V] extends [never] ? N : Y ) : N;
+
+type RPCEventsPart<T, SPECIAL_EVENTS extends string = never> = [T] extends [never] ? unknown : (0 extends (1 & T) ? EventsOfAny<SPECIAL_EVENTS> : (
+	Extract<T, any[]> extends infer F extends any[] ? [F] extends [never] ? unknown : & EventHandlerEmptyArray<F> : never
+) & (
+	Exclude<T, any[]> extends infer F ? (
+		HasAnyValue<F, {
+			[K in Exclude<keyof F, ExtraKeys> as F[K] extends any[] ? never : K]: RPCEventsPart<F[K]>
+		} & EventHandler<F, SPECIAL_EVENTS>, unknown >
+	) : never
+));
+
+interface RPCChannelInstance<S = unknown> extends BaseEventHandler<S> {
+	get state(): S,
+	close(reason?: XJData): void,
+	get closed(): boolean
+	get ready(): boolean
+	then: void,
+	promise: Promise<this>
+}
+
+type RPCChannel<T extends MetaScope | MetaDesc = {}> = ExtractMetaType<T> extends {methods: infer M, events: infer E, state: infer S} ? (
+	& Disposable
+	& MetaScope<M, E, S>
+	& RPCChannelInstance<S>
+	& RPCEventsPart<E, keyof RPCChannelEvents<any>>
+	& RPCMethodsPart<M, Exclude<keyof RPCChannelInstance | ExtraKeys, "notify">>
+) : never
+
 /**
  * Basic events of {@link RPCChannel}
  * @event
@@ -35,13 +178,13 @@ export type RPCChannelEvents<S> = {
 	 * @example
 	 * ```typescript
 	 * const rpc = new RPCChannel(client);
-	 * rpc.on("init", (reason) => {
-	 *   console.log("channel initialized");
+	 * rpc.on("ready", () => {
+	 *   console.log("channel ready");
 	 *   console.assert(rpc.ready);
 	 * });
 	 * ```
 	 */
-	init: []
+	ready: []
 	/**
 	 * channel is closed before was open
 	 * @example
@@ -56,10 +199,13 @@ export type RPCChannelEvents<S> = {
 	error: [error: XJData]
 }
 
+// Code
+
 const enum CLIENT_ACTION {
 	CALL = 0,
 	CLOSE = 1,
-	CREATE = 2
+	CREATE = 2,
+	NOTIFY = 3,
 }
 
 const enum REMOTE_ACTION {
@@ -70,97 +216,31 @@ const enum REMOTE_ACTION {
 	EVENT = 4
 }
 
-type KeyOfArray<T, K = keyof T> = K extends keyof T ? (
-	T[K] extends any[] ? K : never
-) : never;
-
-type KeyOfNotArray<T> = Exclude<keyof T, KeyOfArray<T>>
-
-/**
- * Methods and properties of {@link RPCChannel}
- */
-export interface RPCInstance<S> extends Disposable {
-	then<R1 = [this], R2 = never>(
-		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null,
-	): Promise<R1 | R2>,
-	ready: boolean,
-	closed: boolean,
-	call: (path: string[], ...args: any[]) => Promise<any>,
-	create: (path: string[], ...args: any[]) => RPCInstance<any> & RpcEmitter<never>,
-	close: (reason?: string) => void,
-	state: S
-}
-
-/**
- * Methods to handle events of {@link RPCChannel}
- */
-export interface RpcEmitter<E> {
-	on<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
-	once<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
-	off<T extends KeyOfArray<E>>(eventName: T, handler: E[T] extends any[] ? (this: this, ...args: E[T]) => void : never): this
-}
-type RpcMapper<M, E = never> = (
-	[M] extends [MetaScope<infer METHODS, infer EVENTS, infer STATE>] ? (
-			{new(): RPCChannel<METHODS, EVENTS, STATE>}
-	) :
-	[M] extends [PromiseLike<MetaScope<infer METHODS, infer EVENTS, infer STATE>>] ? (
-			{new(): RPCChannel<METHODS, EVENTS, STATE>}
-	) :
-	[M] extends [{new(...args: infer PARAM): MetaScope<infer METHODS, infer EVENTS, infer STATE>}] ? (
-		{new(...args: PARAM): RPCChannel<METHODS, EVENTS, STATE>}
-	) :
-	M extends (...args: any) => infer RET ? (
-		[RET] extends [never] ? (...args: Parameters<M>) => Promise<Awaited<ReturnType<M>>> :
-		RET extends MetaScope<unknown, unknown, unknown> ? {new(...args: Parameters<M>): RPCChannel<RET>} :
-		(...args: Parameters<M>) => Promise<Awaited<ReturnType<M>>>
-	) :
-	M extends {[key: string]: any} ? {[key in (keyof M | KeyOfNotArray<E>)]: RpcMapper<key extends keyof M ? M[key] : void, key extends keyof E ? E[key]: void> } :
-	E extends {[key: string]: any} ? {[key in (keyof M | KeyOfNotArray<E>)]: RpcMapper<key extends keyof M ? M[key] : void, key extends keyof E ? E[key]: void> } :
-	never
-) & (KeyOfArray<E> extends never ? unknown : RpcEmitter<E>);
-
 /**
  * Constructor for new RPC channel based on {@link VarhubClient}
  * @group Classes
  */
-export const RPCChannel = (function(client: VarhubClient, {key = "$rpc"} = {}): {foo: string}{
+export const RPCChannel = (function<M extends MetaScope | MetaDesc = {}>(client: VarhubClient, {key = "$rpc"} = {}) {
 	const manager = new ChannelManager(client, key);
-	return manager.defaultChannel.proxy;
+	return manager.defaultChannel.proxy as RPCChannel<M>;
 } as any as (
 	{
-		/** @hidden */
-		new(client: VarhubClient, options?: {key?: string}): RPCChannel<{}, unknown>,
 		/**
 		 * Create new channel for RPC
 		 * @typeParam M - typeof current {@link RPCSource} of room (with methods, constructors and events)
 		 * @param {VarhubClient} client - varhub client. Client may not be ready.
 		 * @param options
 		 * @param options.key default:`"$rpc"`
-		 * @returns {RPCInstance<undefined>} - stateless channel.
-		 * - result extends {@link RPCInstance}.
-		 * - result extends {@link RpcEmitter} and can subscribe on events of current {@link RPCSource} of room
+		 * @returns {RPCChannelInstance<undefined>} - stateless channel.
+		 * - result extends {@link RPCChannelInstance}.
 		 * - result has all methods of current {@link RPCSource} in room.
 		 * - all methods are asynchronous and return a {@link Promise}<{@link XJData}>
 		 * - result has constructors for all constructable methods of {@link RPCSource} in room.
 		 * - all constructors are synchronous and return a new {@link RPCChannel}
 		 */
-		new<M>(client: VarhubClient, options?: {key?: string}): M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? RPCChannel<METHODS, EVENTS, STATE> : RPCChannel<M>,
-		/** @hidden */
-		new<M, E, S = any>(client: VarhubClient,options?:  {key?: string}): RPCChannel<MetaScope<M, E, S>>
+		new<M extends MetaScope | MetaDesc = {}>(client: VarhubClient, options?: {key?: string}): RPCChannel<M>,
 	}
 ));
-
-type MetaScope<M, E, S> = { [Symbol.unscopables]: {[Symbol.unscopables]:{__rpc_methods: M, __rpc_events: E, __rpc_state: S}}}
-
-/** @hidden */
-export type RPCChannel<M = unknown, E = unknown, S = undefined> = (
-	M extends MetaScope<infer METHODS, infer EVENTS, infer STATE> ? (
-		RPCInstance<STATE> & RpcMapper<METHODS, EVENTS & RPCChannelEvents<STATE>>
-	) : (
-		RPCInstance<S> & RpcMapper<M, E & RPCChannelEvents<S>>
-	)
-);
 
 /** @hidden */
 class ChannelManager {
@@ -210,7 +290,7 @@ class Channel {
 	proxy: any;
 	state: any = undefined;
 	events = new EventEmitter();
-	resolver = Promise.withResolvers<void>();
+	resolver = Promise.withResolvers<RPCChannel>();
 	ready = false;
 	closed = false;
 	currentCallId = 0;
@@ -221,10 +301,10 @@ class Channel {
 		this.resolver.promise.catch(() => {});
 		if (channelId === undefined) {
 			if (manager.client.ready) {
-				this.send(CLIENT_ACTION.CALL);
+				void this.send(CLIENT_ACTION.CALL); // request base state
 			} else {
 				manager.client.once("open", () => {
-					this.send(CLIENT_ACTION.CALL)
+					void this.send(CLIENT_ACTION.CALL); // request base state
 				});
 			}
 		}
@@ -238,9 +318,9 @@ class Channel {
 		this.state = state;
 		this.ready = true;
 		if (!wasReady) {
-			this.events.emitWithTry("init");
+			this.events.emitWithTry("ready");
 			this.events.emitWithTry("state", state);
-			this.resolver.resolve();
+			this.resolver.resolve(this.proxy);
 		} else {
 			this.events.emitWithTry("state", state, oldState);
 		}
@@ -286,24 +366,20 @@ class Channel {
 			}
 			this.responseEventTarget.addEventListener(callId as any, onResponse, {once: true});
 			this.events.once("close", onClose);
-			this.send(CLIENT_ACTION.CALL, callId, path, args);
+			void this.send(CLIENT_ACTION.CALL, callId, path, args);
 		});
 	}
 	
 	proxyConstruct = (path: string[], ...args: any[]) => {
 		if (this.closed) throw new Error("channel is closed");
 		const channel = this.manager.createNextChannel();
-		this.send(CLIENT_ACTION.CREATE, channel.channelId, path, args);
+		void this.send(CLIENT_ACTION.CREATE, channel.channelId, path, args);
 		return channel.proxy;
 	}
 	
 	async send(callCode: CLIENT_ACTION, ...args: XJData[]) {
-		if (!this.manager.client.ready) await this.manager.client;
+		if (!this.manager.client.ready) await this.manager.client.promise;
 		this.manager.client.send(this.manager.key, this.channelId, callCode, ...args);
-	}
-	
-	then = (res: any, rej: any) => {
-		return this.resolver.promise.then(() => [this.proxy]).then(res, rej);
 	}
 	
 	close = (reason: any) => {
@@ -313,7 +389,7 @@ class Channel {
 		if (this.channelId === undefined) {
 			this.manager.client.close(reason);
 		} else {
-			this.send(CLIENT_ACTION.CLOSE, reason)
+			void this.send(CLIENT_ACTION.CLOSE, reason)
 		}
 		this.events.emitWithTry("close", reason);
 		this.resolver.reject(reason);
@@ -328,28 +404,32 @@ class Channel {
 		const children = new Map<string|number, any>();
 		const events = this.events;
 		const subscribers = {
-			on: function(eventName: string, handler: (...args: any) => void) {
+			on: function(eventName: string|number|(string|number)[], handler: (...args: any) => void) {
 				return events.on.call(this, getEventCode(path, eventName), handler);
 			},
-			once: function(eventName: string, handler: (...args: any) => void) {
+			once: function(eventName: string|number|(string|number)[], handler: (...args: any) => void) {
 				return events.once.call(this, getEventCode(path, eventName), handler);
 			},
-			off: function(eventName: string, handler: (...args: any) => void) {
+			off: function(eventName: string|number|(string|number)[], handler: (...args: any) => void) {
 				return events.off.call(this, getEventCode(path, eventName), handler);
 			}
+		}
+		const notify = (...args: any) => {
+			void this.send(CLIENT_ACTION.NOTIFY, path, args);
 		}
 		
 		const proxyHandler = {
 			get: (_target: any, prop: string|symbol) => {
+				if (prop === "then") return undefined;
 				if (path.length === 0) {
 					if (prop === Symbol.dispose) return this[Symbol.dispose];
 					if (prop === "ready") return this.ready;
 					if (prop === "closed") return this.closed;
 					if (prop === "state") return this.state;
-					if (prop === "then") return this.then;
-					if (prop === "call") return this.proxyApply;
-					if (prop === "create") return this.proxyConstruct;
+					if (prop === "promise") return this.resolver.promise;
 					if (prop === "close") return this.close;
+				} else {
+					if (prop === "notify") return notify;
 				}
 				if (prop in subscribers) return (subscribers as any)[prop];
 				if (typeof prop !== "string") return undefined;
@@ -378,8 +458,8 @@ class Channel {
 }
 
 /** @hidden */
-function getEventCode(path: string[], e: string){
-	if (path.length > 0) return JSON.stringify([...path, e]);
-	if (e === "close" || e === "init" || e === "error" || e === "state") return e;
-	return JSON.stringify([e]);
+function getEventCode(path: string[], e: string|number|(string|number)[]){
+	if (path.length > 0) return JSON.stringify([...path, ...(Array.isArray(e) ? e : [e])]);
+	if (e === "close" || e === "ready" || e === "error" || e === "state") return e;
+	return JSON.stringify(Array.isArray(e) ? e : [e]);
 }

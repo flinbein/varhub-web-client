@@ -4,12 +4,12 @@ const getNoError = async () => undefined;
 export class VarhubClient {
     #ws;
     #selfEvents = new EventEmitter();
-    #initResolver = Promise.withResolvers();
+    #resolver = Promise.withResolvers();
     #ready = false;
     #closed = false;
     constructor(ws, getErrorLog = getNoError) {
         this.#ws = ws;
-        this.#initResolver.promise.catch(() => { });
+        this.#resolver.promise.catch(() => { });
         ws.binaryType = "arraybuffer";
         if (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED) {
             throw new Error("websocket is closed");
@@ -19,12 +19,12 @@ export class VarhubClient {
                 this.#ready = true;
                 this.#closed = false;
                 this.#selfEvents.emitWithTry("open");
-                this.#initResolver.resolve([this]);
+                this.#resolver.resolve([this]);
             });
         }
         else {
             this.#ready = true;
-            this.#initResolver.resolve([this]);
+            this.#resolver.resolve([this]);
         }
         ws.addEventListener("message", (event) => {
             this.#selfEvents.emitWithTry("message", ...parse(event.data));
@@ -40,13 +40,12 @@ export class VarhubClient {
             this.#closed = true;
             const errorPromise = getErrorLog ? getErrorLog() : Promise.resolve(undefined);
             this.#selfEvents.emitWithTry("error", errorPromise);
-            this.#initResolver.reject(new Error("websocket closed", { cause: errorPromise }));
+            this.#resolver.reject(new Error("websocket closed", { cause: errorPromise }));
         });
     }
-    then(onfulfilled, onrejected) {
-        return this.#initResolver.promise.then(onfulfilled, onrejected);
+    get promise() {
+        return this.#resolver.promise;
     }
-    ;
     get ready() { return this.#ready; }
     get closed() { return this.#closed; }
     send(...data) {

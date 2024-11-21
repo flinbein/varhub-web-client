@@ -29,6 +29,17 @@ Handler will respond with:
 * [HandlerMessageCallResult](#method-call-result) if channel exists.
 * [HandlerMessageChannelClosed](#channel-closed) if channel closed or not exists.
 
+### Notify
+```typescript
+type ClientMessageCall = [
+  key: string, // default: "$rpc"
+  channelId: number /* subchannel */ | undefined /* default channel */,
+  action: 3, // CLIENT_ACTION.NOTIFY
+  path: string[], // path to remote function
+  arguments: any[] // call function with this arguments  
+]
+```
+No response for this message. Even if handler throws an exception.
 
 ### Request state
 ```typescript

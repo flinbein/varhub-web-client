@@ -23,27 +23,31 @@ export type RPCHandler = (
 /** @hidden */
 type EventPath<T, K extends keyof T = keyof T> = (
 	K extends (string|number) ? (
-		T[K] extends any[] ? (K | [K]) : [K, ...(
-			EventPath<T[K]> extends infer NEXT extends ((string|number)|(string|number)[]) ? (
-				NEXT extends any[] ? NEXT : [NEXT]
-			) : never
-		)]
+		T[K] extends infer P ? (
+			0 extends (1 & P) ? (K | [K, ...(number|string)[]]) :
+			P extends unknown[] ? (K | [K]) : [K, ...(
+				EventPath<T[K]> extends infer NEXT extends ((string|number)|(string|number)[]) ? (
+					NEXT extends any[] ? NEXT : [NEXT]
+				) : never
+			)]
+		): never
 	) : never
-)
+);
 
-/** @hidden */
-type EventPathArgs<PATH, FORM> = (
-	PATH extends keyof FORM ? (FORM[PATH] extends any[] ? FORM[PATH] : never) :
-	PATH extends [] ? (FORM extends any[] ? FORM : never) :
-	PATH extends [infer STEP extends (string|number), ...infer TAIL extends (string|number)[]] ? (
-		STEP extends keyof FORM ? EventPathArgs<TAIL, FORM[STEP]> : never
+type EventPathArgs<PATH extends number|string|(number|string)[], FORM> = (
+	0 extends (1 & FORM) ? any[] :
+	PATH extends (number|string) ? EventPathArgs<[PATH], FORM> :
+	PATH extends [] ? FORM extends any[] ? 0 extends (1 & FORM) ? any[] : FORM : never :
+	PATH extends [infer PROP, ...infer TAIL extends (number|string)[]] ? (
+		PROP extends keyof FORM ? EventPathArgs<TAIL, FORM[PROP]> : never
 	) : never
-)
+);
 
 const enum CLIENT_ACTION {
 	CALL = 0,
 	CLOSE = 1,
 	CREATE = 2,
+	NOTIFY = 3,
 }
 
 const enum REMOTE_ACTION {
@@ -133,7 +137,7 @@ const dangerPropNames = [
 /**
  * Remote procedure call handler
  */
-export default class RPCSource<METHODS extends Record<string, any> | string = {}, STATE = undefined, EVENTS = {}> implements Disposable {
+export default class RPCSource<METHODS extends Record<string, any> | string = {}, STATE = undefined, EVENTS = any> implements Disposable {
 	
 	static with <
 		const BIND_METHODS extends string | Record<string, any> = {},
@@ -377,7 +381,10 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 	 * @param event path for event. String or array of strings.
 	 * @param args event values
 	 */
-	emit<P extends EventPath<EVENTS>>(event: P, ...args: EventPathArgs<P, EVENTS>): this{
+	emit<P extends 0 extends (1&EVENTS) ? (string|number|(string|number)[]) : EventPath<EVENTS>>(
+		event: P,
+		...args: 0 extends (1&EVENTS) ? any[] : EventPathArgs<P, EVENTS>
+	): this{
 		return this.emitFor(undefined, event, ...args);
 	}
 	
@@ -388,10 +395,10 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 	 * @param event path for event. String or array of strings.
 	 * @param args event values
 	 */
-	emitFor<P extends EventPath<EVENTS>>(
+	emitFor<P extends 0 extends (1&EVENTS) ? (string|number|(string|number)[]) : EventPath<EVENTS>>(
 		predicate: DeepIterable<Connection> | ((con: Connection) => any) | null | undefined,
 		event: P,
-		...args: EventPathArgs<P, EVENTS>
+		...args: 0 extends (1&EVENTS) ? any[] : EventPathArgs<P, EVENTS>
 	): this {
 		if (this.#disposed) throw new Error("disposed");
 		const path: (string|number)[] = (typeof event === "string" || typeof event === "number") ? [event] : event;
@@ -453,6 +460,12 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 					con.send(incomingKey, msgArgs[0], REMOTE_ACTION.CLOSE, new Error("wrong channel"));
 				}
 				return;
+			}
+			if (operationId === CLIENT_ACTION.NOTIFY) {
+				const [path, callArgs] = msgArgs;
+				try {
+					source.#handler(con, path as any[], callArgs as any[], false);
+				} catch {}
 			}
 			if (operationId === CLIENT_ACTION.CALL) {
 				if (msgArgs.length === 0) /*request state*/ {

@@ -64,11 +64,11 @@ class Channel {
         this.resolver.promise.catch(() => { });
         if (channelId === undefined) {
             if (manager.client.ready) {
-                this.send(0);
+                void this.send(0);
             }
             else {
                 manager.client.once("open", () => {
-                    this.send(0);
+                    void this.send(0);
                 });
             }
         }
@@ -82,9 +82,9 @@ class Channel {
         this.state = state;
         this.ready = true;
         if (!wasReady) {
-            this.events.emitWithTry("init");
+            this.events.emitWithTry("ready");
             this.events.emitWithTry("state", state);
-            this.resolver.resolve();
+            this.resolver.resolve(this.proxy);
         }
         else {
             this.events.emitWithTry("state", state, oldState);
@@ -130,24 +130,21 @@ class Channel {
             };
             this.responseEventTarget.addEventListener(callId, onResponse, { once: true });
             this.events.once("close", onClose);
-            this.send(0, callId, path, args);
+            void this.send(0, callId, path, args);
         });
     };
     proxyConstruct = (path, ...args) => {
         if (this.closed)
             throw new Error("channel is closed");
         const channel = this.manager.createNextChannel();
-        this.send(2, channel.channelId, path, args);
+        void this.send(2, channel.channelId, path, args);
         return channel.proxy;
     };
     async send(callCode, ...args) {
         if (!this.manager.client.ready)
-            await this.manager.client;
+            await this.manager.client.promise;
         this.manager.client.send(this.manager.key, this.channelId, callCode, ...args);
     }
-    then = (res, rej) => {
-        return this.resolver.promise.then(() => [this.proxy]).then(res, rej);
-    };
     close = (reason) => {
         if (this.closed)
             return;
@@ -157,7 +154,7 @@ class Channel {
             this.manager.client.close(reason);
         }
         else {
-            this.send(1, reason);
+            void this.send(1, reason);
         }
         this.events.emitWithTry("close", reason);
         this.resolver.reject(reason);
@@ -180,8 +177,13 @@ class Channel {
                 return events.off.call(this, getEventCode(path, eventName), handler);
             }
         };
+        const notify = (...args) => {
+            void this.send(3, path, args);
+        };
         const proxyHandler = {
             get: (_target, prop) => {
+                if (prop === "then")
+                    return undefined;
                 if (path.length === 0) {
                     if (prop === Symbol.dispose)
                         return this[Symbol.dispose];
@@ -191,14 +193,14 @@ class Channel {
                         return this.closed;
                     if (prop === "state")
                         return this.state;
-                    if (prop === "then")
-                        return this.then;
-                    if (prop === "call")
-                        return this.proxyApply;
-                    if (prop === "create")
-                        return this.proxyConstruct;
+                    if (prop === "promise")
+                        return this.resolver.promise;
                     if (prop === "close")
                         return this.close;
+                }
+                else {
+                    if (prop === "notify")
+                        return notify;
                 }
                 if (prop in subscribers)
                     return subscribers[prop];
@@ -230,9 +232,9 @@ class Channel {
 }
 function getEventCode(path, e) {
     if (path.length > 0)
-        return JSON.stringify([...path, e]);
-    if (e === "close" || e === "init" || e === "error" || e === "state")
+        return JSON.stringify([...path, ...(Array.isArray(e) ? e : [e])]);
+    if (e === "close" || e === "ready" || e === "error" || e === "state")
         return e;
-    return JSON.stringify([e]);
+    return JSON.stringify(Array.isArray(e) ? e : [e]);
 }
 //# sourceMappingURL=RPCChannel.js.map

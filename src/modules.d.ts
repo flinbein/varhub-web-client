@@ -76,32 +76,8 @@ declare module "varhub:room" {
 		 * custom data for this connection
 		 */
 		data?: DESC extends {data: infer T} ? T : any;
-		/**
-		 * Promise like for events "open", "error"
-		 * ### Using in async context
-		 * @example
-		 * ```typescript
-		 * try {
-		 *   await connection;
-		 *   console.log("client connected");
-		 * } catch (error) {
-		 *   console.log("connection error");
-		 * }
-		 * ```
-		 * ### Using in sync context
-		 * @example
-		 * ```
-		 * connection.then(([connection]) => {
-		 *   console.log("client connected");
-		 * });
-		 * ```
-		 * @param onfulfilled
-		 * @param onrejected
-		 */
-		then<R1 = [this], R2 = never>(
-			onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-			onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
-		): Promise<R1 | R2>;
+		
+		get promise(): Promise<this>
 		/**
 		 * connection open
 		 */
@@ -242,10 +218,7 @@ declare module "varhub:room" {
 	interface Room <DESC extends RoomDesc = {}> {
 		#private
 		/** @hidden */
-		then<R1 = [this]>(
-			onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-			onrejected?: ((reason: any) => any) | undefined | null
-		): Promise<R1>;
+		get promise(): Promise<this>;
 		/** @hidden */
 		get ready(): true;
 		/** @hidden */

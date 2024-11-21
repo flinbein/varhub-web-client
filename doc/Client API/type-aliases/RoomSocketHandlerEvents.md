@@ -195,7 +195,7 @@ client.on("error", (asyncError) => {
 <tr>
 <td>
 
-`init`
+`ready`
 
 </td>
 <td>

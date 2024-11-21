@@ -1,3 +1,8 @@
+# RPC API
+The API allows you to create methods that a client can call.
+
+---
+
 You can create an separate RPCSource and allow clients to subscribe on it by method:
 ```javascript
 // VM code

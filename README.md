@@ -211,7 +211,7 @@ room.on("connectionOpen", (connection) => {
   connection.send("Welcome!");
 })
 
-await room; // wait for connection established
+await room.promise; // wait for connection established
 console.log("Room id:", room.id);
 
 const client = hub.join(room.id, {integrity: "custom:welcome-room"});
@@ -240,7 +240,7 @@ all ws room events is listed in [RoomSocketHandlerEvents](doc/Client%20API/type-
 
 ```javascript
 const room = hub.createRoomSocket();
-room.on("init", () => {
+room.on("ready", () => {
   console.log("room is ready", room.id);
 })
 ```
@@ -250,7 +250,7 @@ Also, you can wait for initialization in async code:
 ```javascript
 const room = hub.createRoomSocket();
 // ... add listeners
-await room;
+await room.promise;
 ```
 
 ### error event
@@ -265,7 +265,7 @@ async node:
 ```javascript
 const room = hub.createRoomSocket();
 try {
-  await room;
+  await room.promise;
 } catch (error) {
   console.error("room can not be created because: ", await error.cause);
 }
@@ -666,7 +666,7 @@ const rpcBase = new RPCSource({
 
 // start listening RPC for room
 RPCSource.start(rpcBase, room);
-await room;
+await room.promise;
 
 // client-side code
 //////////////////////

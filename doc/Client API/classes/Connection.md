@@ -77,6 +77,16 @@ get the parameters with which the connection was initialized
 
 ***
 
+### promise
+
+> `get` **promise**(): `Promise`\<`this`\>
+
+#### Returns
+
+`Promise`\<`this`\>
+
+***
+
 ### ready
 
 > `get` **ready**(): `boolean`
@@ -291,118 +301,6 @@ any serializable arguments
 #### Returns
 
 [`Connection`](Connection.md)\<`DESC`\>
-
-***
-
-### then()
-
-> **then**\<`R1`, `R2`\>(`onfulfilled`?, `onrejected`?): `PromiseLike`\<`R1` \| `R2`\>
-
-Promise like for events "open", "error"
-### Using in async context
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-<th>Default type</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`R1`
-
-</td>
-<td>
-
-[[`Connection`](Connection.md)\<`DESC`\>]
-
-</td>
-</tr>
-<tr>
-<td>
-
-`R2`
-
-</td>
-<td>
-
-`never`
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`onfulfilled`?
-
-</td>
-<td>
-
-`null` \| (`value`) => `R1` \| `PromiseLike`\<`R1`\>
-
-</td>
-<td>
-
-</td>
-</tr>
-<tr>
-<td>
-
-`onrejected`?
-
-</td>
-<td>
-
-`null` \| (`reason`) => `R2` \| `PromiseLike`\<`R2`\>
-
-</td>
-<td>
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`PromiseLike`\<`R1` \| `R2`\>
-
-#### Examples
-
-```typescript
-try {
-  await connection;
-  console.log("client connected");
-} catch (error) {
-  console.log("connection error");
-}
-```
-### Using in sync context
-
-```
-connection.then(([connection]) => {
-  console.log("client connected");
-});
-```
 
 ***
 

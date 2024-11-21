@@ -16,7 +16,7 @@ import {Varhub} from "@flinbein/varhub-web-client";
 
 const hub = new Varhub("https://example.com/varhub/");
 const room: RoomSocketHandler = hub.createRoomSocket();
-await room;
+await room.promise;
 console.log(room.id);
 ```
 
@@ -100,6 +100,7 @@ change public message of the room. Set null to make room private.
 <tr>
 <th>Parameter</th>
 <th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -114,6 +115,9 @@ change public message of the room. Set null to make room private.
 `null` \| `string`
 
 </td>
+<td>
+
+</td>
 </tr>
 </tbody>
 </table>
@@ -121,6 +125,16 @@ change public message of the room. Set null to make room private.
 #### Returns
 
 `null` \| `string`
+
+***
+
+### promise
+
+> `get` **promise**(): `Promise`\<`this`\>
+
+#### Returns
+
+`Promise`\<`this`\>
 
 ***
 
@@ -303,123 +317,6 @@ get only ready (or not ready) connections.
 
 connections found
 
-***
-
-### then()
-
-> **then**\<`R1`, `R2`\>(`onfulfilled`?, `onrejected`?): `PromiseLike`\<`R1` \| `R2`\>
-
-Promise like for events "init", "error"
-### Using in async context
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-<th>Default type</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`R1`
-
-</td>
-<td>
-
-[[`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>]
-
-</td>
-</tr>
-<tr>
-<td>
-
-`R2`
-
-</td>
-<td>
-
-`never`
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`onfulfilled`?
-
-</td>
-<td>
-
-`null` \| (`value`) => `R1` \| `PromiseLike`\<`R1`\>
-
-</td>
-<td>
-
-</td>
-</tr>
-<tr>
-<td>
-
-`onrejected`?
-
-</td>
-<td>
-
-`null` \| (`reason`) => `R2` \| `PromiseLike`\<`R2`\>
-
-</td>
-<td>
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`PromiseLike`\<`R1` \| `R2`\>
-
-#### Examples
-
-```typescript
-const room = varhub.createRoomSocket();
-try {
-  await room;
-  console.log("room ready");
-} catch (error) {
-  console.log("room error");
-}
-```
-
-```typescript
-const [room] = await varhub.createRoomSocket();
-```
-### Using in sync context
-
-```typescript
-varhub.createRoomSocket().then(([room]) => {
-  console.log("room ready", room.id);
-});
-```
-
 ## Events
 
 ### off()
@@ -475,7 +372,7 @@ unsubscribe from event
 </td>
 <td>
 
-"init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+"ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 
 </td>
 </tr>
@@ -562,7 +459,7 @@ subscribe on event
 </td>
 <td>
 
-"init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+"ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 
 </td>
 </tr>
@@ -649,7 +546,7 @@ subscribe on event once
 </td>
 <td>
 
-"init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+"ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 
 </td>
 </tr>

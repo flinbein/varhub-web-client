@@ -50,7 +50,7 @@ Remote procedure call handler
 </td>
 <td>
 
-`object`
+`any`
 
 </td>
 </tr>
@@ -375,7 +375,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 <tr>
 <td>
 
-`P` *extends* `string` \| `number` \| [`string`] \| [`number`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
+`P` *extends* `string` \| `number` \| (`string` \| `number`)[] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
 
 </td>
 </tr>
@@ -418,7 +418,7 @@ path for event. String or array of strings.
 </td>
 <td>
 
-`EventPathArgs`\<`P`, `EVENTS`\>
+`0` *extends* `1` & `EVENTS` ? `any`[] : `EventPathArgs`\<`P`, `EVENTS`\>
 
 </td>
 <td>
@@ -455,7 +455,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 <tr>
 <td>
 
-`P` *extends* `string` \| `number` \| [`string`] \| [`number`] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
+`P` *extends* `string` \| `number` \| (`string` \| `number`)[] \| [`string`, `...(EventPath<EVENTS[string], keyof EVENTS[string]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`] \| [`number`, `...(EventPath<EVENTS[number], keyof EVENTS[number]> extends NEXT ? NEXT extends any[] ? NEXT<NEXT> : [NEXT] : never)[]`]
 
 </td>
 </tr>
@@ -515,7 +515,7 @@ path for event. String or array of strings.
 </td>
 <td>
 
-`EventPathArgs`\<`P`, `EVENTS`\>
+`0` *extends* `1` & `EVENTS` ? `any`[] : `EventPathArgs`\<`P`, `EVENTS`\>
 
 </td>
 <td>

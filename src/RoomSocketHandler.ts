@@ -78,7 +78,7 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
 	 * ```
 	 */
 	error: [asyncError: Promise<any>];
-	init: [];
+	ready: [];
 	close: [];
 }
 
@@ -91,7 +91,7 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
  *
  * const hub = new Varhub("https://example.com/varhub/");
  * const room: RoomSocketHandler = hub.createRoomSocket();
- * await room;
+ * await room.promise;
  * console.log(room.id);
  * ```
  */
@@ -102,7 +102,7 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	#wsEvents = new EventEmitter<any>();
 	#selfEvents = new EventEmitter<RoomSocketHandlerEvents>();
 	#publicMessage: string|null = null;
-	#initResolver = Promise.withResolvers<[this]>();
+	#initResolver = Promise.withResolvers<this>();
 	#ready = false;
 	#closed = false;
 	#connectionsLayer: ConnectionsLayer;
@@ -145,46 +145,15 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 			this.#id = roomId;
 			this.#publicMessage = publicMessage ?? null;
 			this.#integrity = integrity ?? null;
-			this.#initResolver.resolve([this]);
+			this.#initResolver.resolve(this);
 			this.#ready = true;
-			this.#selfEvents.emitWithTry("init");
+			this.#selfEvents.emitWithTry("ready");
 		});
 	}
 	
-	/**
-	 * Promise like for events "init", "error"
-	 * ### Using in async context
-	 * @example
-	 * ```typescript
-	 * const room = varhub.createRoomSocket();
-	 * try {
-	 *   await room;
-	 *   console.log("room ready");
-	 * } catch (error) {
-	 *   console.log("room error");
-	 * }
-	 * ```
-	 * @example
-	 * ```typescript
-	 * const [room] = await varhub.createRoomSocket();
-	 * ```
-	 * ### Using in sync context
-	 * @example
-	 * ```typescript
-	 * varhub.createRoomSocket().then(([room]) => {
-	 *   console.log("room ready", room.id);
-	 * });
-	 * ```
-	 * @param onfulfilled
-	 * @param onrejected
-	 */
-	
-	then<R1 = [this], R2 = never>(
-		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
-	): PromiseLike<R1 | R2> {
-		return this.#initResolver.promise.then(onfulfilled, onrejected);
-	};
+	get promise() {
+		return this.#initResolver.promise;
+	}
 	
 	/**
 	 * get all connections
@@ -216,7 +185,7 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	
 	/**
 	 * change public message of the room. Set null to make room private.
-	 * @param value
+	 * @param msg
 	 */
 	set message(msg: string|null) {
 		if (this.#ws.readyState !== WebSocket.OPEN) throw new Error("websocket is not ready");
@@ -266,11 +235,11 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	 * @event
 	 * @template {keyof RoomSocketHandlerEvents} T
 	 * subscribe on event
-	 * @param {keyof RoomSocketHandlerEvents} event "init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+	 * @param {keyof RoomSocketHandlerEvents} event "ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	on<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
+	on<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.on.call(this, event, handler as any);
 		return this;
 	}
@@ -279,11 +248,11 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	 * @event
 	 * @template {keyof RoomSocketHandlerEvents} T
 	 * subscribe on event once
-	 * @param {keyof RoomSocketHandlerEvents} event "init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+	 * @param {keyof RoomSocketHandlerEvents} event "ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	once<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
+	once<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.once.call(this, event, handler as any);
 		return this;
 	}
@@ -292,11 +261,11 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 	 * @event
 	 * @template {keyof RoomSocketHandlerEvents} T
 	 * unsubscribe from event
-	 * @param {keyof RoomSocketHandlerEvents} event "init", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
+	 * @param {keyof RoomSocketHandlerEvents} event "ready", "close", "error", "connection", "connectionOpen", "connectionClose" or "connectionMessage"
 	 * @param {(...args: RoomSocketHandlerEvents[T]) => void} handler event handler
 	 * @see RoomSocketHandlerEvents
 	 */
-	off<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: typeof this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
+	off<T extends keyof RoomSocketHandlerEvents<DESC>>(event: T, handler: (this: this, ...args: RoomSocketHandlerEvents<DESC>[T]) => void): this{
 		this.#selfEvents.off.call(this, event, handler as any);
 		return this;
 	}
@@ -458,7 +427,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	#parameters: XJData[];
 	#handle: ConnectionsLayer
 	#subscriber
-	#initResolver = Promise.withResolvers<void>();
+	#initResolver = Promise.withResolvers<this>();
 	#deferred = false;
 	/**
 	 * custom data for this connection
@@ -471,39 +440,14 @@ class Connection<DESC extends {data?: any} = {}> {
 		this.#handle = handle;
 		this.#parameters = parameters;
 		const subscriber = this.#subscriber = this.#handle.getConnectionEmitter(this);
-		subscriber.on("open", () => this.#initResolver.resolve())
+		subscriber.on("open", () => this.#initResolver.resolve(this))
 		subscriber.on("close", (reason) => this.#initResolver.reject(reason));
 		this.#initResolver.promise.catch(() => {});
 	}
 	
-	/**
-	 * Promise like for events "open", "error"
-	 * ### Using in async context
-	 * @example
-	 * ```typescript
-	 * try {
-	 *   await connection;
-	 *   console.log("client connected");
-	 * } catch (error) {
-	 *   console.log("connection error");
-	 * }
-	 * ```
-	 * ### Using in sync context
-	 * @example
-	 * ```
-	 * connection.then(([connection]) => {
-	 *   console.log("client connected");
-	 * });
-	 * ```
-	 * @param onfulfilled
-	 * @param onrejected
-	 */
-	then<R1 = [this], R2 = never>(
-		onfulfilled?: ((value: [this]) => R1 | PromiseLike<R1>) | undefined | null,
-		onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | undefined | null
-	): PromiseLike<R1 | R2> {
-		return this.#initResolver.promise.then(() => [this] as [this]).then(onfulfilled, onrejected);
-	};
+	get promise(): Promise<this> {
+		return this.#initResolver.promise;
+	}
 	
 	/**
 	 * get the parameters with which the connection was initialized
