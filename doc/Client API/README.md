@@ -186,6 +186,18 @@ Constructor for new RPC channel based on [VarhubClient](classes/VarhubClient.md)
 <tr>
 <td>
 
+[RPCChannel](type-aliases/RPCChannel.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
 [RPCHandler](type-aliases/RPCHandler.md)
 
 </td>

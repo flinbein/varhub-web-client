@@ -137,7 +137,7 @@ interface RPCChannelInstance<S = unknown> extends BaseEventHandler<S> {
 	promise: Promise<this>
 }
 
-type RPCChannel<T extends MetaScope | MetaDesc = {}> = ExtractMetaType<T> extends {methods: infer M, events: infer E, state: infer S} ? (
+export type RPCChannel<T extends MetaScope | MetaDesc = {}> = ExtractMetaType<T> extends {methods: infer M, events: infer E, state: infer S} ? (
 	& Disposable
 	& MetaScope<M, E, S>
 	& RPCChannelInstance<S>

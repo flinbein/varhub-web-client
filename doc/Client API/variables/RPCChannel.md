@@ -6,7 +6,7 @@
 
 # Variable: RPCChannel()
 
-> `const` **RPCChannel**: \<`M`\>(`client`, `options`?) => `RPCChannel`\<`M`\>
+> **RPCChannel**: \<`M`\>(`client`, `options`?) => [`RPCChannel`](../type-aliases/RPCChannel.md)\<`M`\>
 
 Constructor for new RPC channel based on [VarhubClient](../classes/VarhubClient.md)
 
@@ -77,7 +77,7 @@ default:`"$rpc"`
 
 ## Returns
 
-`RPCChannel`\<`M`\>
+[`RPCChannel`](../type-aliases/RPCChannel.md)\<`M`\>
 
 - stateless channel.
 - result extends RPCChannelInstance.
