@@ -15,7 +15,8 @@ describe("Room init", async () => {
 		const wsMock = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(wsMock);
 		wsMock.backend.open();
-		await room.promise;
+		const room2 = await room.promise;
+		assert.equal(room2, room);
 	});
 
 	await it("rejects waitForReady", {timeout: 2000}, async () => {

@@ -14,6 +14,17 @@ test.describe("RPCChannel", () => {
 		await rpc.promise;
 		assert.equal(rpc.ready, true);
 	})
+	
+	it("tests promise", {timeout: 2000}, async () => {
+		const wsMock = new WebsocketMockClientWithMethods({});
+		await using client = new VarhubClient(wsMock);
+		using rpc = new RPCChannel<{events: {}}>(client);
+		assert.equal(rpc.ready, false);
+		wsMock.backend.open();
+		const rpc2 = await rpc.promise;
+		assert.equal(rpc2, rpc);
+		assert.equal(rpc2.ready, true);
+	})
 
 	it("tests close now", {timeout: 1000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});

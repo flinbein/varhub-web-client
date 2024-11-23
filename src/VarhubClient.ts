@@ -70,7 +70,7 @@ export class VarhubClient {
 	readonly #ws: WebSocket;
 	
 	readonly #selfEvents = new EventEmitter<VarhubClientEvents>();
-	#resolver = Promise.withResolvers<[this]>();
+	#resolver = Promise.withResolvers<this>();
 	#ready = false;
 	#closed = false;
 	
@@ -87,11 +87,11 @@ export class VarhubClient {
 				this.#ready = true;
 				this.#closed = false;
 				this.#selfEvents.emitWithTry("open");
-				this.#resolver.resolve([this]);
+				this.#resolver.resolve(this);
 			})
 		} else {
 			this.#ready = true;
-			this.#resolver.resolve([this]);
+			this.#resolver.resolve(this);
 		}
 		ws.addEventListener("message", (event) => {
 			this.#selfEvents.emitWithTry("message", ...parse(event.data));
@@ -111,7 +111,7 @@ export class VarhubClient {
 		})
 	}
 	
-	get promise(){
+	get promise(): Promise<this> {
 		return this.#resolver.promise;
 	}
 	

@@ -19,12 +19,12 @@ export class VarhubClient {
                 this.#ready = true;
                 this.#closed = false;
                 this.#selfEvents.emitWithTry("open");
-                this.#resolver.resolve([this]);
+                this.#resolver.resolve(this);
             });
         }
         else {
             this.#ready = true;
-            this.#resolver.resolve([this]);
+            this.#resolver.resolve(this);
         }
         ws.addEventListener("message", (event) => {
             this.#selfEvents.emitWithTry("message", ...parse(event.data));

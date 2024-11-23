@@ -33,7 +33,7 @@ describe("VarHubRpcClient", () => {
 		assert.equal(client.ready, false);
 		assert.equal(client.closed, true);
 	})
-
+	
 	it("tests waitForReady", {timeout: 3000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});
 		await using client = new VarhubClient(wsMock);
@@ -43,6 +43,16 @@ describe("VarHubRpcClient", () => {
 		wsMock.backend.open();
 		await client.promise;
 		assert.equal(ready, true);
+	});
+	
+	it("tests waitForReady promise value", {timeout: 3000}, async () => {
+		const wsMock = new WebsocketMockClientWithMethods({});
+		await using client = new VarhubClient(wsMock);
+		assert.equal(client.ready, false);
+		wsMock.backend.open();
+		const client2 = await client.promise;
+		assert.equal(client, client2);
+		assert.equal(client.ready, true);
 	});
 
 	it("tests async method", {timeout: 3000}, async () => {

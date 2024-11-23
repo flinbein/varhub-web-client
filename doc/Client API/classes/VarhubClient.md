@@ -35,11 +35,11 @@ client's connection is closed
 
 ### promise
 
-> `get` **promise**(): `Promise`\<[`this`]\>
+> `get` **promise**(): `Promise`\<`this`\>
 
 #### Returns
 
-`Promise`\<[`this`]\>
+`Promise`\<`this`\>
 
 ***
 
