@@ -31,10 +31,29 @@
  */
 declare module "varhub:room" {
 	
-	type RoomDesc = {data?: any}
+	export type RoomDesc = {
+		data?: any,
+		parameters?: any[],
+		clientMessage?: any[],
+		roomMessage?: any[],
+	}
+	
+	type OverrideKeys<A, B> = {[K in keyof A | keyof B]: K extends keyof B ? B[K] : K extends keyof A ? A[K] : never }
+	type RoomValidator = {
+		parameters?: ((params: any[]) => any[] | undefined | null | false) | ((params: any[]) => params is any[]),
+		clientMessage?: ((params: any[]) => any[] | undefined | null | false) | ((params: any[]) => params is any[])
+	}
+	type ApplyRoomValidator<DESC extends RoomDesc, VAL extends RoomValidator> = (
+		Pick<VAL, keyof RoomValidator & keyof VAL> extends infer P ?
+		{
+			[K in keyof P]: P[K] extends (args: any[]) => args is (infer R extends any[]) ? R : P[K] extends (args: any[]) => (infer R) ? Extract<R, any[]> : never
+		} extends infer T ?
+		OverrideKeys<DESC, T>
+		: never : never
+	)
 	
 	/** @event */
-	export type ConnectionEvents = {
+	export type ConnectionEvents<DESC extends RoomDesc> = {
 		/**
 		 * connection successfully opened
 		 * @example
@@ -68,7 +87,7 @@ declare module "varhub:room" {
 		 * })
 		 * ```
 		 */
-		message: any[];
+		message: DESC extends {clientMessage: infer R extends any []} ? R : any[];
 	}
 	
 	interface Connection<DESC extends RoomDesc = {}> {
@@ -90,7 +109,7 @@ declare module "varhub:room" {
 		 * send data to connection
 		 * @param data any serializable arguments
 		 */
-		send(...data: any[]): this;
+		send(...data: DESC extends {roomMessage: infer T extends any[]} ? T : any[]): this;
 		/**
 		 * @event
 		 * @template {keyof ConnectionEvents} T
@@ -98,7 +117,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		on<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof ConnectionEvents} T
@@ -106,7 +125,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		once<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof ConnectionEvents} T
@@ -114,7 +133,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this;
+		off<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * close client's connection
 		 * @param reason
@@ -159,7 +178,7 @@ declare module "varhub:room" {
 		/**
 		 * get the parameters with which the connection was initialized
 		 */
-		get parameters(): any[];
+		get parameters(): DESC extends {parameters: infer T extends any[]} ? T : any[];
 		toString(): string;
 		valueOf(): number;
 	}
@@ -182,7 +201,7 @@ declare module "varhub:room" {
 		 * ```
 		 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
 		 * */
-		connection: [connection: Connection<DESC>, ...params: any[]];
+		connection: [connection: Connection<DESC>, ...params: DESC extends {parameters: infer T extends any[]} ? T : any[]];
 		/**
 		 * connection successfully opened
 		 * @example
@@ -212,11 +231,18 @@ declare module "varhub:room" {
 		 * })
 		 * ```
 		 * */
-		connectionMessage: [connection: Connection<DESC>, ...data: any[]];
+		connectionMessage: [connection: Connection<DESC>, ...data: DESC extends {clientMessage: infer T extends any[]} ? T : any[]];
 	}
 	
 	interface Room <DESC extends RoomDesc = {}> {
-		#private
+		withType<
+			PARTIAL_DESC extends Record<keyof RoomDesc, any> extends PARTIAL_DESC ? RoomDesc : never = {}
+		>(): OverrideKeys<DESC, PARTIAL_DESC> extends infer T extends (Record<keyof RoomDesc, any> extends T ? RoomDesc : never) ? Room<T> : never;
+		
+		validate<V extends RoomValidator>(
+			{clientMessage, parameters}: V
+		): ApplyRoomValidator<DESC, V> extends infer T extends (Record<keyof RoomDesc, any> extends T ? RoomDesc : never) ? Room<T> : never;
+		
 		/** @hidden */
 		get promise(): Promise<this>;
 		/** @hidden */
@@ -330,7 +356,7 @@ declare module "varhub:events" {
  * @module
  */
 declare module "varhub:players" {
-	import type { Connection, Room } from "varhub:room"
+	import type { Connection, Room, RoomDesc } from "varhub:room"
 	type PlayerDesc = {
 		team?: string,
 		data?: any
@@ -339,7 +365,7 @@ declare module "varhub:players" {
 	/**
 	 * @event
 	 */
-	export type PlayerEvents = {
+	export type PlayerEvents<ROOM_DESC extends RoomDesc> = {
 		/**
 		 * player leaves the game
 		 * @example
@@ -392,13 +418,13 @@ declare module "varhub:players" {
 		 * });
 		 * ```
 		 */
-		connectionMessage: [connecton: Connection, ...message: any[]]
+		connectionMessage: [connecton: Connection<ROOM_DESC>, ...message: ROOM_DESC extends {clientMessage: infer T extends any[]} ? T : any[]]
 	}
 	
 	/**
 	 * Player represents a list of {@link Connection}s with same name.
 	 */
-	export interface Player<DESC extends PlayerDesc = {}> {
+	export interface Player<DESC extends PlayerDesc = {}, ROOM_DESC extends RoomDesc = {}> {
 		/**
 		 * custom data for this player
 		 */
@@ -410,7 +436,7 @@ declare module "varhub:players" {
 		/**
 		 * get all player's connections
 		 */
-		get connections(): Set<Connection>;
+		get connections(): Set<Connection<ROOM_DESC>>;
 		
 		/**
 		 * player is online (has at least one opened connection)
@@ -432,7 +458,7 @@ declare module "varhub:players" {
 		 * send message for all connections
 		 * @param args
 		 */
-		send(...args: any[]): this;
+		send(...args: ROOM_DESC extends {roomMessage: infer R extends any[]} ? R : any[]): this;
 		/**
 		 * @event
 		 * @template {keyof PlayerEvents} T
@@ -440,7 +466,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		on<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayerEvents} T
@@ -448,7 +474,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		once<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayerEvents} T
@@ -456,7 +482,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 		 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this;
+		off<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this;
 		/**
 		 * kick player and close all player's connections
 		 * @param reason
@@ -468,11 +494,11 @@ declare module "varhub:players" {
 		/**
 		 * iterate on all player's connections
 		 */
-		[Symbol.iterator](): SetIterator<Connection>;
+		[Symbol.iterator](): SetIterator<Connection<ROOM_DESC>>;
 	}
 	
 	/** @group Events */
-	export type PlayersEvents<DESC extends PlayerDesc = {}> = {
+	export type PlayersEvents<PLAYER_DESC extends PlayerDesc, ROOM_DESC extends RoomDesc> = {
 		/**
 		 * new player joined
 		 * @example
@@ -483,7 +509,7 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		join: [Player<DESC>]
+		join: [Player<PLAYER_DESC, ROOM_DESC>]
 		/**
 		 * player leaves the game
 		 * @example
@@ -505,7 +531,7 @@ declare module "varhub:players" {
 		 * players.on("offline", player => player.kick("disconnected"))
 		 * ```
 		 */
-		leave: [Player<DESC>]
+		leave: [Player<PLAYER_DESC, ROOM_DESC>]
 		/**
 		 * player goes online
 		 * @example
@@ -517,7 +543,7 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		online: [Player<DESC>]
+		online: [Player<PLAYER_DESC, ROOM_DESC>]
 		/**
 		 * player goes offline, last player's connection is closed.
 		 * @example
@@ -529,9 +555,12 @@ declare module "varhub:players" {
 		 * })
 		 * ```
 		 */
-		offline: [Player<DESC>]
+		offline: [Player<PLAYER_DESC, ROOM_DESC>]
 	}
-	export default class Players<DESC extends PlayerDesc = {}> {
+	export default class Players<
+		PLAYER_DESC extends Record<keyof PlayerDesc, any> extends PLAYER_DESC ? PlayerDesc : never = {},
+		ROOM_DESC extends Record<keyof RoomDesc, any> extends ROOM_DESC ? RoomDesc : never = {}
+	> {
 		/**
 		 * Create a player list based on connections.
 		 * @example
@@ -554,12 +583,17 @@ declare module "varhub:players" {
 		 * - if handler throws or rejects - the connection will be closed
 		 * - async handler will defer the connection
 		 */
-		constructor(room: Room, registerPlayerHandler: (connection: Connection, ...args: any) => string|void|null|undefined|Promise<string|void|null|undefined>);
+		constructor(
+			room: Room<ROOM_DESC>,
+			registerPlayerHandler: (
+				connection: Connection
+				, ...args: ROOM_DESC extends {parameters: infer R extends any[]} ? R : any[]
+			) => string|void|null|undefined|Promise<string|void|null|undefined>);
 		/**
 		 * get player by name or connection
 		 * @param nameOrConnection name or connection
 		 */
-		get(nameOrConnection: Connection|string): Player<DESC>|undefined;
+		get(nameOrConnection: Connection|string): Player<PLAYER_DESC, ROOM_DESC>|undefined;
 		
 		/**
 		 * get number of players
@@ -569,11 +603,11 @@ declare module "varhub:players" {
 		 * get all players with specified group. If group is undefined - get all players without group.
 		 * @param group
 		 */
-		getTeam(group: (DESC extends {team: infer T} ? T : string)|undefined): Set<Player<DESC>>;
+		getTeam(group: (PLAYER_DESC extends {team: infer T} ? T : string)|undefined): Set<Player<PLAYER_DESC, ROOM_DESC>>;
 		/**
 		 * get all players
 		 */
-		all(): Set<Player<DESC>>;
+		all(): Set<Player<PLAYER_DESC, ROOM_DESC>>;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -581,7 +615,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
+		on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -589,7 +623,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
+		once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -597,11 +631,11 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this;
+		off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * iterate on all players
 		 */
-		[Symbol.iterator](): MapIterator<Player<DESC>>;
+		[Symbol.iterator](): MapIterator<Player<PLAYER_DESC, ROOM_DESC>>;
 	}
 }
 
@@ -640,8 +674,7 @@ declare module "varhub:rpc" {
 	/**
 	 * Remote procedure call handler
 	 */
-	export default class RPCSource<METHODS extends Record<string, any> = {}, STATE = undefined, EVENTS = {}> implements Disposable {
-		#private;
+	export default class RPCSource<METHODS extends Record<string, any> | string = {}, STATE = undefined, EVENTS = any> implements Disposable {
 		static with<const BIND_METHODS extends string | Record<string, any> = {}, BIND_STATE = undefined, const BIND_EVENTS = {}>(): {
 			new <METHODS extends Record<string, any> | string = BIND_METHODS, STATE = BIND_STATE, EVENTS = BIND_EVENTS>(methods: METHODS, state?: STATE): RPCSource<METHODS, STATE, EVENTS>;
 			prototype: RPCSource<any, any, any>;
@@ -823,7 +856,7 @@ declare module "varhub:rpc" {
 		 * @param parameters.form object with methods.
 		 * @returns - {@link RPCHandler}
 		 */
-		static readonly createDefaultHandler(parameters: {form: any}): RPCHandler;
+		static createDefaultHandler(parameters: {form: any}): RPCHandler;
 		
 		/**
 		 * get the current rpc source, based on exports of main module.

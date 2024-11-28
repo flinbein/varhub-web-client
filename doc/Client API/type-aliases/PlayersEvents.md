@@ -1,12 +1,12 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / PlayersEvents
 
-# Type Alias: PlayersEvents\<DESC\>
+# Type Alias: PlayersEvents\<PLAYER_DESC, ROOM_DESC\>
 
-> **PlayersEvents**\<`DESC`\>: `object`
+> **PlayersEvents**\<`PLAYER_DESC`, `ROOM_DESC`\>: `object`
 
 events of [Players](../classes/Players.md) object
 
@@ -16,19 +16,20 @@ events of [Players](../classes/Players.md) object
 <thead>
 <tr>
 <th>Type Parameter</th>
-<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`DESC` *extends* `PlayerDesc`
+`PLAYER_DESC` *extends* `PlayerDesc`
 
 </td>
+</tr>
+<tr>
 <td>
 
-`object`
+`ROOM_DESC` *extends* `RoomDesc`
 
 </td>
 </tr>
@@ -54,7 +55,7 @@ events of [Players](../classes/Players.md) object
 </td>
 <td>
 
-[[`Player`](../classes/Player.md)\<`DESC`\>]
+[[`Player`](../classes/Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>]
 
 </td>
 <td>
@@ -80,7 +81,7 @@ players.on("join", (player) => {
 </td>
 <td>
 
-[[`Player`](../classes/Player.md)\<`DESC`\>]
+[[`Player`](../classes/Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>]
 
 </td>
 <td>
@@ -117,7 +118,7 @@ players.on("offline", player => player.kick("disconnected"))
 </td>
 <td>
 
-[[`Player`](../classes/Player.md)\<`DESC`\>]
+[[`Player`](../classes/Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>]
 
 </td>
 <td>
@@ -144,7 +145,7 @@ players.on("offline", (player) => {
 </td>
 <td>
 
-[[`Player`](../classes/Player.md)\<`DESC`\>]
+[[`Player`](../classes/Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>]
 
 </td>
 <td>

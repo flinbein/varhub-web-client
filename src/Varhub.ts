@@ -1,5 +1,5 @@
 import { VarhubClient } from "./VarhubClient.js";
-import { RoomSocketHandler } from "./RoomSocketHandler.js";
+import { RoomSocketHandler, type RoomDesc } from "./RoomSocketHandler.js";
 
 type RoomCreateOptionsMap = {
 	/** isolate-dvm controller */
@@ -63,11 +63,12 @@ interface RoomModule {
 	source: Record<string, string>
 }
 
-export interface RoomJoinOptions {
-	integrity?: string
-	params?: any[],
+export type RoomJoinOptions<PARAMS extends any[]> = {
+	integrity?: string,
 	allowInspect?: boolean,
-}
+} & (
+	any[] extends PARAMS ? {params?: any[]} : {params: PARAMS[]}
+);
 
 /**
  * Varhub instance to manage rooms, create clients
@@ -102,7 +103,11 @@ export class Varhub {
 	 * @param [options.message] set public message of this room
 	 * @param [options.integrity] set integrity for new room. Starts with "custom:"
 	 */
-	createRoomSocket(options: {message?: string, integrity?: `custom:${string}`} = {}): RoomSocketHandler {
+	createRoomSocket<
+		DESC extends Record<keyof RoomDesc, any> extends DESC ? RoomDesc : never = {}
+	>(
+		options: {message?: string, integrity?: `custom:${string}`} = {}
+	): RoomSocketHandler<DESC> {
 		const [ws, getErrorLog] = this.#createWebsocketWithErrorLoader("room/ws", options);
 		return new RoomSocketHandler(ws, getErrorLog);
 	}
@@ -148,7 +153,12 @@ export class Varhub {
 	 *
 	 * @returns client
 	 */
-	join(roomId: string, options: RoomJoinOptions = {}): VarhubClient {
+	join<
+		DESC extends Record<keyof RoomDesc, any> extends DESC ? RoomDesc : never = {}
+	>(
+		roomId: string,
+		options: RoomJoinOptions<DESC extends {parameters: infer T extends any[]} ? T : any[]>
+	): VarhubClient<DESC> {
 		const [ws, getErrorLog] = this.#createWebsocketWithErrorLoader(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
 		return new VarhubClient(ws, getErrorLog);
 	}

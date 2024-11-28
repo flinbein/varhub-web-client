@@ -41,6 +41,9 @@ export default class Players {
     }
     get room() { return this.#room; }
     ;
+    withType() {
+        return this;
+    }
     #onConnection = async (connection, ...args) => {
         let registerResult;
         try {

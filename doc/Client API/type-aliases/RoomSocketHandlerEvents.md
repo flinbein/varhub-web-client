@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -71,7 +71,7 @@
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md)\<`DESC`\>, `XJData`[]]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>, `DESC` *extends* `object` ? `T` : `XJData`[]]
 
 </td>
 <td>
@@ -124,7 +124,7 @@ room.on("connectionClose", (con, reason, wasOpen) => {
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md)\<`DESC`\>, `XJData`[]]
+[[`Connection`](../classes/Connection.md)\<`DESC`\>, `DESC` *extends* `object` ? `T` : `XJData`[]]
 
 </td>
 <td>

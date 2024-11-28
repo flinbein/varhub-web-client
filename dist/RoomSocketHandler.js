@@ -33,7 +33,17 @@ export class RoomSocketHandler {
             this.#initResolver.reject(new Error("websocket closed", { cause: errorPromise }));
         });
         this.#wsEvents.on(3, (conId, ...args) => {
-            this.#connectionsLayer.onEnter(conId, ...args);
+            if (!this.#parametersValidator)
+                return this.#connectionsLayer.onEnter(conId, ...args);
+            try {
+                const validateResult = this.#parametersValidator(args);
+                if (!validateResult)
+                    return this.#connectionsLayer.roomAction(1, conId, "invalid parameters");
+                this.#connectionsLayer.onEnter(conId, ...(Array.isArray(validateResult) ? validateResult : args));
+            }
+            catch {
+                this.#connectionsLayer.roomAction(1, conId, "invalid parameters");
+            }
         });
         this.#wsEvents.on(2, (conId) => {
             this.#connectionsLayer.onJoin(conId);
@@ -42,7 +52,17 @@ export class RoomSocketHandler {
             this.#connectionsLayer.onClose(conId, wasOnline, message);
         });
         this.#wsEvents.on(4, (conId, ...args) => {
-            this.#connectionsLayer.onMessage(conId, ...args);
+            if (!this.#clientMessageValidator)
+                return this.#connectionsLayer.onMessage(conId, ...args);
+            try {
+                const validateResult = this.#clientMessageValidator(args);
+                if (!validateResult)
+                    return this.#connectionsLayer.close(conId, "invalid message");
+                this.#connectionsLayer.onMessage(conId, ...(Array.isArray(validateResult) ? validateResult : args));
+            }
+            catch {
+                this.#connectionsLayer.close(conId, "invalid message");
+            }
         });
         this.#wsEvents.on(0, (roomId, publicMessage, integrity) => {
             this.#id = roomId;
@@ -52,6 +72,16 @@ export class RoomSocketHandler {
             this.#ready = true;
             this.#selfEvents.emitWithTry("ready");
         });
+    }
+    withType() {
+        return this;
+    }
+    #clientMessageValidator;
+    #parametersValidator;
+    validate({ clientMessage, parameters }) {
+        this.#clientMessageValidator = clientMessage;
+        this.#parametersValidator = parameters;
+        return this;
     }
     get promise() {
         return this.#initResolver.promise;

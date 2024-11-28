@@ -1,14 +1,33 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / VarhubClientEvents
 
-# Type Alias: VarhubClientEvents
+# Type Alias: VarhubClientEvents\<DESC\>
 
-> **VarhubClientEvents**: `object`
+> **VarhubClientEvents**\<`DESC`\>: `object`
 
 Events of [VarhubClient](../classes/VarhubClient.md)
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -81,7 +100,7 @@ client.on("error", (asyncError) => {
 </td>
 <td>
 
-`XJData`[]
+`DESC` *extends* `object` ? `R` : `XJData`[]
 
 </td>
 <td>

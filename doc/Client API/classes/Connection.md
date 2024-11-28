@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -21,12 +21,12 @@ Handler of room connection
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* `RoomDesc`
 
 </td>
 <td>
 
-`object`
+`RoomDesc`
 
 </td>
 </tr>
@@ -43,11 +43,13 @@ Handler of room connection
 
 ### closed
 
-> `get` **closed**(): `boolean`
+#### Get Signature
+
+> **get** **closed**(): `boolean`
 
 connection closed
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -55,11 +57,13 @@ connection closed
 
 ### deferred
 
-> `get` **deferred**(): `boolean`
+#### Get Signature
+
+> **get** **deferred**(): `boolean`
 
 connection is deferred
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -67,21 +71,25 @@ connection is deferred
 
 ### parameters
 
-> `get` **parameters**(): `XJData`[]
+#### Get Signature
+
+> **get** **parameters**(): `DESC` *extends* `object` ? `T` : `XJData`[]
 
 get the parameters with which the connection was initialized
 
-#### Returns
+##### Returns
 
-`XJData`[]
+`DESC` *extends* `object` ? `T` : `XJData`[]
 
 ***
 
 ### promise
 
-> `get` **promise**(): `Promise`\<`this`\>
+#### Get Signature
 
-#### Returns
+> **get** **promise**(): `Promise`\<`this`\>
+
+##### Returns
 
 `Promise`\<`this`\>
 
@@ -89,11 +97,13 @@ get the parameters with which the connection was initialized
 
 ### ready
 
-> `get` **ready**(): `boolean`
+#### Get Signature
+
+> **get** **ready**(): `boolean`
 
 connection open
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -286,7 +296,7 @@ send data to connection
 </td>
 <td>
 
-`XJData`[]
+`DESC` *extends* `object` ? `T` : `XJData`[]
 
 </td>
 <td>
@@ -341,7 +351,7 @@ any serializable arguments
 <tr>
 <td>
 
-`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)
+`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -424,7 +434,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)
+`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -507,7 +517,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)
+`T` *extends* keyof [`ConnectionEvents`](../type-aliases/ConnectionEvents.md)\<`DESC`\>
 
 </td>
 <td>

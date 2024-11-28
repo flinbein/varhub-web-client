@@ -1,14 +1,33 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / PlayerEvents
 
-# Type Alias: PlayerEvents
+# Type Alias: PlayerEvents\<ROOM_DESC\>
 
-> **PlayerEvents**: `object`
+> **PlayerEvents**\<`ROOM_DESC`\>: `object`
 
 Events of [Player](../classes/Player.md)
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`ROOM_DESC` *extends* `RoomDesc`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -29,7 +48,7 @@ Events of [Player](../classes/Player.md)
 </td>
 <td>
 
-[[`Connection`](../classes/Connection.md), `XJData`[]]
+[[`Connection`](../classes/Connection.md)\<`ROOM_DESC`\>, `ROOM_DESC` *extends* `object` ? `T` : `XJData`[]]
 
 </td>
 <td>

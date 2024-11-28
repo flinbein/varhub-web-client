@@ -1,10 +1,10 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / Player
 
-# Class: Player\<DESC\>
+# Class: Player\<PLAYER_DESC, ROOM_DESC\>
 
 Player represents a list of [Connection](Connection.md)s with same name.
 
@@ -21,7 +21,19 @@ Player represents a list of [Connection](Connection.md)s with same name.
 <tr>
 <td>
 
-`DESC` *extends* `PlayerDesc`
+`PLAYER_DESC` *extends* `PlayerDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`ROOM_DESC` *extends* `RoomDesc`
 
 </td>
 <td>
@@ -37,29 +49,33 @@ Player represents a list of [Connection](Connection.md)s with same name.
 
 | Property | Type | Description |
 | ------ | ------ | ------ |
-| `data?` | `DESC` *extends* `object` ? `T` : `any` | custom data for this player |
+| `data?` | `PLAYER_DESC` *extends* `object` ? `T` : `any` | custom data for this player |
 
 ## Accessors
 
 ### connections
 
-> `get` **connections**(): `Set`\<[`Connection`](Connection.md)\<`object`\>\>
+#### Get Signature
+
+> **get** **connections**(): `Set`\<[`Connection`](Connection.md)\<`ROOM_DESC`\>\>
 
 get all player's connections
 
-#### Returns
+##### Returns
 
-`Set`\<[`Connection`](Connection.md)\<`object`\>\>
+`Set`\<[`Connection`](Connection.md)\<`ROOM_DESC`\>\>
 
 ***
 
 ### name
 
-> `get` **name**(): `string`
+#### Get Signature
+
+> **get** **name**(): `string`
 
 player's name
 
-#### Returns
+##### Returns
 
 `string`
 
@@ -67,11 +83,13 @@ player's name
 
 ### online
 
-> `get` **online**(): `boolean`
+#### Get Signature
+
+> **get** **online**(): `boolean`
 
 player is online (has at least one opened connection)
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -79,11 +97,13 @@ player is online (has at least one opened connection)
 
 ### registered
 
-> `get` **registered**(): `boolean`
+#### Get Signature
+
+> **get** **registered**(): `boolean`
 
 player is registered in list of players
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -91,25 +111,27 @@ player is registered in list of players
 
 ### team
 
-> `get` **team**(): `undefined` \| `DESC` *extends* `object` ? `T` : `string`
+#### Get Signature
+
+> **get** **team**(): `undefined` \| `PLAYER_DESC` *extends* `object` ? `T` : `string`
 
 get player's team
 
-#### Returns
+##### Returns
 
-`undefined` \| `DESC` *extends* `object` ? `T` : `string`
+`undefined` \| `PLAYER_DESC` *extends* `object` ? `T` : `string`
 
 ## Methods
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `SetIterator`\<[`Connection`](Connection.md)\<`object`\>\>
+> **\[iterator\]**(): `SetIterator`\<[`Connection`](Connection.md)\<`ROOM_DESC`\>\>
 
 iterate on all player's connections
 
 #### Returns
 
-`SetIterator`\<[`Connection`](Connection.md)\<`object`\>\>
+`SetIterator`\<[`Connection`](Connection.md)\<`ROOM_DESC`\>\>
 
 ***
 
@@ -185,7 +207,7 @@ send message for all connections
 </td>
 <td>
 
-`XJData`[]
+`ROOM_DESC` *extends* `object` ? `R` : `XJData`[]
 
 </td>
 <td>
@@ -225,7 +247,7 @@ set player's team
 </td>
 <td>
 
-`undefined` \| `DESC` *extends* `object` ? `T` : `string`
+`undefined` \| `PLAYER_DESC` *extends* `object` ? `T` : `string`
 
 </td>
 </tr>
@@ -275,7 +297,7 @@ set player's team
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)
+`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)\<`ROOM_DESC`\>
 
 </td>
 <td>
@@ -358,7 +380,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)
+`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)\<`ROOM_DESC`\>
 
 </td>
 <td>
@@ -441,7 +463,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)
+`T` *extends* keyof [`PlayerEvents`](../type-aliases/PlayerEvents.md)\<`ROOM_DESC`\>
 
 </td>
 <td>

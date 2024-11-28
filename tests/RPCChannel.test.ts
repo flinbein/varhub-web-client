@@ -4,6 +4,8 @@ import { RPCChannel } from "../src/RPCChannel.js";
 import { VarhubClient } from "../src/VarhubClient.js";
 import { WebsocketMockClientWithMethods } from "./WebsocketMocks.js";
 
+process.on("unhandledRejection", console.error);
+
 test.describe("RPCChannel", () => {
 	it("tests ready", {timeout: 2000}, async () => {
 		const wsMock = new WebsocketMockClientWithMethods({});

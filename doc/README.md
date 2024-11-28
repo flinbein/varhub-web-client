@@ -1,4 +1,4 @@
-**@flinbein/varhub-web-clent** • **Docs**
+**@flinbein/varhub-web-clent**
 
 ***
 

@@ -1,14 +1,33 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / ConnectionEvents
 
-# Type Alias: ConnectionEvents
+# Type Alias: ConnectionEvents\<DESC\>
 
-> **ConnectionEvents**: `object`
+> **ConnectionEvents**\<`DESC`\>: `object`
 
 Events of [Connection](../classes/Connection.md)
+
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Type declaration
 
@@ -55,7 +74,7 @@ connection.on("close", (reason: string|null, wasOpen: boolean) => {
 </td>
 <td>
 
-`XJData`[]
+`DESC` *extends* `object` ? `R` : `XJData`[]
 
 </td>
 <td>

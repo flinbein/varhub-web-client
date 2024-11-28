@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -161,9 +161,11 @@ console.assert(result === 8);
 
 ### disposed
 
-> `get` **disposed**(): `boolean`
+#### Get Signature
 
-#### Returns
+> **get** **disposed**(): `boolean`
+
+##### Returns
 
 `boolean`
 
@@ -171,11 +173,13 @@ console.assert(result === 8);
 
 ### state
 
-> `get` **state**(): `STATE`
+#### Get Signature
+
+> **get** **state**(): `STATE`
 
 get current state
 
-#### Returns
+##### Returns
 
 `STATE`
 
@@ -481,7 +485,7 @@ Reserved event names: `close`, `init`, `error`, `state`
 </td>
 <td>
 
-`undefined` \| `null` \| `DeepIterable`\<[`Connection`](Connection.md)\<`object`\>\> \| (`con`) => `any`
+`undefined` \| `null` \| `DeepIterable`\<[`Connection`](Connection.md)\<`RoomDesc`\>\> \| (`con`) => `any`
 
 </td>
 <td>
@@ -616,7 +620,7 @@ apply generic types for events
 
 ### withState()
 
-#### withState()
+#### Call Signature
 
 > **withState**\<`S`\>(): [`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
 
@@ -645,7 +649,7 @@ apply generic types for state.
 
 [`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
 
-#### withState(state)
+#### Call Signature
 
 > **withState**\<`S`\>(`state`): [`RPCSource`](RPCSource.md)\<`METHODS`, `S`, `EVENTS`\>
 
@@ -727,7 +731,7 @@ create [RPCHandler](../type-aliases/RPCHandler.md) based on object with methods
 </td>
 <td>
 
-`object`
+\{`form`: `any`; \}
 
 </td>
 <td>
@@ -853,7 +857,7 @@ room
 </td>
 <td>
 
-`object`
+\{`key`: `string`;`maxChannelsPerClient`: `number`; \}
 
 </td>
 <td>
@@ -865,12 +869,12 @@ room
 <tr>
 <td>
 
-`__namedParameters.key`
+`__namedParameters.key`?
 
 </td>
 <td>
 
-`undefined` \| `string`
+`string`
 
 </td>
 <td>
@@ -882,12 +886,12 @@ room
 <tr>
 <td>
 
-`__namedParameters.maxChannelsPerClient`
+`__namedParameters.maxChannelsPerClient`?
 
 </td>
 <td>
 
-`undefined` \| `number`
+`number`
 
 </td>
 <td>
@@ -911,7 +915,7 @@ room
 
 ### with()
 
-#### with()
+#### Call Signature
 
 > `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(): \<`METHODS`, `STATE`, `EVENTS`\>(`methods`, `state`?) => [`RPCSource`](RPCSource.md)\<`METHODS`, `STATE`, `EVENTS`\>
 
@@ -1013,7 +1017,7 @@ room
 | ------ | ------ |
 | `prototype` | [`RPCSource`](RPCSource.md)\<`any`, `any`, `any`\> |
 
-#### with(methods)
+#### Call Signature
 
 > `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(`methods`): \<`STATE`, `EVENTS`\>(`state`?) => [`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `STATE`, `EVENTS`\>
 
@@ -1151,7 +1155,7 @@ await rpcCounter.increment();
 console.log(rpcCounter.state) // 101
 ```
 
-#### with(methods, state)
+#### Call Signature
 
 > `static` **with**\<`BIND_METHODS`, `BIND_STATE`, `BIND_EVENTS`\>(`methods`, `state`): \<`EVENTS`\>() => [`RPCSource`](RPCSource.md)\<`BIND_METHODS`, `BIND_STATE`, `EVENTS`\>
 

@@ -1,10 +1,10 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / VarhubClient
 
-# Class: VarhubClient
+# Class: VarhubClient\<DESC\>
 
 Represents a user-controlled connection to the room;
 
@@ -19,15 +19,42 @@ await client;
 client.send("some message");
 ```
 
+## Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `Record`\<keyof `RoomDesc`, `any`\> *extends* `DESC` ? `RoomDesc` : `never`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
 ## Accessors
 
 ### closed
 
-> `get` **closed**(): `boolean`
+#### Get Signature
+
+> **get** **closed**(): `boolean`
 
 client's connection is closed
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -35,9 +62,11 @@ client's connection is closed
 
 ### promise
 
-> `get` **promise**(): `Promise`\<`this`\>
+#### Get Signature
 
-#### Returns
+> **get** **promise**(): `Promise`\<`this`\>
+
+##### Returns
 
 `Promise`\<`this`\>
 
@@ -45,11 +74,13 @@ client's connection is closed
 
 ### ready
 
-> `get` **ready**(): `boolean`
+#### Get Signature
+
+> **get** **ready**(): `boolean`
 
 client is successfully joined to the room.
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -141,7 +172,7 @@ send data to room handler
 </td>
 <td>
 
-`XJData`[]
+`DESC` *extends* `object` ? `R` : `XJData`[]
 
 </td>
 <td>
@@ -176,7 +207,7 @@ any serializable arguments
 <tr>
 <td>
 
-`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)
+`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -257,7 +288,7 @@ Unsubscribe from client event
 <tr>
 <td>
 
-`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)
+`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)\<`DESC`\>
 
 </td>
 <td>
@@ -340,7 +371,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)
+`T` *extends* keyof [`VarhubClientEvents`](../type-aliases/VarhubClientEvents.md)\<`DESC`\>
 
 </td>
 <td>

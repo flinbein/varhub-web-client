@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -33,7 +33,7 @@ console.log(room.id);
 <tr>
 <td>
 
-`DESC` *extends* `object`
+`DESC` *extends* `Record`\<keyof `RoomDesc`, `any`\> *extends* `DESC` ? `RoomDesc` : `never`
 
 </td>
 <td>
@@ -49,11 +49,13 @@ console.log(room.id);
 
 ### closed
 
-> `get` **closed**(): `boolean`
+#### Get Signature
+
+> **get** **closed**(): `boolean`
 
 room is closed
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -61,11 +63,13 @@ room is closed
 
 ### id
 
-> `get` **id**(): `null` \| `string`
+#### Get Signature
+
+> **get** **id**(): `null` \| `string`
 
 room id
 
-#### Returns
+##### Returns
 
 `null` \| `string`
 
@@ -73,11 +77,13 @@ room id
 
 ### integrity
 
-> `get` **integrity**(): `null` \| `string`
+#### Get Signature
+
+> **get** **integrity**(): `null` \| `string`
 
 room integrity
 
-#### Returns
+##### Returns
 
 `null` \| `string`
 
@@ -85,15 +91,23 @@ room integrity
 
 ### message
 
-> `get` **message**(): `null` \| `string`
+#### Get Signature
+
+> **get** **message**(): `null` \| `string`
 
 public message of the room.
 
-> `set` **message**(`msg`): `void`
+##### Returns
+
+`null` \| `string`
+
+#### Set Signature
+
+> **set** **message**(`msg`): `void`
 
 change public message of the room. Set null to make room private.
 
-#### Parameters
+##### Parameters
 
 <table>
 <thead>
@@ -122,17 +136,19 @@ change public message of the room. Set null to make room private.
 </tbody>
 </table>
 
-#### Returns
+##### Returns
 
-`null` \| `string`
+`void`
 
 ***
 
 ### promise
 
-> `get` **promise**(): `Promise`\<`this`\>
+#### Get Signature
 
-#### Returns
+> **get** **promise**(): `Promise`\<`this`\>
+
+##### Returns
 
 `Promise`\<`this`\>
 
@@ -140,11 +156,13 @@ change public message of the room. Set null to make room private.
 
 ### ready
 
-> `get` **ready**(): `boolean`
+#### Get Signature
+
+> **get** **ready**(): `boolean`
 
 room is created and `room.id` is defined
 
-#### Returns
+##### Returns
 
 `boolean`
 
@@ -248,7 +266,7 @@ get all connections
 </td>
 <td>
 
-`object`
+\{`closed`: `boolean`;`deferred`: `boolean`;`ready`: `boolean`; \}
 
 </td>
 <td>
@@ -316,6 +334,95 @@ get only ready (or not ready) connections.
 `Set`\<[`Connection`](Connection.md)\<`DESC`\>\>
 
 connections found
+
+***
+
+### validate()
+
+> **validate**\<`V`\>(`__namedParameters`): `ApplyRoomValidator`\<`DESC`, `V`\> *extends* `T` ? [`RoomSocketHandler`](RoomSocketHandler.md)\<`T`\> : `never`
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`V` *extends* `RoomValidator`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`__namedParameters`
+
+</td>
+<td>
+
+`V`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`ApplyRoomValidator`\<`DESC`, `V`\> *extends* `T` ? [`RoomSocketHandler`](RoomSocketHandler.md)\<`T`\> : `never`
+
+***
+
+### withType()
+
+> **withType**\<`PARTIAL_DESC`\>(): `OverrideKeys`\<`DESC`, `PARTIAL_DESC`\> *extends* `T` ? [`RoomSocketHandler`](RoomSocketHandler.md)\<`T`\> : `never`
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`PARTIAL_DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`OverrideKeys`\<`DESC`, `PARTIAL_DESC`\> *extends* `T` ? [`RoomSocketHandler`](RoomSocketHandler.md)\<`T`\> : `never`
 
 ## Events
 

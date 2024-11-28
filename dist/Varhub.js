@@ -21,7 +21,7 @@ export class Varhub {
     async getRoomMessage(roomId, integrity) {
         return this.#fetch("GET", `room/${encodeURIComponent(roomId)}`);
     }
-    join(roomId, options = {}) {
+    join(roomId, options) {
         const [ws, getErrorLog] = this.#createWebsocketWithErrorLoader(`room/${encodeURIComponent(roomId)}`, options, ["params"]);
         return new VarhubClient(ws, getErrorLog);
     }

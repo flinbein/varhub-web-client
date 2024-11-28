@@ -3,6 +3,7 @@ import { describe, it, mock } from "node:test";
 import { parse, serialize } from "@flinbein/xjmapper";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 describe("Room init", async () => {
 	await it("ok with await using", {timeout: 2000}, async () => {
@@ -425,4 +426,126 @@ describe("Room events", async () => {
 		await room.promise;
 		assert.equal(thisEventValue, room, "this on event");
 	});
-})
+	
+	await it("validate and change parameters", {timeout: 2000}, async () => {
+		const wsMock = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(wsMock).validate({
+			parameters: (params) => params.length ? [String(params[0])] as const : false
+		});
+		const onConnection = mock.fn();
+		room.on("connection", onConnection);
+		wsMock.backend.open();
+		const aliceWs = wsMock.createClientMock();
+		const bobWs = wsMock.createClientMock("Bob", "player");
+		const eveWs = wsMock.createClientMock(100, "ignored");
+		
+		await Promise.allSettled([aliceWs, bobWs, eveWs].map(ws => ws.promise));
+		
+		// check auto-inject types, typescript
+		if (1 + 1 > 3) room.on("connection", (_con, ...args) => {
+			void (true satisfies Equal<typeof args, [string]>)
+		});
+		// @ts-expect-error
+		if (1 + 1 > 3) room.on("connection", (_con, name, unexpected) => {});
+		
+		// sockets
+		assert.equal(aliceWs.readyState, WebSocket.CLOSED, "Alice ws closed");
+		assert.equal(bobWs.readyState, WebSocket.OPEN, "Bob ws open");
+		assert.equal(eveWs.readyState, WebSocket.OPEN, "Eve ws open");
+		
+		// connections
+		const connections = [...room.getConnections()];
+		assert.equal(connections.length, 2, "Only 2 connections");
+		const bobConnection = connections.find(c => +c === bobWs.mockId)!;
+		const eveConnection = connections.find(c => +c === eveWs.mockId)!;
+		assert.deepEqual(bobConnection.parameters, ["Bob"], "valid Bob parameters");
+		assert.deepEqual(eveConnection.parameters, ["100"], "valid Eve parameters");
+		
+		// connection types
+		void (true satisfies Equal<typeof bobConnection.parameters, [string]>)
+		
+		// events
+		assert.equal(onConnection.mock.callCount(), 2, "2 events");
+		assert.deepEqual(onConnection.mock.calls[0].arguments, [bobConnection, "Bob"], "bob event");
+		assert.deepEqual(onConnection.mock.calls[1].arguments, [eveConnection, "100"], "eve event");
+	});
+	
+	await it("validate true parameters", {timeout: 2000}, async () => {
+		const wsMock = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(wsMock).validate({
+			parameters: (params) => params.every(p => typeof p === "number")
+		});
+		const onConnection = mock.fn();
+		room.on("connection", onConnection);
+		wsMock.backend.open();
+		const aliceWs = wsMock.createClientMock();
+		const bobWs = wsMock.createClientMock("Bob", 200);
+		const eveWs = wsMock.createClientMock(100, 200);
+		
+		await Promise.allSettled([aliceWs, bobWs, eveWs].map(ws => ws.promise));
+		
+		// check auto-inject types, typescript
+		if (1 + 1 > 3) room.on("connection", (_con, ...args) => {
+			void (true satisfies Equal<typeof args, number[]>)
+		});
+		
+		// sockets
+		assert.equal(aliceWs.readyState, WebSocket.OPEN, "Alice ws open");
+		assert.equal(bobWs.readyState, WebSocket.CLOSED, "Bob ws closed");
+		assert.equal(eveWs.readyState, WebSocket.OPEN, "Eve ws open");
+		
+		// connections
+		const connections = [...room.getConnections()];
+		assert.equal(connections.length, 2, "Only 2 connections");
+		const aliceConnection = connections.find(c => +c === aliceWs.mockId)!;
+		const eveConnection = connections.find(c => +c === eveWs.mockId)!;
+		assert.deepEqual(aliceConnection.parameters, [], "valid Alice parameters");
+		assert.deepEqual(eveConnection.parameters, [100, 200], "valid Eve parameters");
+		
+		// connection types
+		void (true satisfies Equal<typeof eveConnection.parameters, number[]>)
+		
+		// events
+		assert.equal(onConnection.mock.callCount(), 2, "2 events");
+		assert.deepEqual(onConnection.mock.calls[0].arguments, [aliceConnection], "alice event");
+		assert.deepEqual(onConnection.mock.calls[1].arguments, [eveConnection, 100, 200], "eve event");
+	});
+	
+	await it("validate message", {timeout: 2000}, async () => {
+		const wsMock = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler(wsMock).validate({
+			clientMessage: (params) => params.length >= 2 && params.map(p => String(p))
+		});
+		const onConnectionMessage = mock.fn();
+		room.on("connectionMessage", onConnectionMessage);
+		wsMock.backend.open();
+		const aliceWs = wsMock.createClientMock("Alice");
+		const bobWs = wsMock.createClientMock("Bob");
+		const eveWs = wsMock.createClientMock("Eve");
+		await Promise.allSettled([aliceWs, bobWs, eveWs].map(ws => ws.promise));
+		
+		// sockets
+		assert.equal(aliceWs.readyState, WebSocket.OPEN, "Alice ws open");
+		assert.equal(bobWs.readyState, WebSocket.OPEN, "Bob ws open");
+		assert.equal(eveWs.readyState, WebSocket.OPEN, "Eve ws open");
+		
+		// check auto-inject types, typescript
+		if (1 + 1 > 3) {
+			room.on("connectionMessage", (_con, ...args) => {
+				void (true satisfies Equal<typeof args, string[]>)
+			});
+			const connection = [...room.getConnections()][0]!;
+			connection.on("message", (...args) => {
+				void (true satisfies Equal<typeof args, string[]>)
+			})
+		}
+		
+		bobWs.send(serialize("hello", "world", 100, true));
+		eveWs.send(serialize("short"));
+		await eveWs.closePromise; // close because only 1 arg;
+		
+		// events
+		assert.equal(onConnectionMessage.mock.callCount(), 1, "1 event");
+		assert.deepEqual(onConnectionMessage.mock.calls[0].arguments.slice(1), ["hello", "world", "100", "true"], "bob message as string");
+	})
+});

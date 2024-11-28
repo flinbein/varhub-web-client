@@ -1,11 +1,12 @@
 import { parse, serialize, type XJData } from "@flinbein/xjmapper";
 import EventEmitter from "./EventEmitter.js";
+import type {RoomDesc} from "./RoomSocketHandler.js";
 
 /**
  * Events of {@link VarhubClient }
  * @event
  * */
-export type VarhubClientEvents = {
+export type VarhubClientEvents<DESC extends RoomDesc> = {
 	/**
 	 * client received a message from the room
 	 * @example
@@ -16,7 +17,7 @@ export type VarhubClientEvents = {
 	 * })
 	 * ```
 	 */
-	message: XJData[]
+	message: DESC extends {roomMessage: infer R extends any[]} ? R : XJData[]
 	/**
 	 * client's connection closed
 	 * @example
@@ -66,10 +67,10 @@ const getNoError = async () => undefined;
  * client.send("some message");
  * ```
  */
-export class VarhubClient {
+export class VarhubClient<DESC extends Record<keyof RoomDesc, any> extends DESC ? RoomDesc : never = {}> {
 	readonly #ws: WebSocket;
 	
-	readonly #selfEvents = new EventEmitter<VarhubClientEvents>();
+	readonly #selfEvents = new EventEmitter<VarhubClientEvents<DESC>>();
 	#resolver = Promise.withResolvers<this>();
 	#ready = false;
 	#closed = false;
@@ -94,7 +95,7 @@ export class VarhubClient {
 			this.#resolver.resolve(this);
 		}
 		ws.addEventListener("message", (event) => {
-			this.#selfEvents.emitWithTry("message", ...parse(event.data));
+			this.#selfEvents.emitWithTry("message", ...parse(event.data) as any);
 		})
 		ws.addEventListener("close", (event) => {
 			const wasReady = this.#ready;
@@ -129,7 +130,7 @@ export class VarhubClient {
 	 * send data to room handler
 	 * @param data any serializable arguments
 	 */
-	send(...data: XJData[]): this {
+	send(...data: DESC extends {clientMessage: infer R extends any[]} ? R : XJData[]): this {
 		const rawData = serialize(...data);
 		this.#ws.send(rawData);
 		return this;
@@ -142,7 +143,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event "message", "open", "close" or "error"
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
+	on<T extends keyof VarhubClientEvents<DESC>>(event: T, handler: (this: this, ...args: VarhubClientEvents<DESC>[T]) => void): this{
 		this.#selfEvents.on.call(this, event, handler as any);
 		return this;
 	}
@@ -154,7 +155,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler
 	 */
-	once<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
+	once<T extends keyof VarhubClientEvents<DESC>>(event: T, handler: (this: this, ...args: VarhubClientEvents<DESC>[T]) => void): this{
 		this.#selfEvents.once.call(this, event, handler as any);
 		return this;
 	}
@@ -167,7 +168,7 @@ export class VarhubClient {
 	 * @param {keyof VarhubClientEvents} event
 	 * @param {(...args: VarhubClientEvents[T]) => void} handler
 	 */
-	off<T extends keyof VarhubClientEvents>(event: T, handler: (this: this, ...args: VarhubClientEvents[T]) => void): this{
+	off<T extends keyof VarhubClientEvents<DESC>>(event: T, handler: (this: this, ...args: VarhubClientEvents<DESC>[T]) => void): this{
 		this.#selfEvents.off.call(this, event, handler as any);
 		return this;
 	}

@@ -37,17 +37,29 @@ export class WebsocketMock extends (EventTarget as typeof WebSocket) implements 
 	binaryType: "blob"| "arraybuffer" = "blob";
 	readyState: number = WebSocket.CONNECTING;
 	url: string = "/mock/url"
-	backend: WebsocketBackendMock;
+	readonly backend: WebsocketBackendMock;
+	#resolver = Promise.withResolvers();
+	#closeResolver = Promise.withResolvers();
+	readonly promise: Promise<this> = this.#resolver.promise;
+	readonly closePromise: Promise<this> = this.#closeResolver.promise;
 	
 	constructor(open?: boolean) {
 		super();
+		this.#resolver.promise.catch(() => {});
 		this.backend = new WebsocketBackendMock(this, open ?? false);
-		if (open) this.readyState = WebSocket.OPEN;
+		if (open) {
+			this.readyState = WebSocket.OPEN;
+			this.#resolver.resolve(this);
+		} else {
+			this.addEventListener("open", () => this.#resolver.resolve(this));
+		}
 		this.addEventListener("close", (event: any) => {
 			if (this.readyState === WebSocket.CONNECTING) {
 				this.dispatchEvent(new MockEvent("error", {}))
 			}
 			this.readyState = WebSocket.CLOSED;
+			this.#resolver.reject(event);
+			this.#closeResolver.resolve(this);
 		})
 	}
 	

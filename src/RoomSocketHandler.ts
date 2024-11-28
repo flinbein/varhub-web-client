@@ -18,7 +18,27 @@ const enum ROOM_ACTION {
 	BROADCAST = 5,
 }
 
-type RoomDesc = {data?: any}
+export type RoomDesc = {
+	data?: any,
+	parameters?: XJData[],
+	clientMessage?: XJData[],
+	roomMessage?: XJData[],
+}
+
+type OverrideKeys<A, B> = {[K in keyof A | keyof B]: K extends keyof B ? B[K] : K extends keyof A ? A[K] : never }
+type RoomValidator = {
+	parameters?: ((params: XJData[]) => XJData[] | undefined | null | false) | ((params: XJData[]) => params is XJData[]),
+	clientMessage?: ((params: XJData[]) => XJData[] | undefined | null | false) | ((params: XJData[]) => params is XJData[])
+}
+type ApplyRoomValidator<DESC extends RoomDesc, VAL extends RoomValidator> = (
+	Pick<VAL, keyof RoomValidator & keyof VAL> extends infer P ?
+	{
+		[K in keyof P]: P[K] extends (args: XJData[]) => args is (infer R extends XJData[]) ? R : P[K] extends (args: XJData[]) => (infer R) ? Extract<R, any[]> : never
+	} extends infer T ?
+	OverrideKeys<DESC, T>
+	: never : never
+)
+
 /**
  * {@link RoomSocketHandler} events
  * @group Events
@@ -36,7 +56,7 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
 	 * ```
 	 * After the event is processed, the connection will be automatically opened (if {@link Connection#close} or {@link Connection#defer} was not called).
 	 * */
-	connection: [connection: Connection<DESC>, ...args: XJData[]];
+	connection: [connection: Connection<DESC>, ...args: DESC extends {parameters: infer T extends any[]} ? T : XJData[]];
 	/**
 	 * connection successfully opened
 	 * @example
@@ -66,7 +86,7 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
 	 * })
 	 * ```
 	 * */
-	connectionMessage: [connection: Connection<DESC>, ...args: XJData[]];
+	connectionMessage: [connection: Connection<DESC>, ...args: DESC extends {clientMessage: infer T extends any[]} ? T : XJData[]];
 	/**
 	 * error creating room
 	 * @example
@@ -95,7 +115,7 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
  * console.log(room.id);
  * ```
  */
-export class RoomSocketHandler<DESC extends {data?: any} = {}> {
+export class RoomSocketHandler<DESC extends Record<keyof RoomDesc, any> extends DESC ? RoomDesc : never = {}> {
 	#ws: WebSocket;
 	#id: string|null = null;
 	#integrity: string|null = null;
@@ -130,7 +150,14 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 			this.#initResolver.reject(new Error("websocket closed", {cause: errorPromise}));
 		})
 		this.#wsEvents.on(ROOM_EVENT.CONNECTION_ENTER, (conId, ...args) => {
-			this.#connectionsLayer.onEnter(conId, ...args);
+			if (!this.#parametersValidator) return this.#connectionsLayer.onEnter(conId, ...args);
+			try {
+				const validateResult = this.#parametersValidator(args);
+				if (!validateResult) return this.#connectionsLayer.roomAction(ROOM_ACTION.KICK, conId, "invalid parameters");
+				this.#connectionsLayer.onEnter(conId, ...(Array.isArray(validateResult) ? validateResult : args));
+			} catch {
+				this.#connectionsLayer.roomAction(ROOM_ACTION.KICK, conId, "invalid parameters");
+			}
 		});
 		this.#wsEvents.on(ROOM_EVENT.CONNECTION_JOIN, (conId) => {
 			this.#connectionsLayer.onJoin(conId);
@@ -139,7 +166,14 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 			this.#connectionsLayer.onClose(conId, wasOnline, message);
 		});
 		this.#wsEvents.on(ROOM_EVENT.CONNECTION_MESSAGE, (conId, ...args) => {
-			this.#connectionsLayer.onMessage(conId, ...args);
+			if (!this.#clientMessageValidator) return this.#connectionsLayer.onMessage(conId, ...args);
+			try {
+				const validateResult = this.#clientMessageValidator(args);
+				if (!validateResult) return this.#connectionsLayer.close(conId, "invalid message");
+				this.#connectionsLayer.onMessage(conId, ...(Array.isArray(validateResult) ? validateResult : args));
+			} catch {
+				this.#connectionsLayer.close(conId, "invalid message");
+			}
 		});
 		this.#wsEvents.on(ROOM_EVENT.INIT, (roomId: string, publicMessage?: string, integrity?: string) => {
 			this.#id = roomId;
@@ -149,6 +183,22 @@ export class RoomSocketHandler<DESC extends {data?: any} = {}> {
 			this.#ready = true;
 			this.#selfEvents.emitWithTry("ready");
 		});
+	}
+	
+	withType<
+		PARTIAL_DESC extends Record<keyof RoomDesc, any> extends PARTIAL_DESC ? RoomDesc : never = {}
+	>(): OverrideKeys<DESC, PARTIAL_DESC> extends infer T extends (Record<keyof RoomDesc, any> extends T ? RoomDesc : never) ? RoomSocketHandler<T> : never {
+		return this as any;
+	}
+	
+	#clientMessageValidator?: RoomValidator["clientMessage"];
+	#parametersValidator?: RoomValidator["parameters"];
+	validate<V extends RoomValidator>(
+		{clientMessage, parameters}: V
+	): ApplyRoomValidator<DESC, V> extends infer T extends (Record<keyof RoomDesc, any> extends T ? RoomDesc : never) ? RoomSocketHandler<T> : never {
+		this.#clientMessageValidator = clientMessage;
+		this.#parametersValidator = parameters;
+		return this as any;
 	}
 	
 	get promise() {
@@ -381,7 +431,7 @@ class ConnectionsLayer {
  * Events of {@link Connection}
  * @event
  * */
-export type ConnectionEvents = {
+export type ConnectionEvents<DESC extends RoomDesc> = {
 	/**
 	 * connection successfully opened
 	 * @example
@@ -415,16 +465,16 @@ export type ConnectionEvents = {
 	 * })
 	 * ```
 	 */
-	message: XJData[];
+	message: DESC extends {clientMessage: infer R extends any []} ? R : XJData[];
 }
 
 /**
  * Handler of room connection
  * @group Classes
  */
-class Connection<DESC extends {data?: any} = {}> {
+class Connection<DESC extends RoomDesc = RoomDesc> {
 	#id: number;
-	#parameters: XJData[];
+	#parameters: DESC extends {parameters: infer T} ? T : XJData[];
 	#handle: ConnectionsLayer
 	#subscriber
 	#initResolver = Promise.withResolvers<this>();
@@ -438,7 +488,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	constructor(id: number, parameters: XJData[], handle: ConnectionsLayer){
 		this.#id = id;
 		this.#handle = handle;
-		this.#parameters = parameters;
+		this.#parameters = parameters as any;
 		const subscriber = this.#subscriber = this.#handle.getConnectionEmitter(this);
 		subscriber.on("open", () => this.#initResolver.resolve(this))
 		subscriber.on("close", (reason) => this.#initResolver.reject(reason));
@@ -452,7 +502,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	/**
 	 * get the parameters with which the connection was initialized
 	 */
-	get parameters() {
+	get parameters(): DESC extends {parameters: infer T extends any[]} ? T : XJData[] {
 		return this.#parameters;
 	}
 	
@@ -538,7 +588,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	 * send data to connection
 	 * @param data any serializable arguments
 	 */
-	send(...data: XJData[]){
+	send(...data: DESC extends {roomMessage: infer T extends any[]} ? T : XJData[]){
 		this.#handle.send(this.#id, ...data);
 		return this;
 	}
@@ -550,7 +600,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 	 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this {
+	on<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this {
 		this.#subscriber.on(eventName, handler);
 		return this;
 	}
@@ -562,7 +612,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 	 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 	 */
-	once<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this {
+	once<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this {
 		this.#subscriber.once(eventName, handler);
 		return this;
 	}
@@ -574,7 +624,7 @@ class Connection<DESC extends {data?: any} = {}> {
 	 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 	 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 	 */
-	off<T extends keyof ConnectionEvents>(eventName: T, handler: (...args: ConnectionEvents[T]) => void): this {
+	off<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this {
 		this.#subscriber.off(eventName, handler);
 		return this;
 	}

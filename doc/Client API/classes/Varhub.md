@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -47,11 +47,13 @@ Varhub instance to manage rooms, create clients
 
 ### url
 
-> `get` **url**(): `string`
+#### Get Signature
+
+> **get** **url**(): `string`
 
 get current url as string
 
-#### Returns
+##### Returns
 
 `string`
 
@@ -189,9 +191,34 @@ options
 
 ### createRoomSocket()
 
-> **createRoomSocket**(`options`?): [`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
+> **createRoomSocket**\<`DESC`\>(`options`?): [`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>
 
 create websocket connection to handle new room
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 #### Parameters
 
@@ -212,7 +239,7 @@ create websocket connection to handle new room
 </td>
 <td>
 
-`object`
+\{`integrity`: \`custom:$\{string\}\`;`message`: `string`; \}
 
 </td>
 <td>
@@ -260,7 +287,7 @@ set public message of this room
 
 #### Returns
 
-[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`DESC`\>
 
 ***
 
@@ -379,9 +406,34 @@ Error if room not found or room not public or integrity mismatch
 
 ### join()
 
-> **join**(`roomId`, `options`?): [`VarhubClient`](VarhubClient.md)
+> **join**\<`DESC`\>(`roomId`, `options`?): [`VarhubClient`](VarhubClient.md)\<`DESC`\>
 
 Join room.
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `RoomDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
 
 #### Parameters
 
@@ -419,7 +471,7 @@ room id
 </td>
 <td>
 
-`RoomJoinOptions`
+`RoomJoinOptions`\<`DESC` *extends* `object` ? `T` : `any`[]\>
 
 </td>
 <td>
@@ -433,6 +485,6 @@ options
 
 #### Returns
 
-[`VarhubClient`](VarhubClient.md)
+[`VarhubClient`](VarhubClient.md)\<`DESC`\>
 
 client

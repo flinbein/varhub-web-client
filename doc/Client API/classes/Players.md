@@ -1,10 +1,10 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
 [@flinbein/varhub-web-clent](../../README.md) / [Client API](../README.md) / Players
 
-# Class: Players\<DESC\>
+# Class: Players\<PLAYER_DESC, ROOM_DESC\>
 
 List of players based on named connections.
 
@@ -21,7 +21,19 @@ List of players based on named connections.
 <tr>
 <td>
 
-`DESC` *extends* `PlayerDesc`
+`PLAYER_DESC` *extends* `Record`\<keyof `PlayerDesc`, `any`\> *extends* `PLAYER_DESC` ? `PlayerDesc` : `never`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`ROOM_DESC` *extends* `Record`\<keyof `RoomDesc`, `any`\> *extends* `ROOM_DESC` ? `RoomDesc` : `never`
 
 </td>
 <td>
@@ -37,7 +49,7 @@ List of players based on named connections.
 
 ### new Players()
 
-> **new Players**\<`DESC`\>(`room`, `registerPlayerHandler`): [`Players`](Players.md)\<`DESC`\>
+> **new Players**\<`PLAYER_DESC`, `ROOM_DESC`\>(`room`, `registerPlayerHandler`): [`Players`](Players.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 Create a player list based on connections.
 
@@ -60,7 +72,7 @@ Create a player list based on connections.
 </td>
 <td>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`ROOM_DESC`\>
 
 </td>
 <td>
@@ -95,7 +107,7 @@ handler to get the player's name.
 
 #### Returns
 
-[`Players`](Players.md)\<`DESC`\>
+[`Players`](Players.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 #### Examples
 
@@ -115,11 +127,13 @@ const players = new Players(room, async (connection, name, password) => {
 
 ### count
 
-> `get` **count**(): `number`
+#### Get Signature
+
+> **get** **count**(): `number`
 
 get number of players
 
-#### Returns
+##### Returns
 
 `number`
 
@@ -127,41 +141,43 @@ get number of players
 
 ### room
 
-> `get` **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
+#### Get Signature
 
-#### Returns
+> **get** **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)\<`ROOM_DESC`\>
 
-[`RoomSocketHandler`](RoomSocketHandler.md)\<`object`\>
+##### Returns
+
+[`RoomSocketHandler`](RoomSocketHandler.md)\<`ROOM_DESC`\>
 
 ## Methods
 
 ### \[iterator\]()
 
-> **\[iterator\]**(): `MapIterator`\<[`Player`](Player.md)\<`DESC`\>\>
+> **\[iterator\]**(): `MapIterator`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
 
 iterate on all players
 
 #### Returns
 
-`MapIterator`\<[`Player`](Player.md)\<`DESC`\>\>
+`MapIterator`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
 
 ***
 
 ### all()
 
-> **all**(): `Set`\<[`Player`](Player.md)\<`DESC`\>\>
+> **all**(): `Set`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
 
 get all players
 
 #### Returns
 
-`Set`\<[`Player`](Player.md)\<`DESC`\>\>
+`Set`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
 
 ***
 
 ### get()
 
-> **get**(`nameOrConnection`): `undefined` \| [`Player`](Player.md)\<`DESC`\>
+> **get**(`nameOrConnection`): `undefined` \| [`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 get player by name or connection
 
@@ -184,7 +200,7 @@ get player by name or connection
 </td>
 <td>
 
-`string` \| [`Connection`](Connection.md)\<`object`\>
+`string` \| [`Connection`](Connection.md)\<`RoomDesc`\>
 
 </td>
 <td>
@@ -198,13 +214,13 @@ name or connection
 
 #### Returns
 
-`undefined` \| [`Player`](Player.md)\<`DESC`\>
+`undefined` \| [`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 ***
 
 ### getTeam()
 
-> **getTeam**(`team`): `Set`\<[`Player`](Player.md)\<`DESC`\>\>
+> **getTeam**(`team`): `Set`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
 
 get all players with specified group. If group is undefined - get all players without group.
 
@@ -227,7 +243,7 @@ get all players with specified group. If group is undefined - get all players wi
 </td>
 <td>
 
-`undefined` \| `DESC` *extends* `object` ? `T` : `string`
+`undefined` \| `PLAYER_DESC` *extends* `object` ? `T` : `string`
 
 </td>
 <td>
@@ -239,7 +255,42 @@ get all players with specified group. If group is undefined - get all players wi
 
 #### Returns
 
-`Set`\<[`Player`](Player.md)\<`DESC`\>\>
+`Set`\<[`Player`](Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
+
+***
+
+### withType()
+
+> **withType**\<`DESC`\>(): [`Players`](Players.md)\<`DESC`, `ROOM_DESC`\>
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* `PlayerDesc`
+
+</td>
+<td>
+
+`object`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+[`Players`](Players.md)\<`DESC`, `ROOM_DESC`\>
 
 ## Events
 
@@ -260,7 +311,7 @@ get all players with specified group. If group is undefined - get all players wi
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 </td>
 <td>
@@ -343,7 +394,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 </td>
 <td>
@@ -426,7 +477,7 @@ event handler
 <tr>
 <td>
 
-`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`DESC`\>
+`T` *extends* keyof [`PlayersEvents`](../type-aliases/PlayersEvents.md)\<`PLAYER_DESC`, `ROOM_DESC`\>
 
 </td>
 <td>

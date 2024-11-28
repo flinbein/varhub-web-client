@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../../README.md)
 
 ***
 
@@ -31,7 +31,7 @@ Create new channel for RPC
 </td>
 <td>
 
-[`VarhubClient`](../classes/VarhubClient.md)
+[`VarhubClient`](../classes/VarhubClient.md)\<`object`\>
 
 </td>
 <td>
@@ -48,7 +48,7 @@ varhub client. Client may not be ready.
 </td>
 <td>
 
-`object`
+\{`key`: `string`; \}
 
 </td>
 <td>

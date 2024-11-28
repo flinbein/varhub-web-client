@@ -3,6 +3,7 @@ import test, { it, mock } from "node:test";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
 import { Players, VarhubClient} from "../src/index.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 test.describe("Players", () => {
 	it("join and leave", {timeout: 10000}, async () => {
@@ -151,9 +152,9 @@ test.describe("Players", () => {
 	
 	it("teams", {timeout: 3000}, async () => {
 		const roomWs = new WebsocketMockRoom("test");
-		await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler<{parameters: [string]}>(roomWs);
 		roomWs.backend.open();
-		const players = new Players<{team: "redTeam"|"blueTeam"|"greenTeam"}>(room, (_con, name) => String(name));
+		const players = new Players(room, (_con, name) => String(name)).withType<{team: "redTeam"|"blueTeam"|"greenTeam"}>();
 		const aliceWs = roomWs.createClientMock("Alice");
 		const bobWs = roomWs.createClientMock("Bob");
 		const charlieWs = roomWs.createClientMock("Charlie");
@@ -285,5 +286,44 @@ test.describe("Players", () => {
 		
 		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments.slice(1), [ 3, "from Bob"]);
 		assert.deepEqual(onBobConnectionMessage.mock.calls[1].arguments[0].parameters, ["Bob", 3]);
+	})
+	
+	it("Players types with Room<DESC>", async () => {
+		if (1 + 1 < 3) return; // test only types
+		const roomWs = new WebsocketMockRoom("test");
+		await using room = new RoomSocketHandler(roomWs).validate({
+			parameters: (s) => s.every(v => typeof v === "string"),
+			clientMessage: (s) => s.every(v => typeof v === "number"),
+		});
+		const players = new Players(room, (_con, ...args) => {
+			void (true satisfies Equal<typeof args, string[]>)
+		}).withType<{team: "red"|"blue", data: Date}>();
+		
+		const player = players.get("Bob")!;
+		player.on("connectionMessage", (_con, ...args) => {
+			void (true satisfies Equal<typeof args, number[]>)
+		})
+		for (let connection of player) {
+			connection.on("message", (...args) => {
+				void (true satisfies Equal<typeof args, number[]>)
+			})
+			void (true satisfies Equal<typeof connection.parameters, string[]>)
+		}
+		void (true satisfies Equal<typeof player.team, "red"|"blue"|undefined>);
+		void (true satisfies Equal<typeof player.data, Date|undefined>);
+		
+		players.on("join", player => {
+			player.on("connectionMessage", (_con, ...args) => {
+				void (true satisfies Equal<typeof args, number[]>)
+			})
+			void (true satisfies Equal<typeof player.data, Date|undefined>)
+		})
+		
+		for (let player of players.getTeam("red")) {
+			player.on("connectionMessage", (_con, ...args) => {
+				void (true satisfies Equal<typeof args, number[]>)
+			})
+			void (true satisfies Equal<typeof player.data, Date|undefined>)
+		}
 	})
 });

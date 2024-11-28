@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../README.md)
 
 ***
 
@@ -29,12 +29,12 @@ room.on("connectionMessage", (con, ...args) => {
 
 ## Index
 
-### Namespaces
+### Modules
 
 <table>
 <thead>
 <tr>
-<th>Namespace</th>
+<th>Module</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -42,7 +42,7 @@ room.on("connectionMessage", (con, ...args) => {
 <tr>
 <td>
 
-["varhub:api/network"](namespaces/varhub_api_network/README.md)
+[varhub:api/network](varhub:api/network/README.md)
 
 </td>
 <td>
@@ -62,7 +62,7 @@ console.log(response.body);
 <tr>
 <td>
 
-["varhub:config"](namespaces/varhub_config/README.md)
+[varhub:config](varhub:config/README.md)
 
 </td>
 <td>
@@ -81,19 +81,19 @@ console.log("Room config", config);
 <tr>
 <td>
 
-["varhub:events"](namespaces/varhub_events/README.md)
+[varhub:events](varhub:events/README.md)
 
 </td>
 <td>
 
-provides class [EventEmitter](namespaces/varhub_events/classes/default.md)
+provides class [EventEmitter](varhub:events/classes/default.md)
 
 </td>
 </tr>
 <tr>
 <td>
 
-["varhub:performance"](namespaces/varhub_performance/README.md)
+[varhub:performance](varhub:performance/README.md)
 
 </td>
 <td>
@@ -117,24 +117,24 @@ console.log(now());
 <tr>
 <td>
 
-["varhub:players"](namespaces/varhub_players/README.md)
+[varhub:players](varhub:players/README.md)
 
 </td>
 <td>
 
-provides class [Players](namespaces/varhub_players/classes/default.md) to combine connections by name
+provides class [Players](varhub:players/classes/default.md) to combine connections by name
 
 </td>
 </tr>
 <tr>
 <td>
 
-["varhub:room"](namespaces/varhub_room/README.md)
+[varhub:room](varhub:room/README.md)
 
 </td>
 <td>
 
-This module allows you to get a controller of current [Room](namespaces/varhub_room/interfaces/Room.md).
+This module allows you to get a controller of current [Room](varhub:room/interfaces/Room.md).
 
 **Example**
 
@@ -148,12 +148,12 @@ import room from "varhub:room"
 <tr>
 <td>
 
-["varhub:rpc"](namespaces/varhub_rpc/README.md)
+[varhub:rpc](varhub:rpc/README.md)
 
 </td>
 <td>
 
-provides class [RPCSource](namespaces/varhub_rpc/classes/default.md) that allows you to handle remote procedure calls
+provides class [RPCSource](varhub:rpc/classes/default.md) that allows you to handle remote procedure calls
 
 **Example**
 

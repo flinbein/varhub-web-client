@@ -1,7 +1,6 @@
 import EventEmitter from "./EventEmitter.js";
-import type { Connection, RoomSocketHandler as Room } from "./RoomSocketHandler.js";
+import type { Connection, RoomSocketHandler as Room, RoomDesc } from "./RoomSocketHandler.js";
 import type { XJData } from "@flinbein/xjmapper";
-
 
 type PlayerDesc = {
 	team?: string,
@@ -11,7 +10,7 @@ type PlayerDesc = {
  * events of {@link Players} object
  * @event
  * */
-export type PlayersEvents<DESC extends PlayerDesc = {}> = {
+export type PlayersEvents<PLAYER_DESC extends PlayerDesc, ROOM_DESC extends RoomDesc> = {
 	/**
 	 * new player joined
 	 * @example
@@ -22,7 +21,7 @@ export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 	 * })
 	 * ```
 	 */
-	join: [Player<DESC>]
+	join: [Player<PLAYER_DESC, ROOM_DESC>]
 	/**
 	 * player leaves the game
 	 * @example
@@ -44,7 +43,7 @@ export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 	 * players.on("offline", player => player.kick("disconnected"))
 	 * ```
 	 */
-	leave: [Player<DESC>]
+	leave: [Player<PLAYER_DESC, ROOM_DESC>]
 	/**
 	 * player goes online
 	 * @example
@@ -56,7 +55,7 @@ export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 	 * })
 	 * ```
 	 */
-	online: [Player<DESC>]
+	online: [Player<PLAYER_DESC, ROOM_DESC>]
 	/**
 	 * player goes offline, last player's connection is closed.
 	 * @example
@@ -68,20 +67,23 @@ export type PlayersEvents<DESC extends PlayerDesc = {}> = {
 	 * })
 	 * ```
 	 */
-	offline: [Player<DESC>]
+	offline: [Player<PLAYER_DESC, ROOM_DESC>]
 }
 
 /**
  * List of players based on named connections.
  */
-export default class Players<DESC extends PlayerDesc = {}> {
-	readonly #playerMap = new Map<string, Player<DESC>>();
-	readonly #playerConnections = new WeakMap<Player<DESC>, Set<Connection>>();
-	readonly #playerGroups = new WeakMap<Player, string>();
-	readonly #playerEvents = new WeakMap<Player<DESC>, EventEmitter<PlayerEvents>>();
+export default class Players<
+	PLAYER_DESC extends Record<keyof PlayerDesc, any> extends PLAYER_DESC ? PlayerDesc : never = {},
+	ROOM_DESC extends Record<keyof RoomDesc, any> extends ROOM_DESC ? RoomDesc : never = {}
+> {
+	readonly #playerMap = new Map<string, Player<PLAYER_DESC, ROOM_DESC>>();
+	readonly #playerConnections = new WeakMap<Player<PLAYER_DESC, ROOM_DESC>, Set<Connection>>();
+	readonly #playerGroups = new WeakMap<Player<PLAYER_DESC, ROOM_DESC>, string>();
+	readonly #playerEvents = new WeakMap<Player<PLAYER_DESC, ROOM_DESC>, EventEmitter<PlayerEvents<ROOM_DESC>>>();
 	readonly #connectionPlayerNameMap = new WeakMap<Connection, string>();
 	readonly #registerPlayer
-	readonly #events = new EventEmitter<PlayersEvents<DESC>>();
+	readonly #events = new EventEmitter<PlayersEvents<PLAYER_DESC, ROOM_DESC>>();
 	readonly #room;
 	readonly #controller = {
 		isRegistered: (player: Player) => this.#playerMap.get(player.name) === player,
@@ -91,7 +93,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 			this.#playerGroups.set(player, group);
 		},
 		getConnectionsOf: (player: Player) => this.#playerConnections.get(player as any),
-		registerEvents: (player: Player, events: EventEmitter<PlayerEvents>) => this.#playerEvents.set(player as any, events),
+		registerEvents: (player: Player, events: EventEmitter<PlayerEvents<ROOM_DESC>>) => this.#playerEvents.set(player as any, events),
 		kick: (player: Player, reason: string|null) => {
 			const existsPlayer =  this.#playerMap.get(player.name);
 			if (existsPlayer !== player) return;
@@ -126,7 +128,13 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * - if handler throws or rejects - the connection will be closed
 	 * - async handler will defer the connection
 	 */
-	constructor(room: Room, registerPlayerHandler: (connection: Connection, ...args: XJData[]) => string|void|null|undefined|Promise<string|void|null|undefined>) {
+	constructor(
+		room: Room<ROOM_DESC>,
+		registerPlayerHandler: (
+			connection: Connection,
+			...args: ROOM_DESC extends {parameters: infer R extends any[]} ? R : XJData[]
+		) => string|void|null|undefined|Promise<string|void|null|undefined>
+	) {
 		this.#registerPlayer = registerPlayerHandler;
 		this.#room = room;
 		room.on("connection", this.#onConnection);
@@ -137,10 +145,14 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	
 	get room(){return this.#room};
 	
+	withType<DESC extends Record<keyof PlayerDesc, any> extends DESC ? PlayerDesc : never = {}>(): Players<DESC, ROOM_DESC> {
+		return this as any;
+	}
+	
 	#onConnection = async (connection: Connection, ...args: XJData[]) => {
 		let registerResult;
 		try {
-			registerResult = this.#registerPlayer(connection, ...args);
+			registerResult = this.#registerPlayer(connection, ...args as any);
 		} catch (e) {
 			return connection.close(e == null ? null : String(e));
 		}
@@ -179,7 +191,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	
 	#onConnectionMessage = (connection: Connection, ...args: any[]) => {
 		const player = this.get(connection);
-		if (player) this.#playerEvents.get(player as any)?.emitWithTry("connectionMessage", connection, ...args);
+		if (player) this.#playerEvents.get(player as any)?.emitWithTry("connectionMessage", connection, ...args as any);
 	}
 	
 	#onConnectionClose = (connection: Connection) => {
@@ -201,7 +213,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * get player by name or connection
 	 * @param nameOrConnection name or connection
 	 */
-	get(nameOrConnection: Connection|string): Player<DESC>|undefined {
+	get(nameOrConnection: Connection|string): Player<PLAYER_DESC, ROOM_DESC>|undefined {
 		if (typeof nameOrConnection === "string") return this.#playerMap.get(nameOrConnection);
 		const playerName = this.#connectionPlayerNameMap.get(nameOrConnection);
 		if (playerName != null) return this.#playerMap.get(playerName);
@@ -218,14 +230,14 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * get all players with specified group. If group is undefined - get all players without group.
 	 * @param team
 	 */
-	getTeam(team: (DESC extends {team: infer T} ? T : string)|undefined): Set<Player<DESC>> {
+	getTeam(team: (PLAYER_DESC extends {team: infer T} ? T : string)|undefined): Set<Player<PLAYER_DESC, ROOM_DESC>> {
 		return new Set([...this.#playerMap.values()].filter(player => this.#playerGroups.get(player) === team));
 	}
 	
 	/**
 	 * get all players
 	 */
-	all(): Set<Player<DESC>> {
+	all(): Set<Player<PLAYER_DESC, ROOM_DESC>> {
 		return new Set(this.#playerMap.values());
 	}
 	
@@ -236,7 +248,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this{
+	on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
@@ -247,7 +259,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	once<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this{
+	once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
 		this.#events.once.call(this, eventName, handler as any);
 		return this;
 	}
@@ -258,7 +270,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	off<T extends keyof PlayersEvents<DESC>>(eventName: T, handler: (...args: PlayersEvents<DESC>[T]) => void): this {
+	off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this {
 		this.#events.off.call(this, eventName, handler as any);
 		return this;
 	}
@@ -266,7 +278,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
 	/**
 	 * iterate on all players
 	 */
-	[Symbol.iterator](): MapIterator<Player<DESC>> {
+	[Symbol.iterator](): MapIterator<Player<PLAYER_DESC, ROOM_DESC>> {
 		return this.#playerMap.values();
 	}
 }
@@ -275,7 +287,7 @@ export default class Players<DESC extends PlayerDesc = {}> {
  * Events of {@link Player}
  * @event
  * */
-export type PlayerEvents = {
+export type PlayerEvents<ROOM_DESC extends RoomDesc> = {
 	/**
 	 * player leaves the game
 	 * @example
@@ -329,20 +341,20 @@ export type PlayerEvents = {
 	 * });
 	 * ```
 	 */
-	connectionMessage: [connecton: Connection, ...message: XJData[]]
+	connectionMessage: [connecton: Connection<ROOM_DESC>, ...message: ROOM_DESC extends {clientMessage: infer T extends any[]} ? T : XJData[]]
 }
 
 /**
  * Player represents a list of {@link Connection}s with same name.
  */
-class Player<DESC extends PlayerDesc = {}> {
+class Player<PLAYER_DESC extends PlayerDesc = {}, ROOM_DESC extends RoomDesc = {}> {
 	readonly #name: string
 	readonly #controller: any
 	/**
 	 * custom data for this player
 	 */
-	declare data?: DESC extends {data: infer T} ? T : any;
-	readonly #eventBox = new EventEmitter<PlayerEvents>();
+	declare data?: PLAYER_DESC extends {data: infer T} ? T : any;
+	readonly #eventBox = new EventEmitter<PlayerEvents<ROOM_DESC>>();
 	/** @hidden */
 	constructor(name: string, controller: any) {
 		this.#name = name;
@@ -357,7 +369,7 @@ class Player<DESC extends PlayerDesc = {}> {
 	/**
 	 * get all player's connections
 	 */
-	get connections(): Set<Connection> {return new Set(this.#controller.getConnectionsOf(this))}
+	get connections(): Set<Connection<ROOM_DESC>> {return new Set(this.#controller.getConnectionsOf(this))}
 	/**
 	 * player is online (has at least one opened connection)
 	 */
@@ -369,19 +381,19 @@ class Player<DESC extends PlayerDesc = {}> {
 	/**
 	 * get player's team
 	 */
-	get team(): (DESC extends {team: infer T} ? T : string)|undefined {return this.#controller.getGroupOf(this)}
+	get team(): (PLAYER_DESC extends {team: infer T} ? T : string)|undefined {return this.#controller.getGroupOf(this)}
 	/**
 	 * set player's team
 	 */
-	setTeam(value: (DESC extends {team: infer T} ? T : string)|undefined): this {this.#controller.setGroupOf(this, value); return this}
+	setTeam(value: (PLAYER_DESC extends {team: infer T} ? T : string)|undefined): this {this.#controller.setGroupOf(this, value); return this}
 	
 	/**
 	 * send message for all connections
 	 * @param args
 	 */
-	send(...args: XJData[]): this {
+	send(...args: ROOM_DESC extends {roomMessage: infer R extends any[]} ? R : XJData[]): this {
 		for (let connection of this.connections) {
-			connection.send(...args);
+			connection.send(...args as any);
 		}
 		return this;
 	}
@@ -393,7 +405,7 @@ class Player<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
+	on<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this{
 		this.#eventBox.on.call(this, eventName, handler as any);
 		return this;
 	}
@@ -404,7 +416,7 @@ class Player<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
-	once<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this{
+	once<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this{
 		this.#eventBox.once.call(this, eventName, handler as any);
 		return this;
 	}
@@ -415,7 +427,7 @@ class Player<DESC extends PlayerDesc = {}> {
 	 * @param {keyof PlayerEvents} eventName "leave", "online", "connectionMessage" or "offline"
 	 * @param {(...args: PlayerEvents[T]) => void} handler event handler
 	 */
-	off<T extends keyof PlayerEvents>(eventName: T, handler: (...args: PlayerEvents[T]) => void): this {
+	off<T extends keyof PlayerEvents<ROOM_DESC>>(eventName: T, handler: (...args: PlayerEvents<ROOM_DESC>[T]) => void): this {
 		this.#eventBox.off.call(this, eventName, handler as any);
 		return this;
 	}
@@ -439,7 +451,7 @@ class Player<DESC extends PlayerDesc = {}> {
 	/**
 	 * iterate on all player's connections
 	 */
-	[Symbol.iterator](): SetIterator<Connection> {
+	[Symbol.iterator](): SetIterator<Connection<ROOM_DESC>> {
 		return this.connections[Symbol.iterator]()
 	}
 }

@@ -1,4 +1,4 @@
-[**@flinbein/varhub-web-clent**](../README.md) • **Docs**
+[**@flinbein/varhub-web-clent**](../README.md)
 
 ***
 

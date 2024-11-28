@@ -90,4 +90,20 @@ describe("VarHubRpcClient", () => {
 		await client.promise;
 		assert.equal(thisValue, client, "client this value");
 	})
+	
+	it("tests types", {timeout: 3000}, async () => {
+		const wsMock = new WebsocketMockClientWithMethods({
+			sum: async (x: number, y: number) => x + y
+		});
+		await using client = new VarhubClient<{
+			clientMessage: ["$rpc", undefined, 0, number, (string|number)[], any[]]
+			roomMessage: ["$rpc", undefined, 0, number, any]
+		}>(wsMock);
+		wsMock.backend.open();
+		const result = await new Promise<["$rpc", undefined, 0, number, any]>(resolve => {
+			client.on("message", (...args) => resolve(args));
+			client.send("$rpc", undefined, 0, 9999, ["sum"], [100, 200]);
+		});
+		assert.deepEqual(result, ["$rpc", undefined, 0, 9999, 300]);
+	})
 });
