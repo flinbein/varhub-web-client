@@ -596,6 +596,26 @@ declare module "varhub:players" {
 		get(nameOrConnection: Connection|string): Player<PLAYER_DESC, ROOM_DESC>|undefined;
 		
 		/**
+		 * get current Room
+		 */
+		get room(): Room<ROOM_DESC>;
+		
+		/**
+		 * override current type of Players (typescript)
+		 * @typeParam DESC
+		 * @typeParam DESC.team - (optional, extends string) available teams of players
+		 * @typeParam DESC.data - (optional, any) custom data of player ({@link Player#data})
+		 * @example
+		 * ```typescript
+		 * const players = _players.withType<
+		 *   team: "red"|"blue",
+		 *   data: number
+		 * >()
+		 * ```
+		 */
+		withType<DESC extends Record<keyof PlayerDesc, any> extends DESC ? PlayerDesc : never = {}>(): Players<DESC, ROOM_DESC>;
+		
+		/**
 		 * get number of players
 		 */
 		get count(): number;

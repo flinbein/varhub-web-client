@@ -145,6 +145,8 @@ get number of players
 
 > **get** **room**(): [`RoomSocketHandler`](RoomSocketHandler.md)\<`ROOM_DESC`\>
 
+get current Room
+
 ##### Returns
 
 [`RoomSocketHandler`](RoomSocketHandler.md)\<`ROOM_DESC`\>
@@ -263,6 +265,8 @@ get all players with specified group. If group is undefined - get all players wi
 
 > **withType**\<`DESC`\>(): [`Players`](Players.md)\<`DESC`, `ROOM_DESC`\>
 
+override current type of Players (typescript)
+
 #### Type Parameters
 
 <table>
@@ -270,6 +274,7 @@ get all players with specified group. If group is undefined - get all players wi
 <tr>
 <th>Type Parameter</th>
 <th>Default type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
@@ -284,6 +289,12 @@ get all players with specified group. If group is undefined - get all players wi
 `object`
 
 </td>
+<td>
+
+DESC.team - (optional, extends string) available teams of players
+DESC.data - (optional, any) custom data of player ([Player#data](Player.md#data))
+
+</td>
 </tr>
 </tbody>
 </table>
@@ -291,6 +302,15 @@ get all players with specified group. If group is undefined - get all players wi
 #### Returns
 
 [`Players`](Players.md)\<`DESC`, `ROOM_DESC`\>
+
+#### Example
+
+```typescript
+const players = _players.withType<
+  team: "red"|"blue",
+  data: number
+>()
+```
 
 ## Events
 

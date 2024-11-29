@@ -143,8 +143,24 @@ export default class Players<
 		room.on("connectionClose", this.#onConnectionClose);
 	}
 	
+	/**
+	 * get current Room
+	 */
 	get room(){return this.#room};
 	
+	/**
+	 * override current type of Players (typescript)
+	 * @typeParam DESC
+	 * DESC.team - (optional, extends string) available teams of players
+	 * DESC.data - (optional, any) custom data of player ({@link Player#data})
+	 * @example
+	 * ```typescript
+	 * const players = _players.withType<
+	 *   team: "red"|"blue",
+	 *   data: number
+	 * >()
+	 * ```
+	 */
 	withType<DESC extends Record<keyof PlayerDesc, any> extends DESC ? PlayerDesc : never = {}>(): Players<DESC, ROOM_DESC> {
 		return this as any;
 	}

@@ -135,6 +135,20 @@ get number of players
 
 `number`
 
+***
+
+### room
+
+#### Get Signature
+
+> **get** **room**(): [`Room`](../../varhub:room/interfaces/Room.md)\<`ROOM_DESC`\>
+
+get current Room
+
+##### Returns
+
+[`Room`](../../varhub:room/interfaces/Room.md)\<`ROOM_DESC`\>
+
 ## Methods
 
 ### \[iterator\]()
@@ -242,6 +256,56 @@ get all players with specified group. If group is undefined - get all players wi
 #### Returns
 
 `Set`\<[`Player`](../interfaces/Player.md)\<`PLAYER_DESC`, `ROOM_DESC`\>\>
+
+***
+
+### withType()
+
+> **withType**\<`DESC`\>(): [`default`](default.md)\<`DESC`, `ROOM_DESC`\>
+
+override current type of Players (typescript)
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+<th>Default type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DESC` *extends* [`PlayerDesc`](../type-aliases/PlayerDesc.md)
+
+</td>
+<td>
+
+`object`
+
+</td>
+<td>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+[`default`](default.md)\<`DESC`, `ROOM_DESC`\>
+
+#### Example
+
+```typescript
+const players = _players.withType<
+  team: "red"|"blue",
+  data: number
+>()
+```
 
 ## Events
 
