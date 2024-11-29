@@ -117,7 +117,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
+		on<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (this:this, ...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof ConnectionEvents} T
@@ -125,7 +125,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
+		once<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (this:this, ...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof ConnectionEvents} T
@@ -133,7 +133,7 @@ declare module "varhub:room" {
 		 * @param {keyof ConnectionEvents} eventName "message", "open" or "close"
 		 * @param {(...args: ConnectionEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (...args: ConnectionEvents<DESC>[T]) => void): this;
+		off<T extends keyof ConnectionEvents<DESC>>(eventName: T, handler: (this:this, ...args: ConnectionEvents<DESC>[T]) => void): this;
 		/**
 		 * close client's connection
 		 * @param reason
@@ -292,7 +292,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		on<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
+		on<T extends keyof RoomEvents<DESC>>(event: T, handler: (this: this, ...args: RoomEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof RoomEvents} T
@@ -301,7 +301,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		once<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
+		once<T extends keyof RoomEvents<DESC>>(event: T, handler: (this: this, ...args: RoomEvents<DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof RoomEvents} T
@@ -310,7 +310,7 @@ declare module "varhub:room" {
 		 * @param {(...args: RoomEvents[T]) => void} handler event handler
 		 * @see RoomEvents
 		 */
-		off<T extends keyof RoomEvents<DESC>>(event: T, handler: (...args: RoomEvents<DESC>[T]) => void): this;
+		off<T extends keyof RoomEvents<DESC>>(event: T, handler: (this: this, ...args: RoomEvents<DESC>[T]) => void): this;
 		
 		[Symbol.dispose](): void;
 		[Symbol.asyncDispose](): Promise<void>;
@@ -340,10 +340,10 @@ declare module "varhub:events" {
 	 * ```
 	 */
 	export default class EventEmitter<M extends Record<any, any[]>> {
-		on<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
-		once<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
-		off<T extends keyof M>(event: T, handler: (...args: M[T]) => void): this;
-		emit<T extends keyof M>(event: T, ...args: M[T]): boolean;
+		on<E extends keyof M, T = this>(this:T, event: E, handler: (this:T, ...args: M[E]) => void): T;
+		once<E extends keyof M, T = this>(this:T, event: E, handler: (this:T, ...args: M[E]) => void): T;
+		off<E extends keyof M, T = this>(this:T, event: E, handler: (this:T, ...args: M[E]) => void): T;
+		emit<E extends keyof M>(event: E, ...args: M[E]): boolean;
 		/**
 		 * like {@link EventEmitter#emit}, but ignore handler errors
 		 */
@@ -635,7 +635,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
+		on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -643,7 +643,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
+		once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * @event
 		 * @template {keyof PlayersEvents} T
@@ -651,7 +651,7 @@ declare module "varhub:players" {
 		 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 		 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 		 */
-		off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
+		off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this;
 		/**
 		 * iterate on all players
 		 */

@@ -1,6 +1,6 @@
 {
   "name": "@flinbein/varhub-web-clent",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "type": "module",
   "module": "./dist/index.js",
   "main": "./dist/index.js",

@@ -264,7 +264,7 @@ export default class Players<
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
+	on<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
 		this.#events.on.call(this, eventName, handler as any);
 		return this;
 	}
@@ -275,7 +275,7 @@ export default class Players<
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
+	once<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this{
 		this.#events.once.call(this, eventName, handler as any);
 		return this;
 	}
@@ -286,7 +286,7 @@ export default class Players<
 	 * @param {keyof PlayersEvents} eventName "join", "leave", "online" or "offline"
 	 * @param {(...args: PlayersEvents[T]) => void} handler event handler
 	 */
-	off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this {
+	off<T extends keyof PlayersEvents<PLAYER_DESC, ROOM_DESC>>(eventName: T, handler: (this:this, ...args: PlayersEvents<PLAYER_DESC, ROOM_DESC>[T]) => void): this {
 		this.#events.off.call(this, eventName, handler as any);
 		return this;
 	}

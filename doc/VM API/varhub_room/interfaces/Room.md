@@ -405,7 +405,7 @@ unsubscribe from event
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 <td>
@@ -492,7 +492,7 @@ subscribe on event
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 <td>
@@ -579,7 +579,7 @@ subscribe on event once
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 <td>

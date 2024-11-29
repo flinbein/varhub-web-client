@@ -211,7 +211,7 @@ test.describe("Players", () => {
 		
 		const players = new Players(room, (_con, name) => name ? String(name) : null);
 		const joinPromiseThisValue = new Promise<any>(resolve => {
-			players.on("join", function (this: any){resolve(this)});
+			players.on("join", function (){resolve(this)});
 		})
 		roomWs.createClientMock("Bob");
 		assert.equal(await joinPromiseThisValue, players, "this value is players");

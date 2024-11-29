@@ -48,7 +48,7 @@ events.emit("message", 1, 2, 3);
 
 ### emit()
 
-> **emit**\<`T`\>(`event`, ...`args`): `boolean`
+> **emit**\<`E`\>(`event`, ...`args`): `boolean`
 
 #### Type Parameters
 
@@ -62,7 +62,7 @@ events.emit("message", 1, 2, 3);
 <tr>
 <td>
 
-`T` *extends* `string` \| `number` \| `symbol`
+`E` *extends* `string` \| `number` \| `symbol`
 
 </td>
 </tr>
@@ -87,7 +87,7 @@ events.emit("message", 1, 2, 3);
 </td>
 <td>
 
-`T`
+`E`
 
 </td>
 </tr>
@@ -99,7 +99,7 @@ events.emit("message", 1, 2, 3);
 </td>
 <td>
 
-`M`\[`T`\]
+`M`\[`E`\]
 
 </td>
 </tr>
@@ -182,7 +182,7 @@ like EventEmitter#emit, but ignore handler errors
 
 ### off()
 
-> **off**\<`T`\>(`event`, `handler`): `this`
+> **off**\<`E`, `T`\>(`this`, `event`, `handler`): `T`
 
 #### Type Parameters
 
@@ -190,13 +190,31 @@ like EventEmitter#emit, but ignore handler errors
 <thead>
 <tr>
 <th>Type Parameter</th>
+<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`T` *extends* `string` \| `number` \| `symbol`
+`E` *extends* `string` \| `number` \| `symbol`
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+`T`
+
+</td>
+<td>
+
+[`default`](default.md)\<`M`\>
 
 </td>
 </tr>
@@ -216,7 +234,7 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
-`event`
+`this`
 
 </td>
 <td>
@@ -228,12 +246,24 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
+`event`
+
+</td>
+<td>
+
+`E`
+
+</td>
+</tr>
+<tr>
+<td>
+
 `handler`
 
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 </tr>
@@ -242,13 +272,13 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Returns
 
-`this`
+`T`
 
 ***
 
 ### on()
 
-> **on**\<`T`\>(`event`, `handler`): `this`
+> **on**\<`E`, `T`\>(`this`, `event`, `handler`): `T`
 
 #### Type Parameters
 
@@ -256,13 +286,31 @@ like EventEmitter#emit, but ignore handler errors
 <thead>
 <tr>
 <th>Type Parameter</th>
+<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`T` *extends* `string` \| `number` \| `symbol`
+`E` *extends* `string` \| `number` \| `symbol`
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+`T`
+
+</td>
+<td>
+
+[`default`](default.md)\<`M`\>
 
 </td>
 </tr>
@@ -282,7 +330,7 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
-`event`
+`this`
 
 </td>
 <td>
@@ -294,12 +342,24 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
+`event`
+
+</td>
+<td>
+
+`E`
+
+</td>
+</tr>
+<tr>
+<td>
+
 `handler`
 
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 </tr>
@@ -308,13 +368,13 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Returns
 
-`this`
+`T`
 
 ***
 
 ### once()
 
-> **once**\<`T`\>(`event`, `handler`): `this`
+> **once**\<`E`, `T`\>(`this`, `event`, `handler`): `T`
 
 #### Type Parameters
 
@@ -322,13 +382,31 @@ like EventEmitter#emit, but ignore handler errors
 <thead>
 <tr>
 <th>Type Parameter</th>
+<th>Default type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>
 
-`T` *extends* `string` \| `number` \| `symbol`
+`E` *extends* `string` \| `number` \| `symbol`
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+<tr>
+<td>
+
+`T`
+
+</td>
+<td>
+
+[`default`](default.md)\<`M`\>
 
 </td>
 </tr>
@@ -348,7 +426,7 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
-`event`
+`this`
 
 </td>
 <td>
@@ -360,12 +438,24 @@ like EventEmitter#emit, but ignore handler errors
 <tr>
 <td>
 
+`event`
+
+</td>
+<td>
+
+`E`
+
+</td>
+</tr>
+<tr>
+<td>
+
 `handler`
 
 </td>
 <td>
 
-(...`args`) => `void`
+(`this`, ...`args`) => `void`
 
 </td>
 </tr>
@@ -374,4 +464,4 @@ like EventEmitter#emit, but ignore handler errors
 
 #### Returns
 
-`this`
+`T`
