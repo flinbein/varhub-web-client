@@ -102,6 +102,14 @@ export type RoomSocketHandlerEvents<DESC extends RoomDesc = {}> = {
 	close: [];
 }
 
+export namespace RoomSocketHandler {
+	export type ConnectionOf<T extends RoomSocketHandler> = T extends RoomSocketHandler<infer R> ? Connection<R> : never;
+	export type DataOf<T extends RoomSocketHandler> = T extends RoomSocketHandler<infer R> ? R["data"] : never;
+	export type ParametersOf<T extends RoomSocketHandler> = T extends RoomSocketHandler<infer R> ? R["parameters"] : never;
+	export type RoomMessageOf<T extends RoomSocketHandler> = T extends RoomSocketHandler<infer R> ? R["roomMessage"] : never;
+	export type ClientMessageOf<T extends RoomSocketHandler> = T extends RoomSocketHandler<infer R> ? R["clientMessage"] : never;
+}
+
 /**
  * Client-side room handler.
  * It allows you to handle room events and send messages to connected clients.

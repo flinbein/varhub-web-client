@@ -52,6 +52,14 @@ declare module "varhub:room" {
 		: never : never
 	)
 	
+	export namespace Room {
+		export type ConnectionOf<T extends Room> = T extends Room<infer R> ? Connection<R> : never;
+		export type DataOf<T extends Room> = T extends Room<infer R> ? R["data"] : never;
+		export type ParametersOf<T extends Room> = T extends Room<infer R> ? R["parameters"] : never;
+		export type RoomMessageOf<T extends Room> = T extends Room<infer R> ? R["roomMessage"] : never;
+		export type ClientMessageOf<T extends Room> = T extends Room<infer R> ? R["clientMessage"] : never;
+	}
+	
 	/** @event */
 	export type ConnectionEvents<DESC extends RoomDesc> = {
 		/**
@@ -90,7 +98,7 @@ declare module "varhub:room" {
 		message: DESC extends {clientMessage: infer R extends any []} ? R : any[];
 	}
 	
-	interface Connection<DESC extends RoomDesc = {}> {
+	export interface Connection<DESC extends RoomDesc = {}> {
 		/**
 		 * custom data for this connection
 		 */
@@ -182,7 +190,6 @@ declare module "varhub:room" {
 		toString(): string;
 		valueOf(): number;
 	}
-	export type { Connection };
 	
 	/**
 	 * @event
@@ -234,7 +241,7 @@ declare module "varhub:room" {
 		connectionMessage: [connection: Connection<DESC>, ...data: DESC extends {clientMessage: infer T extends any[]} ? T : any[]];
 	}
 	
-	interface Room <DESC extends RoomDesc = {}> {
+	export interface Room <DESC extends RoomDesc = {}> {
 		withType<
 			PARTIAL_DESC extends Record<keyof RoomDesc, any> extends PARTIAL_DESC ? RoomDesc : never = {}
 		>(): OverrideKeys<DESC, PARTIAL_DESC> extends infer T extends (Record<keyof RoomDesc, any> extends T ? RoomDesc : never) ? Room<T> : never;
@@ -315,7 +322,6 @@ declare module "varhub:room" {
 		[Symbol.dispose](): void;
 		[Symbol.asyncDispose](): Promise<void>;
 	}
-	export type { Room };
 	const room: Room;
 	/**
 	 * Controller of this room.
@@ -877,6 +883,100 @@ declare module "varhub:rpc" {
 		 * @returns - {@link RPCHandler}
 		 */
 		static createDefaultHandler(parameters: {form: any}): RPCHandler;
+		
+		/**
+		 * Create function to handle RPC of connection with {@link Connection} as 1st argument
+		 * @example
+		 * ```typescript
+		 * const source = new RPCSource({
+		 * 	 method: RPCSource.unbind((connection: Connection, x: number, y: number) => {
+		 * 	   if (x < 0 || y < 0) return void connection.close();
+		 * 	   return x + y;
+		 * 	 });
+		 * })
+		 * ```
+		 * @param handler method handler with prepended {@link Connection}
+		 * @param thisVal this value bound to handler
+		 */
+		static unbind<T, F extends (this:T, ...args: any[]) => any>(
+			handler: F,
+			thisVal?: T
+		): (this: Parameters<F>[0], ...args: RestParams<Parameters<F>>) => ReturnType<F>;
+		
+		/**
+		 * Create function with validation of arguments
+		 * @param validator function to validate arguments. `(args) => boolean | any[]`
+		 * - args - array of validating values
+		 * - returns:
+		 *   - `true` - pass args to the target function
+		 *   - `false` - validation error will be thrown
+		 *   - `any[]` - replace args and pass to the target function
+		 * - throws: error will be thrown
+		 * @param handler - target function
+		 * @returns a new function with validation of arguments
+		 * @example
+		 * ```typescript
+		 * const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
+		 *
+		 * const fn = RPCSource.validate(validateString, (arg) => {
+		 *   return arg.toUpperCase() // <-- string
+		 * });
+		 *
+		 * fn("foo") // "FOO"
+		 * fn(10) // "10"
+		 * fn(); // throws error
+		 * fn("foo", "bar"); // throws error
+		 * ```
+		 */
+		static validate<
+			V extends ((args: any[]) => false | readonly any[]) | ((args: any[]) => args is any[]),
+			A extends (
+				...args: V extends ((args: any[]) => args is infer R extends any[]) ? R : V extends ((args: any[]) => false | infer R extends readonly any[]) ? R : never
+			) => any
+		>(
+			validator: V,
+			handler: A
+		): NoInfer<A>;
+		
+		/**
+		 * Create function with validation of arguments, and unbind 1st argument
+		 * @param validator function to validate arguments. `(args) => boolean | any[]`
+		 * - args - array of validating values
+		 * - returns:
+		 *   - `true` - pass args to the target function
+		 *   - `false` - validation error will be thrown
+		 *   - `any[]` - replace args and pass to the target function
+		 * - throws: error will be thrown
+		 * @param handler - target function, with "this" as 1st argument
+		 * @param thisVal this value bound to handler
+		 * @returns a new function with validation of arguments
+		 * @example
+		 * ```typescript
+		 * const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
+		 *
+		 * const fn = RPCSource.validateUnbind(validateString, (connection: any, arg) => {
+		 *   return arg.toUpperCase() // <-- string
+		 * });
+		 * const connection = {};
+		 * fn.call(connection, "foo") // "FOO"
+		 * fn.call(connection, 10) // "10"
+		 * fn.call(connection); // throws error
+		 * fn.call(connection, "foo", "bar"); // throws error
+		 * ```
+		 */
+		static validateUnbind<
+			T,
+			V extends ((args: any[]) => false | readonly any[]) | ((args: any[]) => args is any[]),
+			A extends (
+				this: T,
+				bound: any,
+				...args: V extends ((args: any[]) => args is infer R extends any[]) ? R : V extends ((args: any[]) => false | infer R extends readonly any[]) ? R : never
+			) => any
+		>(
+			validator: V,
+			handler: A,
+			thisVal?: T,
+		): (this: Parameters<A>[0], ...args: RestParams<Parameters<A>>) => ReturnType<A>;
 		
 		/**
 		 * get the current rpc source, based on exports of main module.

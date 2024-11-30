@@ -3,6 +3,7 @@ import { describe, it, mock } from "node:test";
 import { RPCSource, RPCChannel, VarhubClient, Connection, Players } from "../src/index.js";
 import { RoomSocketHandler } from "../src/RoomSocketHandler.js";
 import { WebsocketMockRoom } from "./WebsocketMocks.js";
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 describe("RPCSource", () => {
 	it("tests rpc", {timeout: 4000}, async () => {
@@ -455,9 +456,9 @@ describe("RPCSource", () => {
 		
 		class MainRPC extends RPCSource.with("$")<number> {
 			
-			$userSetState = this.bindConnection((connection, value: number): undefined => {
+			$userSetState = RPCSource.unbind(function(connection, value: number): undefined {
 				this.setState(connection.parameters[1] as number + value);
-			});
+			}, this);
 			
 			$Deck = class Deck extends RPCSource<{}, string> {
 				constructor(props: string) {
@@ -600,7 +601,7 @@ describe("RPCSource", () => {
 	
 	it("source with any events", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
-			await using room = new RoomSocketHandler(roomWs);
+		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
 		await room.promise;
 		
@@ -614,5 +615,55 @@ describe("RPCSource", () => {
 			rpcRoom.emit("custom-event", 100);
 		});
 		assert.equal(eventData, 100, "custom event data");
+	});
+	
+	it("source with validate method", {timeout: 10000}, async () => {
+		const roomWs = new WebsocketMockRoom("room-id");
+		await using room = new RoomSocketHandler<{data: string, parameters: [number]}>(roomWs);
+		roomWs.backend.open();
+		
+		const allIsNumbers = (args: any[]) => args.every(v => typeof v === "number");
+		
+		const virtualThis = {value: 100};
+		const rpcRoom = new RPCSource({
+			test1: RPCSource.validate(allIsNumbers, RPCSource.unbind(function(a: RoomSocketHandler.ConnectionOf<typeof room>, x: number, y: number){
+				return x + y + 1 + a.parameters[0] + this.value;
+			}, virtualThis)),
+			test2: RPCSource.validateUnbind(allIsNumbers, function(a: RoomSocketHandler.ConnectionOf<typeof room>, x, y){
+				return x + y + 2 + a.parameters[0] + this.value;
+			}, virtualThis),
+			test3: RPCSource.unbind(function(a: RoomSocketHandler.ConnectionOf<typeof room>, x: number, y: number){
+				return x + y + 3 + a.parameters[0] + this.value
+			}, virtualThis),
+		});
+		RPCSource.start(rpcRoom, room);
+		
+		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock(1000)));
+		await clientRpc.promise;
+		assert.equal(await clientRpc.test1(10, 20), 1000+100+10+20+1, "test1");
+		assert.equal(await clientRpc.test2(10, 20), 1000+100+10+20+2, "test2");
+		assert.equal(await clientRpc.test3(10, 20), 1000+100+10+20+3, "test3");
+		await assert.rejects(clientRpc.test1("10" as any, 20), "rejects test1");
+		await assert.rejects(clientRpc.test2("10" as any, 20), "rejects test2");
+		await clientRpc.test3("10" as any, 20) // no rejection
+		
+		// check types
+		if (1+1>3) {
+			const _test1 = clientRpc.test1(10, 20);
+			void (true satisfies Equal<typeof _test1, Promise<number>>)
+			
+			const _test2 = clientRpc.test2(10, 20);
+			void (true satisfies Equal<typeof _test2, Promise<number>>)
+			
+			const _test3 = clientRpc.test3(10, 20);
+			void (true satisfies Equal<typeof _test3, Promise<number>>)
+			
+			// @ts-expect-error
+			void clientRpc.test1("10", 20);
+			// @ts-expect-error
+			void clientRpc.test2("10", 20);
+			// @ts-expect-error
+			void clientRpc.test3("10", 20);
+		}
 	});
 });

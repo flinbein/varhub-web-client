@@ -41,6 +41,31 @@ console.log(await rpc.sum(10, 20)) // 30
 
 ## Index
 
+### Namespaces
+
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+[RoomSocketHandler](namespaces/RoomSocketHandler/README.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+</tbody>
+</table>
+
 ### Classes
 
 <table>

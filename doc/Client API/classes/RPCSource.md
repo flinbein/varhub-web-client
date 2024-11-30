@@ -201,124 +201,6 @@ dispose this source and disconnect all channels
 
 ***
 
-### bindConnection()
-
-> **bindConnection**\<`A`\>(`handler`): (`this`, ...`args`) => `ReturnType`\<`A`\>
-
-Create function to handle RPC of connection with [Connection](Connection.md) as 1st argument
-
-#### Type Parameters
-
-<table>
-<thead>
-<tr>
-<th>Type Parameter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`A` *extends* (`this`, `c`, ...`args`) => `any`
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`handler`
-
-</td>
-<td>
-
-`A`
-
-</td>
-<td>
-
-method handler with prepended [Connection](Connection.md)
-
-</td>
-</tr>
-</tbody>
-</table>
-
-#### Returns
-
-`Function`
-
-##### Parameters
-
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-
-`this`
-
-</td>
-<td>
-
-`ThisParameterType`\<`A`\>
-
-</td>
-</tr>
-<tr>
-<td>
-
-...`args`
-
-</td>
-<td>
-
-`RestParams`\<`Parameters`\<`A`\>\>
-
-</td>
-</tr>
-</tbody>
-</table>
-
-##### Returns
-
-`ReturnType`\<`A`\>
-
-#### Example
-
-```typescript
-class Deck extends RPCSource<{}, boolean> {
-  constructor(){
-    super({}, false);
-  }
-
-  doSomething = this.bindConnection((connection, ...args) => {
-    console.log(connection, "call doSomething with args:", args);
-    this.setState(true)
-  });
-}
-```
-
-***
-
 ### dispose()
 
 > **dispose**(`reason`?): `void`
@@ -910,6 +792,427 @@ room
 ##### Returns
 
 `void`
+
+***
+
+### unbind()
+
+> `static` **unbind**\<`T`, `F`\>(`handler`, `thisVal`?): (`this`, ...`args`) => `ReturnType`\<`F`\>
+
+Create function to handle RPC of connection with [Connection](Connection.md) as 1st argument
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`T`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`F` *extends* (`this`, ...`args`) => `any`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`handler`
+
+</td>
+<td>
+
+`F`
+
+</td>
+<td>
+
+method handler with prepended [Connection](Connection.md)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`thisVal`?
+
+</td>
+<td>
+
+`T`
+
+</td>
+<td>
+
+this value bound to handler
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`Function`
+
+##### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`this`
+
+</td>
+<td>
+
+`Parameters`\<`F`\>\[`0`\]
+
+</td>
+</tr>
+<tr>
+<td>
+
+...`args`
+
+</td>
+<td>
+
+`RestParams`\<`Parameters`\<`F`\>\>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`ReturnType`\<`F`\>
+
+#### Example
+
+```typescript
+const source = new RPCSource({
+	 method: RPCSource.unbind((connection: Connection, x: number, y: number) => {
+	   if (x < 0 || y < 0) return void connection.close();
+	   return x + y;
+	 });
+})
+```
+
+***
+
+### validate()
+
+> `static` **validate**\<`V`, `A`\>(`validator`, `handler`): `NoInfer`\<`A`\>
+
+Create function with validation of arguments
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`V` *extends* (`args`) => `false` \| readonly `any`[] \| (`args`) => `args is any[]`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`A` *extends* (...`args`) => `any`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`validator`
+
+</td>
+<td>
+
+`V`
+
+</td>
+<td>
+
+function to validate arguments. `(args) => boolean | any[]`
+- args - array of validating values
+- returns:
+  - `true` - pass args to the target function
+  - `false` - validation error will be thrown
+  - `any[]` - replace args and pass to the target function
+- throws: error will be thrown
+
+</td>
+</tr>
+<tr>
+<td>
+
+`handler`
+
+</td>
+<td>
+
+`A`
+
+</td>
+<td>
+
+target function
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`NoInfer`\<`A`\>
+
+a new function with validation of arguments
+
+#### Example
+
+```typescript
+const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
+
+const fn = RPCSource.validate(validateString, (arg) => {
+  return arg.toUpperCase() // <-- string
+});
+
+fn("foo") // "FOO"
+fn(10) // "10"
+fn(); // throws error
+fn("foo", "bar"); // throws error
+```
+
+***
+
+### validateUnbind()
+
+> `static` **validateUnbind**\<`T`, `V`, `A`\>(`validator`, `handler`, `thisVal`?): (`this`, ...`args`) => `ReturnType`\<`A`\>
+
+Create function with validation of arguments, and unbind 1st argument
+
+#### Type Parameters
+
+<table>
+<thead>
+<tr>
+<th>Type Parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`T`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`V` *extends* (`args`) => `false` \| readonly `any`[] \| (`args`) => `args is any[]`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`A` *extends* (`this`, `bound`, ...`args`) => `any`
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`validator`
+
+</td>
+<td>
+
+`V`
+
+</td>
+<td>
+
+function to validate arguments. `(args) => boolean | any[]`
+- args - array of validating values
+- returns:
+  - `true` - pass args to the target function
+  - `false` - validation error will be thrown
+  - `any[]` - replace args and pass to the target function
+- throws: error will be thrown
+
+</td>
+</tr>
+<tr>
+<td>
+
+`handler`
+
+</td>
+<td>
+
+`A`
+
+</td>
+<td>
+
+target function, with "this" as 1st argument
+
+</td>
+</tr>
+<tr>
+<td>
+
+`thisVal`?
+
+</td>
+<td>
+
+`T`
+
+</td>
+<td>
+
+this value bound to handler
+
+</td>
+</tr>
+</tbody>
+</table>
+
+#### Returns
+
+`Function`
+
+a new function with validation of arguments
+
+##### Parameters
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`this`
+
+</td>
+<td>
+
+`Parameters`\<`A`\>\[`0`\]
+
+</td>
+</tr>
+<tr>
+<td>
+
+...`args`
+
+</td>
+<td>
+
+`RestParams`\<`Parameters`\<`A`\>\>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+##### Returns
+
+`ReturnType`\<`A`\>
+
+#### Example
+
+```typescript
+const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
+
+const fn = RPCSource.validateUnbind(validateString, (connection: any, arg) => {
+  return arg.toUpperCase() // <-- string
+});
+const connection = {};
+fn.call(connection, "foo") // "FOO"
+fn.call(connection, 10) // "10"
+fn.call(connection); // throws error
+fn.call(connection, "foo", "bar"); // throws error
+```
 
 ***
 

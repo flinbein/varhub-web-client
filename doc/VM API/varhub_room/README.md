@@ -17,6 +17,31 @@ import room from "varhub:room"
 
 ## Index
 
+### Namespaces
+
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+[Room](namespaces/Room/README.md)
+
+</td>
+<td>
+
+&hyphen;
+
+</td>
+</tr>
+</tbody>
+</table>
+
 ### Interfaces
 
 <table>
