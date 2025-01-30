@@ -292,6 +292,21 @@ declare module "varhub:room" {
 		getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection<DESC>>;
 		
 		/**
+		 * Get current {@link Connection} in scope or throws error.
+		 * Use this method in room event handlers or RPC methods.
+		 * `useConnection` allowed to be called only in sync code.
+		 * ```javascript
+		 * export async function remoteMethod(){
+		 *   const con = room.useConnection(); // OK
+		 *   await something();
+		 *   const con = room.useConnection(); // throws
+		 * }
+		 * ```
+		 * @returns Connection
+		 */
+		useConnection(): Connection<DESC>;
+		
+		/**
 		 * @event
 		 * @template {keyof RoomEvents} T
 		 * subscribe on event
@@ -592,8 +607,8 @@ declare module "varhub:players" {
 		constructor(
 			room: Room<ROOM_DESC>,
 			registerPlayerHandler: (
-				connection: Connection
-				, ...args: ROOM_DESC extends {parameters: infer R extends any[]} ? R : any[]
+				connection: Connection<ROOM_DESC>,
+				...args: ROOM_DESC extends {parameters: infer R extends any[]} ? R : any[]
 			) => string|void|null|undefined|Promise<string|void|null|undefined>);
 		/**
 		 * get player by name or connection
@@ -757,7 +772,6 @@ declare module "varhub:rpc" {
 		 * ```typescript
 		 * // remote code
 		 * const rpcSource = new RPCSource((connection: Connection, path: string[], args: any[], openChannel: boolean) => {
-		 *   console.log("connection:", this);
 		 *   if (path.length === 0 && path[0] === "sum") return args[0] + args[1];
 		 *   throw new Error("method not found");
 		 * });
@@ -774,7 +788,7 @@ declare module "varhub:rpc" {
 		 * // remote code
 		 * const rpcSource = new RPCSource({
 		 *   sum(x, y){
-		 *     console.log("connection:", this);
+		 *     console.log("connection:", room.useConnection());
 		 *     return x + y;
 		 *   }
 		 * });
@@ -804,24 +818,6 @@ declare module "varhub:rpc" {
 		static createDefaultHandler(parameters: {
 			form: any;
 		}, prefix?: string): RPCHandler;
-		/**
-		 * Create function to handle RPC of connection with {@link Connection} as 1st argument
-		 * @example
-		 * ```typescript
-		 * class Deck extends RPCSource<{}, boolean> {
-		 *   constructor(){
-		 *     super({}, false);
-		 *   }
-		 *
-		 *   doSomething = this.bindConnection((connection, ...args) => {
-		 *     console.log(connection, "call doSomething with args:", args);
-		 *     this.setState(true)
-		 *   });
-		 * }
-		 * ```
-		 * @param handler method handler with prepended {@link Connection}
-		 */
-		bindConnection<A extends (this: this, c: Connection, ...args: any) => any>(handler: A): (this: ThisParameterType<A>, ...args: RestParams<Parameters<A>>) => ReturnType<A>;
 		/** apply generic types for events */
 		withEventTypes<E = EVENTS>(): RPCSource<METHODS, STATE, E>;
 		/** @hidden */
@@ -885,25 +881,6 @@ declare module "varhub:rpc" {
 		static createDefaultHandler(parameters: {form: any}): RPCHandler;
 		
 		/**
-		 * Create function to handle RPC of connection with {@link Connection} as 1st argument
-		 * @example
-		 * ```typescript
-		 * const source = new RPCSource({
-		 * 	 method: RPCSource.unbind((connection: Connection, x: number, y: number) => {
-		 * 	   if (x < 0 || y < 0) return void connection.close();
-		 * 	   return x + y;
-		 * 	 });
-		 * })
-		 * ```
-		 * @param handler method handler with prepended {@link Connection}
-		 * @param thisVal this value bound to handler
-		 */
-		static unbind<T, F extends (this:T, ...args: any[]) => any>(
-			handler: F,
-			thisVal?: T
-		): (this: Parameters<F>[0], ...args: RestParams<Parameters<F>>) => ReturnType<F>;
-		
-		/**
 		 * Create function with validation of arguments
 		 * @param validator function to validate arguments. `(args) => boolean | any[]`
 		 * - args - array of validating values
@@ -937,46 +914,6 @@ declare module "varhub:rpc" {
 			validator: V,
 			handler: A
 		): NoInfer<A>;
-		
-		/**
-		 * Create function with validation of arguments, and unbind 1st argument
-		 * @param validator function to validate arguments. `(args) => boolean | any[]`
-		 * - args - array of validating values
-		 * - returns:
-		 *   - `true` - pass args to the target function
-		 *   - `false` - validation error will be thrown
-		 *   - `any[]` - replace args and pass to the target function
-		 * - throws: error will be thrown
-		 * @param handler - target function, with "this" as 1st argument
-		 * @param thisVal this value bound to handler
-		 * @returns a new function with validation of arguments
-		 * @example
-		 * ```typescript
-		 * const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
-		 *
-		 * const fn = RPCSource.validateUnbind(validateString, (connection: any, arg) => {
-		 *   return arg.toUpperCase() // <-- string
-		 * });
-		 * const connection = {};
-		 * fn.call(connection, "foo") // "FOO"
-		 * fn.call(connection, 10) // "10"
-		 * fn.call(connection); // throws error
-		 * fn.call(connection, "foo", "bar"); // throws error
-		 * ```
-		 */
-		static validateUnbind<
-			T,
-			V extends ((args: any[]) => false | readonly any[]) | ((args: any[]) => args is any[]),
-			A extends (
-				this: T,
-				bound: any,
-				...args: V extends ((args: any[]) => args is infer R extends any[]) ? R : V extends ((args: any[]) => false | infer R extends readonly any[]) ? R : never
-			) => any
-		>(
-			validator: V,
-			handler: A,
-			thisVal?: T,
-		): (this: Parameters<A>[0], ...args: RestParams<Parameters<A>>) => ReturnType<A>;
 		
 		/**
 		 * get the current rpc source, based on exports of main module.

@@ -82,3 +82,38 @@ setTimeout(() => {
   counter2.close();
 }, 10000);
 ```
+
+---
+
+Create RPCSource as a class with methods
+```javascript
+// VM code
+import RPCSource from "varhub:rpc";
+import room from "varhub:room";
+
+export class MyCounter extends RPCSource.with("$")<number> {
+  // "$" is prefix for remote callable methods
+  // <number> is type of state
+
+  constructor(baseValue = 0) {
+    super(baseValue)
+  }
+
+  // remote method "add", prefix will be ignored
+  $add(value) {
+    this.setState(this.state + value);
+    console.log("incremented by ", room.useConnection());
+  }
+}
+```
+```javascript
+// client code
+const rpc = new RPCSource(client);
+const counter = new rpc.MyCounter(500);    
+
+counter.on("state", (value) => {
+  console.log(value); // 500, 501, 502
+});
+counter.add(1);
+counter.add(1);
+```

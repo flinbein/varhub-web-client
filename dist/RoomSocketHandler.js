@@ -15,7 +15,7 @@ export class RoomSocketHandler {
         this.#ws = ws;
         this.#initResolver.promise.catch(() => { });
         ws.binaryType = "arraybuffer";
-        this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action);
+        this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action, this.#runWithContext);
         ws.addEventListener("message", (event) => {
             const [eventName, ...params] = parse(event.data);
             this.#wsEvents.emitWithTry(eventName, ...params);
@@ -89,6 +89,21 @@ export class RoomSocketHandler {
     getConnections(filter) {
         return this.#connectionsLayer.getConnections(filter);
     }
+    #context = undefined;
+    #runWithContext = (value, fn, ...args) => {
+        try {
+            this.#context = value;
+            return fn(...args);
+        }
+        finally {
+            this.#context = undefined;
+        }
+    };
+    useConnection() {
+        if (this.#context?.connection == null)
+            throw new Error("useContext error: context is undefined");
+        return this.#context?.connection;
+    }
     get ready() { return this.#ready; }
     get closed() { return this.#closed; }
     get message() {
@@ -154,19 +169,23 @@ export class RoomSocketHandler {
 class ConnectionsLayer {
     roomEmitter;
     roomAction;
+    runWithContext;
     connections = new Map();
     readyConnections = new Set();
     connectionEmitters = new WeakMap();
-    constructor(roomEmitter, roomAction) {
+    constructor(roomEmitter, roomAction, runWithContext) {
         this.roomEmitter = roomEmitter;
         this.roomAction = roomAction;
+        this.runWithContext = runWithContext;
     }
     onEnter(id, ...parameters) {
         const connection = new Connection(id, parameters, this);
         this.connections.set(id, connection);
-        this.roomEmitter.emitWithTry("connection", connection, ...parameters);
-        if (!connection.deferred)
-            connection.open();
+        this.runWithContext({ connection, parameters }, () => {
+            this.roomEmitter.emitWithTry("connection", connection, ...parameters);
+            if (!connection.deferred)
+                connection.open();
+        });
         return connection;
     }
     onJoin(conId) {
@@ -176,24 +195,30 @@ class ConnectionsLayer {
         if (this.readyConnections.has(connection))
             return;
         this.readyConnections.add(connection);
-        this.getConnectionEmitter(connection).emitWithTry("open");
-        this.roomEmitter.emitWithTry("connectionOpen", connection);
+        this.runWithContext({ connection }, () => {
+            this.getConnectionEmitter(connection).emitWithTry("open");
+            this.roomEmitter.emitWithTry("connectionOpen", connection);
+        });
     }
-    onClose(conId, wasOnline, message) {
+    onClose(conId, wasOnline, reason) {
         const connection = this.connections.get(conId);
         if (!connection)
             return;
         this.connections.delete(conId);
         this.readyConnections.delete(connection);
-        this.getConnectionEmitter(connection).emitWithTry("close", message, wasOnline);
-        this.roomEmitter.emitWithTry("connectionClose", connection, message, wasOnline);
+        this.runWithContext({ connection, reason, wasOnline }, () => {
+            this.getConnectionEmitter(connection).emitWithTry("close", reason, wasOnline);
+            this.roomEmitter.emitWithTry("connectionClose", connection, reason, wasOnline);
+        });
     }
-    onMessage(conId, ...msg) {
+    onMessage(conId, ...message) {
         const connection = this.connections.get(conId);
         if (!connection)
             return;
-        this.getConnectionEmitter(connection).emitWithTry("message", ...msg);
-        this.roomEmitter.emitWithTry("connectionMessage", connection, ...msg);
+        this.runWithContext({ connection, message }, () => {
+            this.getConnectionEmitter(connection).emitWithTry("message", ...message);
+            this.roomEmitter.emitWithTry("connectionMessage", connection, ...message);
+        });
     }
     getConnections(options) {
         const connectionsList = [...this.connections.values()];

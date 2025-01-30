@@ -224,7 +224,6 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 	 * ```typescript
 	 * // remote code
 	 * const rpcSource = new RPCSource((connection: Connection, path: string[], args: any[], openChannel: boolean) => {
-	 *   console.log("connection:", this);
 	 *   if (path.length === 0 && path[0] === "sum") return args[0] + args[1];
 	 *   throw new Error("method not found");
 	 * });
@@ -241,7 +240,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 	 * // remote code
 	 * const rpcSource = new RPCSource({
 	 *   sum(x, y){
-	 *     console.log("connection:", this);
+	 *     console.log("connection:", room.useConnection());
 	 *     return x + y;
 	 *   }
 	 * });
@@ -281,6 +280,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 			}
 		}
 		return function(con: Connection, path: string[], args: XJData[], openChannel: boolean) {
+			let base: any = undefined;
 			let target: any = parameters?.form;
 			for (let i=0; i<path.length; i++) {
 				const step = i === 0 ? prefix + path[i] : path[i];
@@ -291,6 +291,7 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 						throw new Error("wrong path: "+step+" in ("+prefix+")"+path.join(".")+": forbidden prop");
 					}
 				}
+				base = target;
 				target = target[step];
 			}
 			if (openChannel && args.length === 0) {
@@ -308,31 +309,8 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 				result.#autoDispose = MetaConstructor.autoClose
 				return result;
 			}
-			return target.apply(con, args);
+			return target.apply(base, args);
 		}
-	}
-	
-	/**
-	 * Create function to handle RPC of connection with {@link Connection} as 1st argument
-	 * @example
-	 * ```typescript
-	 * const source = new RPCSource({
-	 * 	 method: RPCSource.unbind((connection: Connection, x: number, y: number) => {
-	 * 	   if (x < 0 || y < 0) return void connection.close();
-	 * 	   return x + y;
-	 * 	 });
-	 * })
-	 * ```
-	 * @param handler method handler with prepended {@link Connection}
-	 * @param thisVal this value bound to handler
-	 */
-	static unbind<T, F extends (this:T, ...args: any[]) => any>(
-		handler: F,
-		thisVal?: T
-	): (this: Parameters<F>[0], ...args: RestParams<Parameters<F>>) => ReturnType<F> {
-		return function(this: any, ...args: any[]){
-			return handler.call(thisVal!, this as any, ...args as any);
-		} as any;
 	}
 	
 	/**
@@ -376,55 +354,6 @@ export default class RPCSource<METHODS extends Record<string, any> | string = {}
 			}
 			if (!validateResult) throw new Error("invalid parameters");
 			return handler.call(this, ...args);
-		} as any;
-	}
-	
-	/**
-	 * Create function with validation of arguments, and unbind 1st argument
-	 * @param validator function to validate arguments. `(args) => boolean | any[]`
-	 * - args - array of validating values
-	 * - returns:
-	 *   - `true` - pass args to the target function
-	 *   - `false` - validation error will be thrown
-	 *   - `any[]` - replace args and pass to the target function
-	 * - throws: error will be thrown
-	 * @param handler - target function, with "this" as 1st argument
-	 * @param thisVal this value bound to handler
-	 * @returns a new function with validation of arguments
-	 * @example
-	 * ```typescript
-	 * const validateString = (args: any[]) => args.length === 1 && [String(args[0])] as const;
-	 *
-	 * const fn = RPCSource.validateUnbind(validateString, (connection: any, arg) => {
-	 *   return arg.toUpperCase() // <-- string
-	 * });
-	 * const connection = {};
-	 * fn.call(connection, "foo") // "FOO"
-	 * fn.call(connection, 10) // "10"
-	 * fn.call(connection); // throws error
-	 * fn.call(connection, "foo", "bar"); // throws error
-	 * ```
-	 */
-	static validateUnbind<
-		T,
-		V extends ((args: any[]) => false | readonly any[]) | ((args: any[]) => args is any[]),
-		A extends (
-			this: T,
-			bound: any,
-			...args: V extends ((args: any[]) => args is infer R extends any[]) ? R : V extends ((args: any[]) => false | infer R extends readonly any[]) ? R : never
-		) => any
-	>(
-		validator: V,
-		handler: A,
-		thisVal?: T,
-	): (this: Parameters<A>[0], ...args: RestParams<Parameters<A>>) => ReturnType<A> {
-		return function (this: Connection, ...args: any){
-			const validateResult = validator(args);
-			if (Array.isArray(validateResult)) {
-				return handler.call(thisVal as any, this as any, ...validateResult as any);
-			}
-			if (!validateResult) throw new Error("invalid parameters");
-			return handler.call(thisVal as any, this as any, ...args);
 		} as any;
 	}
 	

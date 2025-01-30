@@ -205,8 +205,9 @@ describe("RPCSource", () => {
 		class Deck extends RPCSource<{getMyName(): string, changeState(a: number): undefined}, number, unknown> {
 			constructor(baseState: number) {
 				super({
-					getMyName(this: Connection){
-						return String(this.parameters[0]);
+					getMyName(){
+						const connection = room.useConnection();
+						return String(connection.parameters[0]);
 					},
 					changeState: (value: number) => {
 						this.setState(value);
@@ -241,6 +242,8 @@ describe("RPCSource", () => {
 			declare private static connection: Connection;
 			constructor() {
 				const connection = new.target.connection;
+				const connection2 = room.useConnection();
+				if (connection !== connection2) throw new Error("dif connections");
 				super({
 					getMyName(this: Connection){
 						return String(connection.parameters[0]);
@@ -448,7 +451,7 @@ describe("RPCSource", () => {
 		assert.deepEqual(onDeckState.mock.calls.map(c => c.arguments), [[100], [200, 100], [300, 200]], "wrong");
 	})
 	
-	it("RPCSource with prefix", {timeout: 10000}, async () => {
+	it("RPCSource with prefix, useConnection", {timeout: 10000}, async () => {
 		const roomWs = new WebsocketMockRoom("room-id");
 		await using room = new RoomSocketHandler(roomWs);
 		roomWs.backend.open();
@@ -456,9 +459,10 @@ describe("RPCSource", () => {
 		
 		class MainRPC extends RPCSource.with("$")<number> {
 			
-			$userSetState = RPCSource.unbind(function(connection, value: number): undefined {
-				this.setState(connection.parameters[1] as number + value);
-			}, this);
+			$userSetState(value: number){
+				const connection = room.useConnection();
+				this.setState(connection.parameters[1] as number + value)
+			}
 			
 			$Deck = class Deck extends RPCSource<{}, string> {
 				constructor(props: string) {
@@ -624,46 +628,25 @@ describe("RPCSource", () => {
 		
 		const allIsNumbers = (args: any[]) => args.every(v => typeof v === "number");
 		
-		const virtualThis = {value: 100};
 		const rpcRoom = new RPCSource({
-			test1: RPCSource.validate(allIsNumbers, RPCSource.unbind(function(a: RoomSocketHandler.ConnectionOf<typeof room>, x: number, y: number){
-				return x + y + 1 + a.parameters[0] + this.value;
-			}, virtualThis)),
-			test2: RPCSource.validateUnbind(allIsNumbers, function(a: RoomSocketHandler.ConnectionOf<typeof room>, x, y){
-				return x + y + 2 + a.parameters[0] + this.value;
-			}, virtualThis),
-			test3: RPCSource.unbind(function(a: RoomSocketHandler.ConnectionOf<typeof room>, x: number, y: number){
-				return x + y + 3 + a.parameters[0] + this.value
-			}, virtualThis),
+			test0: RPCSource.validate(allIsNumbers, function(x, y){
+				void (true satisfies Equal<typeof x, number>)
+				void (true satisfies Equal<typeof y, number>)
+				return ["result", x, y] as const;
+			}),
 		});
 		RPCSource.start(rpcRoom, room);
 		
 		const clientRpc = new RPCChannel<typeof rpcRoom>(new VarhubClient(roomWs.createClientMock(1000)));
 		await clientRpc.promise;
-		assert.equal(await clientRpc.test1(10, 20), 1000+100+10+20+1, "test1");
-		assert.equal(await clientRpc.test2(10, 20), 1000+100+10+20+2, "test2");
-		assert.equal(await clientRpc.test3(10, 20), 1000+100+10+20+3, "test3");
-		await assert.rejects(clientRpc.test1("10" as any, 20), "rejects test1");
-		await assert.rejects(clientRpc.test2("10" as any, 20), "rejects test2");
-		await clientRpc.test3("10" as any, 20) // no rejection
 		
 		// check types
-		if (1+1>3) {
-			const _test1 = clientRpc.test1(10, 20);
-			void (true satisfies Equal<typeof _test1, Promise<number>>)
-			
-			const _test2 = clientRpc.test2(10, 20);
-			void (true satisfies Equal<typeof _test2, Promise<number>>)
-			
-			const _test3 = clientRpc.test3(10, 20);
-			void (true satisfies Equal<typeof _test3, Promise<number>>)
+		void (function() {
+			const _test0 = clientRpc.test0(10, 20);
+			void (true satisfies Equal<typeof _test0, Promise<readonly ["result", number, number]>>)
 			
 			// @ts-expect-error
-			void clientRpc.test1("10", 20);
-			// @ts-expect-error
-			void clientRpc.test2("10", 20);
-			// @ts-expect-error
-			void clientRpc.test3("10", 20);
-		}
+			void clientRpc.test0("10", 20);
+		})
 	});
 });

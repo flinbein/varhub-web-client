@@ -131,7 +131,7 @@ export default class Players<
 	constructor(
 		room: Room<ROOM_DESC>,
 		registerPlayerHandler: (
-			connection: Connection,
+			connection: Connection<ROOM_DESC>,
 			...args: ROOM_DESC extends {parameters: infer R extends any[]} ? R : XJData[]
 		) => string|void|null|undefined|Promise<string|void|null|undefined>
 	) {

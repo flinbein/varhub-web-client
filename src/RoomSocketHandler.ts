@@ -140,7 +140,7 @@ export class RoomSocketHandler<DESC extends Record<keyof RoomDesc, any> extends 
 		this.#ws = ws;
 		this.#initResolver.promise.catch(() => {});
 		ws.binaryType = "arraybuffer";
-		this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action);
+		this.#connectionsLayer = new ConnectionsLayer(this.#selfEvents, this.#action, this.#runWithContext);
 		ws.addEventListener("message", (event: MessageEvent) => {
 			const [eventName, ...params] = parse(event.data);
 			this.#wsEvents.emitWithTry(eventName as any, ...params);
@@ -223,6 +223,34 @@ export class RoomSocketHandler<DESC extends Record<keyof RoomDesc, any> extends 
 	 */
 	getConnections(filter?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection<DESC>>{
 		return this.#connectionsLayer.getConnections(filter);
+	}
+	
+	#context: any = undefined;
+	#runWithContext = <T extends (...args: any) => any>(value: any, fn: T, ...args: Parameters<T>): ReturnType<T> => {
+		try {
+			this.#context = value;
+			return fn(...args);
+		} finally {
+			this.#context = undefined;
+		}
+	}
+	
+	/**
+	 * Get current {@link Connection} in scope or throws error.
+	 * Use this method in room event handlers or RPC methods.
+	 * `useConnection` allowed to be called only in sync code.
+	 * ```javascript
+	 * export async function remoteMethod(){
+	 *   const con = room.useConnection(); // OK
+	 *   await something();
+	 *   const con = room.useConnection(); // throws
+	 * }
+	 * ```
+	 * @returns Connection
+	 */
+	useConnection(): Connection<DESC> {
+		if (this.#context?.connection == null) throw new Error("useContext error: context is undefined");
+		return this.#context?.connection;
 	}
 	
 	/**
@@ -355,13 +383,19 @@ class ConnectionsLayer {
 	readyConnections: WeakSet<Connection> = new Set();
 	connectionEmitters: WeakMap<Connection, EventEmitter<any>> = new WeakMap();
 	
-	constructor(public roomEmitter: EventEmitter<any>, public roomAction: (arg: ROOM_ACTION, ...args: any) => void) {}
+	constructor(
+		public roomEmitter: EventEmitter<any>,
+		public roomAction: (arg: ROOM_ACTION, ...args: any) => void,
+		public runWithContext: <T extends (...args: any) => any>(value: any, fn: T, ...args: Parameters<T>) => ReturnType<T>
+	) {}
 	
 	onEnter(id: number, ...parameters: XJData[]): Connection {
 		const connection = new Connection(id, parameters, this);
 		this.connections.set(id, connection);
-		this.roomEmitter.emitWithTry("connection", connection, ...parameters);
-		if (!connection.deferred) connection.open();
+		this.runWithContext({connection, parameters}, () => {
+			this.roomEmitter.emitWithTry("connection", connection, ...parameters);
+			if (!connection.deferred) connection.open();
+		})
 		return connection;
 	}
 	
@@ -370,24 +404,30 @@ class ConnectionsLayer {
 		if (!connection) return;
 		if (this.readyConnections.has(connection)) return;
 		this.readyConnections.add(connection);
-		this.getConnectionEmitter(connection).emitWithTry("open");
-		this.roomEmitter.emitWithTry("connectionOpen", connection);
+		this.runWithContext({connection}, () => {
+			this.getConnectionEmitter(connection).emitWithTry("open");
+			this.roomEmitter.emitWithTry("connectionOpen", connection);
+		});
 	}
 	
-	onClose(conId: number, wasOnline: boolean, message: string|null){
+	onClose(conId: number, wasOnline: boolean, reason: string|null){
 		const connection = this.connections.get(conId);
 		if (!connection) return;
 		this.connections.delete(conId);
 		this.readyConnections.delete(connection);
-		this.getConnectionEmitter(connection).emitWithTry("close", message, wasOnline);
-		this.roomEmitter.emitWithTry("connectionClose", connection, message, wasOnline);
+		this.runWithContext({connection, reason, wasOnline}, () => {
+			this.getConnectionEmitter(connection).emitWithTry("close", reason, wasOnline);
+			this.roomEmitter.emitWithTry("connectionClose", connection, reason, wasOnline);
+		});
 	}
 	
-	onMessage(conId: number, ...msg: XJData[]){
+	onMessage(conId: number, ...message: XJData[]){
 		const connection = this.connections.get(conId);
 		if (!connection) return;
-		this.getConnectionEmitter(connection).emitWithTry("message", ...msg);
-		this.roomEmitter.emitWithTry("connectionMessage", connection, ...msg);
+		this.runWithContext({connection, message}, () => {
+			this.getConnectionEmitter(connection).emitWithTry("message", ...message);
+			this.roomEmitter.emitWithTry("connectionMessage", connection, ...message);
+		});
 	}
 	
 	getConnections(options?: {ready?: boolean, deferred?: boolean, closed?: boolean}): Set<Connection>{

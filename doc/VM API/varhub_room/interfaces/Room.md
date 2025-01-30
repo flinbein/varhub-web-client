@@ -251,6 +251,29 @@ connections found
 
 ***
 
+### useConnection()
+
+> **useConnection**(): [`Connection`](Connection.md)\<`DESC`\>
+
+Get current [Connection](Connection.md) in scope or throws error.
+Use this method in room event handlers or RPC methods.
+`useConnection` allowed to be called only in sync code.
+```javascript
+export async function remoteMethod(){
+  const con = room.useConnection(); // OK
+  await something();
+  const con = room.useConnection(); // throws
+}
+```
+
+#### Returns
+
+[`Connection`](Connection.md)\<`DESC`\>
+
+Connection
+
+***
+
 ### validate()
 
 > **validate**\<`V`\>(`__namedParameters`): `ApplyRoomValidator`\<`DESC`, `V`\> *extends* `T` ? [`Room`](Room.md)\<`T`\> : `never`
